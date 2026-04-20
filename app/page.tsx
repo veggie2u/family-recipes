@@ -1,58 +1,130 @@
-import { DeployButton } from "@/components/deploy-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
-import { Hero } from "@/components/hero";
+import { BrandLogo } from "@/components/brand-logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
-import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
-import { hasEnvVars } from "@/lib/utils";
+import { BookOpen, Heart, Users } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
+const features = [
+  {
+    icon: BookOpen,
+    title: "Preserve Heritage",
+    description:
+      "Capture beloved recipes exactly as grandma made them — ingredients, stories, and all.",
+  },
+  {
+    icon: Users,
+    title: "Organize Together",
+    description:
+      "Gather your family into one place to build and grow your shared cookbook collection.",
+  },
+  {
+    icon: Heart,
+    title: "Share & Celebrate",
+    description:
+      "Pass traditions forward. Share recipes publicly or keep them close to family only.",
+  },
+];
+
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Next.js Supabase Starter</Link>
-              <div className="flex items-center gap-2">
-                <DeployButton />
-              </div>
-            </div>
-            {!hasEnvVars ? (
-              <EnvVarWarning />
-            ) : (
-              <Suspense>
-                <AuthButton />
-              </Suspense>
-            )}
+    <main className="min-h-screen flex flex-col bg-background">
+      {/* Navigation */}
+      <nav className="w-full border-b border-border">
+        <div className="max-w-5xl mx-auto flex justify-between items-center px-6 py-4">
+          <BrandLogo />
+          <div className="flex items-center gap-3">
+            <Suspense>
+              <AuthButton />
+            </Suspense>
+            <ThemeSwitcher />
           </div>
-        </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          <Hero />
-          <main className="flex-1 flex flex-col gap-6 px-4">
-            <h2 className="font-medium text-xl mb-4">Next steps</h2>
-            {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-          </main>
         </div>
+      </nav>
 
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>
-            Powered by{" "}
-            <a
-              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-              target="_blank"
-              className="font-bold hover:underline"
-              rel="noreferrer"
-            >
-              Supabase
-            </a>
+      {/* Hero */}
+      <section className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 md:py-28">
+        <div className="max-w-2xl flex flex-col items-center gap-6">
+          {/* Decorative icon */}
+          <div className="mb-2">
+            <Image
+              src="/logo.png"
+              alt="Family Recipes"
+              width={188}
+              height={200}
+              className="h-48 w-auto object-contain"
+            />
+          </div>
+
+          <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground leading-tight">
+            Your Family&apos;s Culinary Heritage
+          </h1>
+
+          <p className="text-lg text-muted-foreground leading-relaxed max-w-lg">
+            Preserve, organize, and share the recipes that bring your family
+            together — passed down through generations.
           </p>
-          <ThemeSwitcher />
-        </footer>
-      </div>
+
+          {/* Ornamental divider */}
+          <div className="flex items-center gap-3 my-2 text-accent/50">
+            <div className="h-px w-16 bg-accent/30" />
+            <span className="text-xs tracking-widest uppercase font-medium text-accent/60">
+              ✦ est. in your kitchen ✦
+            </span>
+            <div className="h-px w-16 bg-accent/30" />
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/auth/sign-up"
+              className="inline-flex items-center justify-center px-6 py-3 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+            >
+              Get Started — It&apos;s Free
+            </Link>
+            <Link
+              href="/auth/login"
+              className="inline-flex items-center justify-center px-6 py-3 rounded border border-border text-foreground font-medium hover:bg-muted transition-colors"
+            >
+              Sign In
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="border-t border-border py-16 px-6">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          {features.map(({ icon: Icon, title, description }) => (
+            <div
+              key={title}
+              className="flex flex-col items-center text-center gap-3"
+            >
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 text-accent">
+                <Icon className="w-5 h-5" />
+              </div>
+              <h3 className="font-display font-semibold text-lg text-foreground">
+                {title}
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border py-8 px-6">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <BrandLogo
+            iconClassName="h-5 w-auto"
+            textClassName="text-sm font-medium"
+          />
+          <p>© 2024 Family Recipes. All rights reserved.</p>
+        </div>
+      </footer>
     </main>
   );
 }
+
