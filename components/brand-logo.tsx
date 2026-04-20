@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface BrandLogoProps {
@@ -15,7 +16,7 @@ export function BrandLogo({
   hideText = false,
 }: BrandLogoProps) {
   return (
-    <div className={cn("flex items-center gap-2.5", className)}>
+    <Link href="/dashboard" className={cn("flex items-center gap-2.5", className)}>
       <Image
         src="/icon-transparent.png"
         alt="Family Recipes logo"
@@ -33,6 +34,6 @@ export function BrandLogo({
           Family Recipes
         </span>
       )}
-    </div>
+    </Link>
   );
 }

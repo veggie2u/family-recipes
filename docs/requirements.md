@@ -12,6 +12,8 @@
 ## User
 
     - a User has an account
+    - a user has a profile with a name and avatar
+    - a user can view and update their profile on the profile page (/dashboard/profile)
     - a user can create a family
     - a user can create a cookbook
     - a user can create a recipe
@@ -43,3 +45,9 @@
     - a user can add a recipe to a family and/or a cookbook
     - when a cookbook is added to a family, the user can choose if the recipes are editable by family members (modify recipe)
     - can have multiple pictures associated with it
+
+## Frontend Standards
+
+    - all forms must use react-hook-form for state management and validation
+    - all forms must use shadcn Form components (Form, FormField, FormItem, FormLabel, FormControl, FormMessage) for consistent styling and inline field error display
+    - browser native validation (e.g. the `required` HTML attribute) must not be used; validation rules are defined in react-hook-form and errors are displayed via FormMessage
