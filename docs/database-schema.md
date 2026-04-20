@@ -102,7 +102,7 @@ erDiagram
 ### `family_members`
 | Policy | Command | Roles | Rule |
 |--------|---------|-------|------|
-| `family_members: read` | SELECT | public | Visible if the row is for the current user, or current user is a member of the same family |
+| `family_members: read` | SELECT | public | Visible if the row is for the current user, or current user is a member of the same family — implemented via `is_family_member()` security definer function to avoid self-referential RLS recursion |
 | `family_members: authenticated insert` | INSERT | authenticated | Any authenticated user |
 | `family_members: authenticated update` | UPDATE | authenticated | Any authenticated user |
 | `family_members: authenticated delete` | DELETE | authenticated | Any authenticated user |
@@ -146,3 +146,16 @@ erDiagram
 | `family_recipes: authenticated insert` | INSERT | authenticated | Any authenticated user |
 | `family_recipes: authenticated update` | UPDATE | authenticated | Any authenticated user |
 | `family_recipes: authenticated delete` | DELETE | authenticated | Any authenticated user |
+
+---
+
+## Helper Functions
+
+### `is_family_member(p_family_id uuid) → boolean`
+Security definer function used in RLS policies to check if `auth.uid()` is a member of the given family. Runs with elevated privileges to bypass RLS on `family_members`, preventing infinite recursion in the `family_members: read` policy.
+
+## Triggers
+
+### `on_auth_user_created` (on `auth.users`)
+After a new user signs up, automatically inserts a row into `public.profiles` with the user's `id`. This ensures the FK constraint on `recipes.created_by → profiles.id` (and similar) is always satisfiable. A one-time backfill migration (`backfill_profiles_for_existing_users`) created profiles for all users who signed up before this trigger was added.
+

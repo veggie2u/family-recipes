@@ -59,12 +59,13 @@ Establish the app shell, navigation, and all authentication flows. By the end of
 - Branded shell: logo nav at top, `ThemeSwitcher`, link back to `/`
 - Card copy updated: "Create an account" / "Join Family Recipes and start preserving your culinary heritage"
 
-### 🔲 Navigation (persistent, post-auth)
-- Still needed: nav bar for authenticated pages showing user identity + logout
+### ✅ Navigation (persistent, post-auth) — complete
+- Branded nav bar on all `/dashboard/*` pages: `BrandLogo`, `AuthButton` (shows email + logout), `ThemeSwitcher`
+- Branded footer with logo wordmark and copyright
 
-### 🔲 Post-auth redirect
-- After login → dashboard/home for authenticated users (placeholder `/protected` exists)
-- After logout → welcome page
+### ✅ Post-auth redirect — complete
+- After login → `/dashboard` (recipe home for authenticated users)
+- After logout → welcome page (`/`)
 
 ### 🔲 Remaining auth flows
 - Forgot password / password reset — page exists (`/auth/forgot-password`) but needs branding pass

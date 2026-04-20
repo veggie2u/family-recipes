@@ -42,3 +42,4 @@
     - the recipe is associated to the user that created it
     - a user can add a recipe to a family and/or a cookbook
     - when a cookbook is added to a family, the user can choose if the recipes are editable by family members (modify recipe)
+    - can have multiple pictures associated with it
