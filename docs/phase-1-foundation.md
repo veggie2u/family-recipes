@@ -66,12 +66,12 @@ Establish the app shell, navigation, and all authentication flows. By the end of
 - `app/protected/page.tsx` currently shows raw JSON user claims and a "FetchDataSteps" tutorial component
 - Needs to become a real (if minimal) authenticated home page
 
-### 🔲 Remaining auth pages — branding pass needed
-All four still use the plain starter kit centered-card layout with no logo nav:
+### ✅ Remaining auth pages — branding pass
+All four now have the consistent branded shell (logo nav + ThemeSwitcher + link back to `/`):
 - `/auth/forgot-password`
 - `/auth/sign-up-success`
-- `/auth/error`
+- `/auth/error` — also gained a "Back to home" link
 - `/auth/update-password`
 
-### 🔲 Post-logout redirect
-- Verify `LogoutButton` redirects to `/` (the welcome page) after sign-out
+### ✅ Post-logout redirect
+`LogoutButton` now redirects to `/` (the welcome page) after sign-out.
