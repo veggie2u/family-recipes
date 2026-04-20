@@ -33,9 +33,7 @@ export default async function ProfilePage() {
         <UserCircle className="h-24 w-24 text-muted-foreground" />
       )}
 
-      <h1 className="text-2xl font-semibold">{displayName}</h1>
-
-      <ProfileForm defaultName={profile?.name ?? ""} />
+      <ProfileForm defaultName={profile?.name ?? ""} defaultDisplayName={displayName} />
     </div>
   );
 }
