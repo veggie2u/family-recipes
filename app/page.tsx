@@ -2,6 +2,7 @@ import { AuthButton } from "@/components/auth-button";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { BookOpen, Heart, Users } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -46,47 +47,14 @@ export default function Home() {
       <section className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 md:py-28">
         <div className="max-w-2xl flex flex-col items-center gap-6">
           {/* Decorative icon */}
-          <div className="flex items-center justify-center w-20 h-20 rounded-full bg-accent/10 text-accent mb-2">
-            <svg
-              viewBox="0 0 32 32"
-              fill="none"
-              className="w-11 h-11"
-              aria-hidden="true"
-            >
-              <path
-                d="M10 15C7.2 15 5.5 13.5 5.5 11.5C5.5 9.5 7.2 8 10 8"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M22 15C24.8 15 26.5 13.5 26.5 11.5C26.5 9.5 24.8 8 22 8"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M9 15H23L21 26Q20.5 27 19.5 27H12.5Q11.5 27 11 26Z"
-                fill="currentColor"
-                fillOpacity="0.15"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinejoin="round"
-              />
-              <line
-                x1="8"
-                y1="15"
-                x2="24"
-                y2="15"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M16 24L12.5 20.5C11.4 19.4 11.4 17.6 12.5 16.5C13.3 15.7 14.4 15.6 15.3 16.2L16 16.8L16.7 16.2C17.6 15.6 18.7 15.7 19.5 16.5C20.6 17.6 20.6 19.4 19.5 20.5Z"
-                fill="currentColor"
-              />
-            </svg>
+          <div className="mb-2">
+            <Image
+              src="/logo.png"
+              alt="Family Recipes"
+              width={188}
+              height={200}
+              className="h-48 w-auto object-contain"
+            />
           </div>
 
           <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground leading-tight">
@@ -150,7 +118,7 @@ export default function Home() {
       <footer className="border-t border-border py-8 px-6">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <BrandLogo
-            iconClassName="w-5 h-5"
+            iconClassName="h-5 w-auto"
             textClassName="text-sm font-medium"
           />
           <p>© 2024 Family Recipes. All rights reserved.</p>
