@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
-import { deleteRecipe } from "../actions";
 import Link from "next/link";
-import { Globe, Lock, Pencil, Trash2 } from "lucide-react";
+import { Globe, Lock, Pencil } from "lucide-react";
 import { Suspense } from "react";
+import { DeleteRecipeButton } from "@/components/delete-recipe-button";
 
 async function RecipeDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,7 +27,6 @@ async function RecipeDetail({ params }: { params: Promise<{ id: string }> }) {
   }
 
   const isOwner = recipe.created_by === userId;
-  const deleteWithId = deleteRecipe.bind(null, id);
 
   return (
     <>
@@ -61,15 +60,7 @@ async function RecipeDetail({ params }: { params: Promise<{ id: string }> }) {
               <Pencil className="w-3.5 h-3.5" />
               Edit
             </Link>
-            <form action={deleteWithId}>
-              <button
-                type="submit"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-destructive/40 text-destructive text-sm font-medium hover:bg-destructive/10 transition-colors"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                Delete
-              </button>
-            </form>
+            <DeleteRecipeButton id={id} />
           </div>
         )}
       </div>
