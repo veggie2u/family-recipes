@@ -35,3 +35,35 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 - Adding recipes to families (Phase 4)
 - Family-editable recipes (Phase 5)
 - Recipe sharing link (Phase 5)
+
+---
+
+## Progress
+
+### ✅ Recipe data model — complete
+- `recipes` table with `title`, `description`, `ingredients`, `instructions`, `is_public`, `created_by`, `created_at`
+- `created_by` references `public.profiles.id` (not `auth.users` directly)
+- RLS policies applied (see `database-schema.md`)
+
+### ✅ Recipe CRUD (authenticated users) — complete
+- **Create** — `/dashboard/recipes/new`: form with title, description, ingredients, instructions, public/private toggle
+- **View own recipes** — `/dashboard`: lists all accessible recipes (own + public) as cards with public/private badge
+- **Edit** — `/dashboard/recipes/[id]/edit`: pre-filled form, only accessible to owner
+- **Delete** — `/dashboard/recipes/[id]`: confirmation dialog before deletion, only accessible to owner
+- Server actions in `app/dashboard/recipes/actions.ts`
+
+### ✅ Recipe visibility toggle — complete
+- `is_public` checkbox on create and edit forms
+- Badge on recipe cards and detail page shows Public/Private status
+
+### ✅ Dashboard home page — complete
+- Authenticated home page at `/dashboard` (was `/protected`)
+- Recipe list with skeleton loading state (Partial Prerendering)
+- "Add Recipe" button links to `/dashboard/recipes/new`
+- Empty state with prompt to add first recipe
+
+### 🔲 Public recipe browsing (unauthenticated users)
+- Not yet implemented; dashboard currently requires login
+
+### 🔲 Recipe search
+- Not yet implemented
