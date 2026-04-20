@@ -73,28 +73,42 @@ Defined as CSS custom properties in `app/globals.css` and consumed via Tailwind'
 
 **Icon + wordmark** combination.
 
-### Icon — Heart in a Pot
-- A simple SVG pot/cauldron with two side handles and a heart inside the opening
-- Represents home cooking and family love
-- Implemented as `<PotHeartIcon>` in `components/brand-logo.tsx`
-- Uses `currentColor` so it inherits any text color
+### Image assets
+
+Two logo files live in `public/`:
+
+| File | Dimensions | Used in |
+|---|---|---|
+| `public/logo.png` | 387×411px (portrait) | Hero section on the welcome page |
+| `public/icon-transparent.png` | 358×326px (landscape, transparent bg) | Nav bar and footer (`BrandLogo` component) |
+
+The transparent-background icon is preferred anywhere it appears alongside UI chrome (nav, footer) since it blends with any background color in both light and dark mode. The full logo is used as a large decorative element in the hero.
 
 ### Wordmark
-- "Family Recipes" in `font-display` (Playfair Display), `font-semibold`, `text-xl`
+- "Family Recipes" in `font-display` (Playfair Display), `font-semibold`, `text-xl`, `leading-none`
 - Tight tracking (`tracking-tight`)
+- `leading-none` is intentional — it collapses the line-height bounding box so `items-center` in flex aligns on the actual visual cap-height of the letterforms rather than the padded text box
+
+### Sizing
+
+| Context | Height | Width |
+|---|---|---|
+| Nav bar | `h-12` (48px) | `w-auto` (≈53px at 358:326 ratio) |
+| Footer | `h-5` (20px) | `w-auto` (≈22px) |
+| Welcome page hero | `h-48` (192px) | `w-auto` (≈181px at 387:411 ratio) |
 
 ### Component
 ```tsx
 import { BrandLogo } from "@/components/brand-logo";
 
-// Full logo (icon + text)
+// Full logo (icon + wordmark) — uses icon-transparent.png
 <BrandLogo />
 
 // Icon only
 <BrandLogo hideText />
 
-// Custom sizing
-<BrandLogo iconClassName="w-5 h-5" textClassName="text-sm" />
+// Custom icon size (e.g. footer)
+<BrandLogo iconClassName="h-5 w-auto" textClassName="text-sm font-medium" />
 ```
 
 ---
