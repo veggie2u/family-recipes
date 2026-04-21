@@ -5,6 +5,7 @@ import { Pencil } from "lucide-react";
 import { Suspense } from "react";
 import { DeleteRecipeButton } from "@/components/delete-recipe-button";
 import { RecipeDetail } from "@/components/recipe-detail";
+import AddToCookbookButton from "@/components/add-to-cookbook-button";
 
 async function RecipeDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -28,6 +29,30 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
   }
 
   const isOwner = recipe.created_by === userId;
+
+  let eligibleCookbooks: { id: string; name: string }[] = [];
+  if (isOwner) {
+    const { data: alreadyIn } = await supabase
+      .from("cookbook_recipes")
+      .select("cookbook_id")
+      .eq("recipe_id", id);
+
+    const excludedIds = (alreadyIn ?? []).map((r) => r.cookbook_id);
+
+    const query = supabase
+      .from("cookbooks")
+      .select("id, name")
+      .eq("created_by", userId)
+      .order("name");
+
+    if (excludedIds.length > 0) {
+      query.not("id", "in", `(${excludedIds.join(",")})`);
+    }
+
+    const { data } = await query;
+    eligibleCookbooks = data ?? [];
+  }
+
   const creatorName = (recipe.profiles as unknown as { name: string | null } | null)?.name ?? undefined;
   const tags: string[] = recipe.recipe_tags?.flatMap(
     (rt: { tags: { name: string } | { name: string }[] | null }) =>
@@ -47,6 +72,7 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
       actions={
         isOwner ? (
           <>
+            <AddToCookbookButton recipeId={id} cookbooks={eligibleCookbooks} />
             <Link
               href={`/dashboard/recipes/${id}/edit`}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"

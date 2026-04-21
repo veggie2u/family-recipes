@@ -209,13 +209,21 @@ export default function DashboardPage({
             Your curated collections of recipes
           </p>
         </div>
-        <Link
-          href="/dashboard/cookbooks/new"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
-        >
-          <PlusIcon className="w-4 h-4" />
-          Add Cookbook
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/dashboard/cookbooks"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
+          >
+            Browse all cookbooks
+          </Link>
+          <Link
+            href="/dashboard/cookbooks/new"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+          >
+            <PlusIcon className="w-4 h-4" />
+            Add Cookbook
+          </Link>
+        </div>
       </div>
 
       <Suspense fallback={<CookbookListSkeleton />}>
