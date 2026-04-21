@@ -1,6 +1,5 @@
 import { AuthButton } from "@/components/auth-button";
 import { BrandLogo } from "@/components/brand-logo";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Suspense } from "react";
 
 export default function DashboardLayout({
@@ -17,7 +16,6 @@ export default function DashboardLayout({
             <Suspense>
               <AuthButton />
             </Suspense>
-            <ThemeSwitcher />
           </div>
         </div>
       </nav>
