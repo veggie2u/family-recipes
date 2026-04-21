@@ -34,7 +34,7 @@ export default function Home() {
       <nav className="w-full border-b border-border">
         <div className="max-w-5xl mx-auto flex justify-between items-center px-6 py-4">
           <BrandLogo />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-5">
             <Suspense>
               <AuthButton />
             </Suspense>
@@ -81,6 +81,12 @@ export default function Home() {
               className="inline-flex items-center justify-center px-6 py-3 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
             >
               Get Started — It&apos;s Free
+            </Link>
+            <Link
+              href="/recipes"
+              className="inline-flex items-center justify-center px-6 py-3 rounded border border-border text-foreground font-medium hover:bg-muted transition-colors"
+            >
+              Browse Recipes
             </Link>
             <Link
               href="/auth/login"

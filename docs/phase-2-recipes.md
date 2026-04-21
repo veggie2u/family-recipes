@@ -62,8 +62,12 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 - "Add Recipe" button links to `/dashboard/recipes/new`
 - Empty state with prompt to add first recipe
 
-### 🔲 Public recipe browsing (unauthenticated users)
-- Not yet implemented; dashboard currently requires login
+### ✅ Public recipe browsing (unauthenticated users)
+- `/recipes` — grid listing of all `is_public = true` recipes with loading skeleton
+- `/recipes/[id]` — recipe detail page showing title, description, ingredients, and instructions; returns 404 for private or missing recipes
+- Proxy allows `/recipes/*` through without authentication
+- Shared layout (`app/recipes/layout.tsx`) with same nav/footer as dashboard; shows Sign in / Sign up buttons and theme switcher for guests, user menu for authenticated users
+- `BrandLogo` links to `/` (welcome page) for guests; dashboard layout passes `href="/dashboard"` explicitly
 
 ### 🔲 Recipe search
 - Not yet implemented
