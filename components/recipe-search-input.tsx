@@ -17,11 +17,13 @@ export function RecipeSearchInput({
   const searchParams = useSearchParams();
   const [value, setValue] = useState(searchParams.get("q") ?? "");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParamsRef.current.toString());
       if (value) {
         params.set("q", value);
       } else {
@@ -33,7 +35,7 @@ export function RecipeSearchInput({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [value, pathname, router, searchParams]);
+  }, [value, pathname, router]);
 
   return (
     <div className="relative">
