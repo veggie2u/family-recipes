@@ -90,7 +90,13 @@ export default function AllRecipesPage({
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">
+          <Link
+            href="/dashboard"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Back to my recipes
+          </Link>
+          <h1 className="font-display text-3xl font-bold text-foreground mt-3">
             All Recipes
           </h1>
           <p className="text-muted-foreground mt-1">
