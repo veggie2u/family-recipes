@@ -7,7 +7,7 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 ## Scope
 
 ### Recipe data model
-- Title, description, ingredients, instructions
+- Title (required), description, ingredients (required), instructions (required)
 - Owner (linked to user account)
 - Visibility: public or private (default private)
 - Created/updated timestamps
@@ -46,9 +46,9 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 - RLS policies applied (see `database-schema.md`)
 
 ### ✅ Recipe CRUD (authenticated users) — complete
-- **Create** — `/dashboard/recipes/new`: form with title, description, ingredients, instructions, public/private toggle
+- **Create** — `/dashboard/recipes/new`: form with title (required), description, ingredients (required), instructions (required), public/private toggle
 - **View own recipes** — `/dashboard`: lists all accessible recipes (own + public) as cards with public/private badge
-- **Edit** — `/dashboard/recipes/[id]/edit`: pre-filled form, only accessible to owner
+- **Edit** — `/dashboard/recipes/[id]/edit`: pre-filled form with same required fields, only accessible to owner
 - **Delete** — `/dashboard/recipes/[id]`: confirmation dialog before deletion, only accessible to owner
 - Server actions in `app/dashboard/recipes/actions.ts`
 
