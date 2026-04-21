@@ -1,5 +1,6 @@
 import { AuthButton } from "@/components/auth-button";
 import { BrandLogo } from "@/components/brand-logo";
+import { Toaster } from "@/components/ui/sonner";
 import { Suspense } from "react";
 
 export default function DashboardLayout({
@@ -34,6 +35,7 @@ export default function DashboardLayout({
           <p>© 2024 Family Recipes. All rights reserved.</p>
         </div>
       </footer>
+      <Toaster position="top-right" />
     </main>
   );
 }

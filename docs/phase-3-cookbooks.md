@@ -73,9 +73,17 @@ Users can create cookbooks and organize their recipes into them. Cookbooks are p
 - `cookbook_tags` join table; `syncCookbookTags` helper in `actions.ts` replaces all tags on create/update
 - Tags shown on cookbook cards and detail page as Badge pills
 
-### 🔲 Adding / removing recipes from cookbooks — not yet implemented
-- UI to add a recipe the user owns to a cookbook they own
-- UI to remove a recipe from a cookbook
+### ✅ Adding / removing recipes from cookbooks — complete
+- **Add recipe to cookbook (cookbook page):** On the cookbook detail page, owners see an inline "＋ Add Recipe" toggle panel in the Recipes section. It renders a search input that filters the user's eligible recipes (owned, not already in the cookbook). Clicking a recipe adds it immediately with a loading state via `useTransition`.
+- **Remove recipe from cookbook:** Each recipe on the cookbook detail page (owner view) has a "Remove" button that opens a confirmation dialog before calling `removeRecipeFromCookbook`.
+- **Add recipe to cookbook (recipe page):** On the recipe detail page, owners see an "Add to cookbook" dropdown button (with `BookPlus` icon) listing their cookbooks that don't already contain this recipe. Selecting one adds it and shows a success toast notification ("Added to '[cookbook name]'") in the top-right corner.
+- Server actions `addRecipeToCookbook` and `removeRecipeFromCookbook` in `app/dashboard/cookbooks/actions.ts` — both validate cookbook ownership and use `revalidatePath` to refresh the page in place.
+- Eligible recipes are currently defined as **recipes the user owns** (see `requirements.md` note).
+- Toast notifications use `sonner` (shadcn component at `components/ui/sonner.tsx`); `<Toaster position="top-right" />` is mounted in the dashboard layout.
+
+### 🔲 Show which cookbooks a recipe belongs to — future feature
+- On the recipe detail page, display which cookbooks the recipe has been added to
+- Note: the definition of "eligible recipes" (recipes a user can add to a cookbook) is currently recipes the user owns; this will need to be revisited when families are implemented (Phase 4)
 
 ### 🔲 Cookbook search — not yet implemented
 - Unauthenticated users: search across public cookbooks

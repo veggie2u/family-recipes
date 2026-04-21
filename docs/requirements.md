@@ -39,6 +39,8 @@
     - when a cookbook is added to a family, the user can choose if the cookbook is editable by family members (add/delete recipe)
     - a cookbook can be shared with multiple families
 
+> ⚠️ **Eligible recipes** (recipes a user can add to a cookbook) are currently defined as recipes the user owns. This definition will need to be revisited once families are implemented (Phase 4), as family membership may expand which recipes are eligible.
+
 ## Recipe
 
     - the recipe is associated to the user that created it
@@ -50,8 +52,11 @@
     - when a cookbook is added to a family, the user can choose if the recipes are editable by family members (modify recipe)
     - can have multiple pictures associated with it
 
+> 🔲 **Future feature:** on the recipe detail page, show which cookbooks the recipe currently belongs to.
+
 ## Frontend Standards
 
     - all forms must use react-hook-form for state management and validation
     - all forms must use shadcn Form components (Form, FormField, FormItem, FormLabel, FormControl, FormMessage) for consistent styling and inline field error display
     - browser native validation (e.g. the `required` HTML attribute) must not be used; validation rules are defined in react-hook-form and errors are displayed via FormMessage
+    - toast notifications use `sonner` (via shadcn); the `<Toaster position="top-right" />` is mounted in the dashboard layout; use `toast.success(...)` / `toast.error(...)` from `sonner` for user feedback after async actions

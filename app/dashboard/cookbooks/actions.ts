@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 async function syncCookbookTags(
@@ -99,7 +100,59 @@ export async function deleteCookbook(id: string) {
     .eq("id", id)
     .eq("created_by", claims.claims.sub);
 
+  redirect("/dashboard");
+}
+
+export async function addRecipeToCookbook(cookbookId: string, recipeId: string) {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims?.claims) redirect("/auth/login");
+
+  const userId = claims.claims.sub;
+
+  const { data: cookbook } = await supabase
+    .from("cookbooks")
+    .select("id")
+    .eq("id", cookbookId)
+    .eq("created_by", userId)
+    .single();
+
+  if (!cookbook) throw new Error("Cookbook not found or access denied");
+
+  const { error } = await supabase
+    .from("cookbook_recipes")
+    .insert({ cookbook_id: cookbookId, recipe_id: recipeId });
+
   if (error) throw new Error(error.message);
 
-  redirect("/dashboard");
+  revalidatePath(`/dashboard/cookbooks/${cookbookId}`);
+  revalidatePath(`/dashboard/recipes/${recipeId}`);
+}
+
+export async function removeRecipeFromCookbook(cookbookId: string, recipeId: string) {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims?.claims) redirect("/auth/login");
+
+  const userId = claims.claims.sub;
+
+  const { data: cookbook } = await supabase
+    .from("cookbooks")
+    .select("id")
+    .eq("id", cookbookId)
+    .eq("created_by", userId)
+    .single();
+
+  if (!cookbook) throw new Error("Cookbook not found or access denied");
+
+  const { error } = await supabase
+    .from("cookbook_recipes")
+    .delete()
+    .eq("cookbook_id", cookbookId)
+    .eq("recipe_id", recipeId);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/dashboard/cookbooks/${cookbookId}`);
+  revalidatePath(`/dashboard/recipes/${recipeId}`);
 }

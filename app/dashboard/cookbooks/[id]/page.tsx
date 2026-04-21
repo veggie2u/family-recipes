@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import { RecipeCard } from "@/components/recipe-card";
 import { DeleteCookbookButton } from "@/components/delete-cookbook-button";
+import AddRecipeToCookbookPanel from "@/components/add-recipe-to-cookbook-panel";
+import { RemoveRecipeFromCookbookButton } from "@/components/remove-recipe-from-cookbook-button";
 
 async function CookbookDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -55,6 +57,24 @@ async function CookbookDetailContent({ params }: { params: Promise<{ id: string 
     .map((cr) => cr.recipes)
     .flat()
     .filter((r): r is NonNullable<typeof r> => r != null) as unknown as RecipeRow[];
+
+  const recipeIdsInCookbook = recipes.map((r) => r.id);
+
+  let availableRecipes: { id: string; title: string; description: string | null }[] = [];
+  if (isOwner) {
+    const query = supabase
+      .from("recipes")
+      .select("id, title, description")
+      .eq("created_by", userId)
+      .order("title");
+
+    if (recipeIdsInCookbook.length > 0) {
+      query.not("id", "in", `(${recipeIdsInCookbook.join(",")})`);
+    }
+
+    const { data } = await query;
+    availableRecipes = data ?? [];
+  }
 
   return (
     <article className="flex flex-col gap-8">
@@ -110,10 +130,18 @@ async function CookbookDetailContent({ params }: { params: Promise<{ id: string 
       )}
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-semibold text-xl text-foreground">Recipes</h2>
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="font-semibold text-xl text-foreground">Recipes</h2>
+          {isOwner && (
+            <AddRecipeToCookbookPanel
+              cookbookId={id}
+              availableRecipes={availableRecipes}
+            />
+          )}
+        </div>
         {recipes.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center gap-3 border border-dashed border-border rounded-lg">
-            <p className="text-muted-foreground">No recipes in this cookbook yet.</p>
+            <p className="text-muted-foreground">No recipes in this cookbook yet.{isOwner ? " Use the button above to add your first recipe." : ""}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -123,16 +151,22 @@ async function CookbookDetailContent({ params }: { params: Promise<{ id: string 
                   Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
               ) ?? [];
               return (
-                <RecipeCard
-                  key={recipe.id}
-                  id={recipe.id}
-                  title={recipe.title}
-                  description={recipe.description}
-                  isPublic={recipe.is_public}
-                  isOwner={recipe.created_by === userId}
-                  creatorName={(recipe.profiles as unknown as { name: string | null } | null)?.name ?? undefined}
-                  tags={recipeTags}
-                />
+                <div key={recipe.id} className="flex flex-col gap-1">
+                  <RecipeCard
+                    id={recipe.id}
+                    title={recipe.title}
+                    description={recipe.description}
+                    isPublic={recipe.is_public}
+                    isOwner={recipe.created_by === userId}
+                    creatorName={(recipe.profiles as unknown as { name: string | null } | null)?.name ?? undefined}
+                    tags={recipeTags}
+                  />
+                  {isOwner && (
+                    <div className="flex justify-end">
+                      <RemoveRecipeFromCookbookButton cookbookId={id} recipeId={recipe.id} />
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
