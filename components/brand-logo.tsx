@@ -7,6 +7,7 @@ interface BrandLogoProps {
   iconClassName?: string;
   textClassName?: string;
   hideText?: boolean;
+  href?: string;
 }
 
 export function BrandLogo({
@@ -14,9 +15,10 @@ export function BrandLogo({
   iconClassName,
   textClassName,
   hideText = false,
+  href = "/",
 }: BrandLogoProps) {
   return (
-    <Link href="/dashboard" className={cn("flex items-center gap-2.5", className)}>
+    <Link href={href} className={cn("flex items-center gap-2.5", className)}>
       <Image
         src="/icon-transparent.png"
         alt="Family Recipes logo"
