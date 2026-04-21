@@ -75,3 +75,15 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 - Guest `/recipes` page: searches public recipes only
 - Authenticated `/dashboard` page: searches all accessible recipes (own + public + family, per RLS)
 - Empty state distinguishes between "no results for query" and "no recipes yet"
+- **Bug fix:** `searchParams` was in the `useEffect` dependency array, causing an infinite GET request loop on page load. Fixed by storing `searchParams` in a ref so the effect only re-runs when the user's typed `value`, `pathname`, or `router` changes.
+
+### ✅ Reusable recipe components
+- **`components/recipe-card.tsx`** — shared card used on both `/recipes` and `/dashboard`. Props: `id`, `title`, `description`, `isOwner?`, `creatorName?`, `isPublic?` (omit to hide the badge), `href?` (defaults to `/dashboard/recipes/:id`).
+- **`components/recipe-detail.tsx`** — shared detail view used on both `/recipes/[id]` and `/dashboard/recipes/[id]`. Props: `title`, `description`, `ingredients`, `instructions`, `isOwner?`, `creatorName?`, `isPublic?` (omit to hide the badge), `actions?` (render slot for Edit/Delete buttons).
+
+### ✅ Creator attribution on recipe cards and detail pages
+- Recipe cards and detail pages show a byline below the title indicating who created the recipe
+- "Your recipe" is shown in `text-accent/70` when the viewer owns the recipe
+- The creator's display name (from `profiles.name`) is shown in `text-muted-foreground` for all other recipes
+- Unauthenticated viewers always see the creator's name
+- Both `/recipes` and `/dashboard` join `profiles(name)` in their Supabase query; the current user's ID is compared against `created_by` to determine ownership
