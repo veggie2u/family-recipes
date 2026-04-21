@@ -47,7 +47,7 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 
 ### ✅ Recipe CRUD (authenticated users) — complete
 - **Create** — `/dashboard/recipes/new`: form with title (required), description, ingredients (required), instructions (required), public/private toggle
-- **View own recipes** — `/dashboard`: lists all accessible recipes (own + public) as cards with public/private badge
+- **View own recipes** — `/dashboard`: lists only your recipes as cards with public/private badge. To browse all accessible recipes (your recipes + public/community recipes), visit `/dashboard/recipes`.
 - **Edit** — `/dashboard/recipes/[id]/edit`: pre-filled form with same required fields, only accessible to owner
 - **Delete** — `/dashboard/recipes/[id]`: confirmation dialog before deletion, only accessible to owner
 - Server actions in `app/dashboard/recipes/actions.ts`
@@ -57,9 +57,9 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 - Badge on recipe cards and detail page shows Public/Private status
 
 ### ✅ Dashboard home page — complete
-- Authenticated home page at `/dashboard` (was `/protected`)
+- Authenticated home page at `/dashboard` (was `/protected`) showing "My Recipes" (your recipes only)
+- Header includes a "Browse all recipes" link to `/dashboard/recipes` and an "Add Recipe" button
 - Recipe list with skeleton loading state (Partial Prerendering)
-- "Add Recipe" button links to `/dashboard/recipes/new`
 - Empty state with prompt to add first recipe
 
 ### ✅ Public recipe browsing (unauthenticated users)
@@ -73,7 +73,8 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 - `RecipeSearchInput` client component with 300ms debounce updates `?q=` URL param
 - Filters on title and description using case-insensitive `ilike`
 - Guest `/recipes` page: searches public recipes only
-- Authenticated `/dashboard` page: searches all accessible recipes (own + public + family, per RLS)
+- Authenticated `/dashboard` page: searches only your recipes (filtered to recipes you created)
+- `/dashboard/recipes` page: searches all accessible recipes (own + public + family, per RLS)
 - Empty state distinguishes between "no results for query" and "no recipes yet"
 - **Bug fix:** `searchParams` was in the `useEffect` dependency array, causing an infinite GET request loop on page load. Fixed by storing `searchParams` in a ref so the effect only re-runs when the user's typed `value`, `pathname`, or `router` changes.
 

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { RecipeCard } from "@/components/recipe-card";
 import { RecipeSearchInput } from "@/components/recipe-search-input";
-import { PlusIcon } from "lucide-react";
+import { BookOpen, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -20,7 +20,6 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
   let request = supabase
     .from("recipes")
     .select("id, title, description, is_public, created_by, profiles(name), recipe_tags(tags(name))")
-    .eq("created_by", userId)
     .order("created_at", { ascending: false });
 
   if (query) {
@@ -36,19 +35,11 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
   if (!recipes || recipes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center gap-4 border border-dashed border-border rounded-lg">
+        <BookOpen className="w-10 h-10 text-muted-foreground" />
         {query ? (
           <p className="text-muted-foreground text-lg">No recipes found for &ldquo;{query}&rdquo;</p>
         ) : (
-          <>
-            <p className="text-muted-foreground text-lg">No recipes yet.</p>
-            <Link
-              href="/dashboard/recipes/new"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
-            >
-              <PlusIcon className="w-4 h-4" />
-              Add your first recipe
-            </Link>
-          </>
+          <p className="text-muted-foreground text-lg">No recipes yet.</p>
         )}
       </div>
     );
@@ -90,7 +81,7 @@ function RecipeListSkeleton() {
   );
 }
 
-export default function DashboardPage({
+export default function AllRecipesPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string }>;
@@ -99,32 +90,30 @@ export default function DashboardPage({
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">
-            My Recipes
+          <Link
+            href="/dashboard"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Back to my recipes
+          </Link>
+          <h1 className="font-display text-3xl font-bold text-foreground mt-3">
+            All Recipes
           </h1>
           <p className="text-muted-foreground mt-1">
-            Your collection of family recipes
+            Browse your recipes and public recipes from the community.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/dashboard/recipes"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
-          >
-            Browse all recipes
-          </Link>
-          <Link
-            href="/dashboard/recipes/new"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
-          >
-            <PlusIcon className="w-4 h-4" />
-            Add Recipe
-          </Link>
-        </div>
+        <Link
+          href="/dashboard/recipes/new"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+        >
+          <PlusIcon className="w-4 h-4" />
+          Add Recipe
+        </Link>
       </div>
 
       <Suspense>
-        <RecipeSearchInput placeholder="Search your recipes…" />
+        <RecipeSearchInput placeholder="Search all recipes…" />
       </Suspense>
 
       <Suspense fallback={<RecipeListSkeleton />}>
