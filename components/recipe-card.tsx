@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Globe, Lock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface RecipeCardProps {
   id: string;
@@ -7,6 +8,7 @@ interface RecipeCardProps {
   description: string | null;
   isPublic: boolean;
   isOwner: boolean;
+  tags?: string[];
 }
 
 export function RecipeCard({
@@ -15,6 +17,7 @@ export function RecipeCard({
   description,
   isPublic,
   isOwner,
+  tags = [],
 }: RecipeCardProps) {
   return (
     <Link
@@ -47,6 +50,15 @@ export function RecipeCard({
         <p className="text-sm text-muted-foreground line-clamp-2">
           {description}
         </p>
+      )}
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1">
+          {tags.map((tag) => (
+            <Badge key={tag} variant="outline" className="text-xs">
+              {tag}
+            </Badge>
+          ))}
+        </div>
       )}
       {isOwner && (
         <p className="text-xs text-accent/70 mt-auto pt-1">Your recipe</p>
