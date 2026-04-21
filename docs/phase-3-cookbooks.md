@@ -31,8 +31,52 @@ Users can create cookbooks and organize their recipes into them. Cookbooks are p
 - Authenticated users: search across public cookbooks and cookbooks they own
 
 ## Open questions
-- What determines if a cookbook is public vs private? (not explicitly defined in requirements — consider defaulting to private, matching recipe behavior)
+- ~~What determines if a cookbook is public vs private?~~ **Resolved:** defaults to private, matching recipe behavior. The `is_public` checkbox is on the create/edit form.
 
 ## Out of scope
 - Adding cookbooks to families (Phase 4)
 - Family-editable cookbooks (Phase 5)
+
+---
+
+## Progress
+
+### ✅ Cookbook data model — complete
+- `cookbooks` table with `name`, `description`, `is_public` (default `false`), `created_by`, `created_at`
+- `cookbook_tags` join table linking cookbooks to tags
+- `cookbook_recipes` join table linking cookbooks to recipes
+- RLS policies applied (see `database-schema.md`)
+
+### ✅ Cookbook CRUD (authenticated users) — complete
+- **Create** — `/dashboard/cookbooks/new`: form with name (required), description, tags, public/private toggle
+- **View own cookbooks** — `/dashboard`: lists only your cookbooks as cards with public/private badge. Includes a "Browse all cookbooks" link.
+- **View a single cookbook** — `/dashboard/cookbooks/[id]`: shows name, description, public/private badge, creator attribution, tags, and the list of recipes in the cookbook. Edit and Delete buttons are shown to the owner only. Non-owners see only recipes accessible to them (RLS on `recipes` filters private recipes for non-owners).
+- **Edit** — `/dashboard/cookbooks/[id]/edit`: pre-filled form, only accessible to owner (404 otherwise); syncs tags on save
+- **Delete** — `/dashboard/cookbooks/[id]`: confirmation dialog before deletion (only owner can trigger); redirects to dashboard
+- Server actions in `app/dashboard/cookbooks/actions.ts`
+
+### ✅ Cookbook visibility toggle — complete
+- `is_public` checkbox on create and edit forms
+- Public/Private badge on cookbook cards and detail page
+
+### ✅ Public cookbook browsing (authenticated users) — complete
+- `/dashboard/cookbooks` — browse all accessible cookbooks (own + public community cookbooks), ordered by creation date
+- `/dashboard/cookbooks/[id]` — single cookbook detail page; RLS enforces access (public cookbooks visible to all authenticated users)
+- `CookbookCard` component with `creatorName` prop for attribution on community cookbooks
+
+### ✅ Creator attribution on cookbook cards and detail pages
+- Cookbook cards show "Your cookbook" in `text-accent/70` for owned cookbooks; creator's display name in `text-muted-foreground` for others
+- Cookbook detail page shows the same byline below the title
+
+### ✅ Cookbook tags — complete
+- Reuses the shared `tags` table and `TagInput` component from Phase 2
+- `cookbook_tags` join table; `syncCookbookTags` helper in `actions.ts` replaces all tags on create/update
+- Tags shown on cookbook cards and detail page as Badge pills
+
+### 🔲 Adding / removing recipes from cookbooks — not yet implemented
+- UI to add a recipe the user owns to a cookbook they own
+- UI to remove a recipe from a cookbook
+
+### 🔲 Cookbook search — not yet implemented
+- Unauthenticated users: search across public cookbooks
+- Authenticated users: search across public + own cookbooks
