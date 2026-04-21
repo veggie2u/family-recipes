@@ -78,8 +78,8 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 - **Bug fix:** `searchParams` was in the `useEffect` dependency array, causing an infinite GET request loop on page load. Fixed by storing `searchParams` in a ref so the effect only re-runs when the user's typed `value`, `pathname`, or `router` changes.
 
 ### ✅ Reusable recipe components
-- **`components/recipe-card.tsx`** — shared card used on both `/recipes` and `/dashboard`. Props: `id`, `title`, `description`, `isOwner?`, `creatorName?`, `isPublic?` (omit to hide the badge), `href?` (defaults to `/dashboard/recipes/:id`).
-- **`components/recipe-detail.tsx`** — shared detail view used on both `/recipes/[id]` and `/dashboard/recipes/[id]`. Props: `title`, `description`, `ingredients`, `instructions`, `isOwner?`, `creatorName?`, `isPublic?` (omit to hide the badge), `actions?` (render slot for Edit/Delete buttons).
+- **`components/recipe-card.tsx`** — shared card used on both `/recipes` and `/dashboard`. Props: `id`, `title`, `description`, `isOwner?`, `creatorName?`, `isPublic?` (omit to hide the badge), `href?` (defaults to `/dashboard/recipes/:id`), `tags?`.
+- **`components/recipe-detail.tsx`** — shared detail view used on both `/recipes/[id]` and `/dashboard/recipes/[id]`. Props: `title`, `description`, `ingredients`, `instructions`, `isOwner?`, `creatorName?`, `isPublic?` (omit to hide the badge), `tags?`, `actions?` (render slot for Edit/Delete buttons).
 
 ### ✅ Creator attribution on recipe cards and detail pages
 - Recipe cards and detail pages show a byline below the title indicating who created the recipe
@@ -87,3 +87,11 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 - The creator's display name (from `profiles.name`) is shown in `text-muted-foreground` for all other recipes
 - Unauthenticated viewers always see the creator's name
 - Both `/recipes` and `/dashboard` join `profiles(name)` in their Supabase query; the current user's ID is compared against `created_by` to determine ownership
+
+### ✅ Recipe tags
+- `tags` table (id, name) with `CHECK (name = lower(name))` constraint — tags stored lowercase
+- `recipe_tags` join table linking recipes to tags, with RLS policies
+- `TagInput` component: autocomplete from existing tags, create new tags inline, removable badge pills, keyboard support
+- Tags shown on recipe cards (dashboard + public listing) as Badge pills
+- Tags shown on recipe detail pages (dashboard + public)
+- Server actions sync tags on create and update

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
 import { BookOpen } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { RecipeSearchInput } from "@/components/recipe-search-input";
 import { RecipeCard } from "@/components/recipe-card";
 
@@ -13,7 +14,7 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
     (async () => {
       let request = supabase
         .from("recipes")
-        .select("id, title, description, created_by, profiles(name)")
+        .select("id, title, description, created_by, profiles(name), recipe_tags(tags(name))")
         .eq("is_public", true)
         .order("created_at", { ascending: false });
 
@@ -43,7 +44,10 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
       {recipes.map((recipe) => {
         const isOwner = user?.id === recipe.created_by;
         const creatorName = (recipe.profiles as unknown as { name: string | null } | null)?.name ?? undefined;
-
+        const tags: string[] = recipe.recipe_tags?.flatMap(
+          (rt: { tags: { name: string } | { name: string }[] | null }) =>
+            Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
+        ) ?? [];
         return (
           <li key={recipe.id}>
             <RecipeCard
@@ -52,6 +56,7 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
               description={recipe.description}
               isOwner={isOwner}
               creatorName={creatorName}
+              tags={tags}
               href={`/recipes/${recipe.id}`}
             />
           </li>

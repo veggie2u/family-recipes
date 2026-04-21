@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Globe, Lock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface RecipeCardProps {
   id: string;
@@ -13,6 +14,7 @@ interface RecipeCardProps {
   creatorName?: string;
   /** Link destination. Defaults to /dashboard/recipes/:id */
   href?: string;
+  tags?: string[];
 }
 
 export function RecipeCard({
@@ -23,6 +25,7 @@ export function RecipeCard({
   isOwner,
   creatorName,
   href,
+  tags = [],
 }: RecipeCardProps) {
   const byline = isOwner ? "Your recipe" : creatorName;
 
@@ -59,6 +62,15 @@ export function RecipeCard({
         <p className="text-sm text-muted-foreground line-clamp-2">
           {description}
         </p>
+      )}
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1">
+          {tags.map((tag) => (
+            <Badge key={tag} variant="outline" className="text-xs">
+              {tag}
+            </Badge>
+          ))}
+        </div>
       )}
       {byline && (
         <p className={`text-xs mt-auto pt-1 ${isOwner ? "text-accent/70" : "text-muted-foreground"}`}>{byline}</p>

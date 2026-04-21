@@ -19,7 +19,7 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
 
   let request = supabase
     .from("recipes")
-    .select("id, title, description, is_public, created_by, profiles(name)")
+    .select("id, title, description, is_public, created_by, profiles(name), recipe_tags(tags(name))")
     .order("created_at", { ascending: false });
 
   if (query) {
@@ -55,17 +55,23 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {recipes.map((recipe) => (
-        <RecipeCard
-          key={recipe.id}
-          id={recipe.id}
-          title={recipe.title}
-          description={recipe.description}
-          isPublic={recipe.is_public}
-          isOwner={recipe.created_by === userId}
-          creatorName={(recipe.profiles as unknown as { name: string | null } | null)?.name ?? undefined}
-        />
-      ))}
+      {recipes.map((recipe) => {
+        const tags = recipe.recipe_tags?.flatMap((rt: { tags: { name: string } | { name: string }[] | null }) =>
+          Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
+        ) ?? [];
+        return (
+          <RecipeCard
+            key={recipe.id}
+            id={recipe.id}
+            title={recipe.title}
+            description={recipe.description}
+            isPublic={recipe.is_public}
+            isOwner={recipe.created_by === userId}
+            creatorName={(recipe.profiles as unknown as { name: string | null } | null)?.name ?? undefined}
+            tags={tags}
+          />
+        );
+      })}
     </div>
   );
 }

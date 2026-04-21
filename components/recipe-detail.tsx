@@ -1,4 +1,5 @@
 import { Globe, Lock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface RecipeDetailProps {
   title: string;
@@ -11,6 +12,7 @@ interface RecipeDetailProps {
   isOwner?: boolean;
   /** Creator's display name. Shown when isOwner is false. */
   creatorName?: string;
+  tags?: string[];
   /** Optional action buttons (e.g. Edit / Delete) rendered in the header. */
   actions?: React.ReactNode;
 }
@@ -23,6 +25,7 @@ export function RecipeDetail({
   isPublic,
   isOwner,
   creatorName,
+  tags = [],
   actions,
 }: RecipeDetailProps) {
   const byline = isOwner ? "Your recipe" : creatorName;
@@ -53,6 +56,13 @@ export function RecipeDetail({
             <p className={`text-sm ${isOwner ? "text-accent/70" : "text-muted-foreground"}`}>
               {byline}
             </p>
+          )}
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map((tag) => (
+                <Badge key={tag} variant="outline">{tag}</Badge>
+              ))}
+            </div>
           )}
         </div>
         {actions && (

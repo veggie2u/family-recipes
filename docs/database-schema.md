@@ -53,6 +53,16 @@ erDiagram
         timestamp created_at
     }
 
+    TAG {
+        uuid id PK
+        string name
+    }
+
+    RECIPE_TAG {
+        uuid recipe_id FK
+        uuid tag_id FK
+    }
+
     COOKBOOK_RECIPE {
         uuid id PK
         uuid cookbook_id FK
@@ -79,6 +89,8 @@ erDiagram
     COOKBOOK ||--o{ FAMILY_COOKBOOK : "shared with"
     FAMILY ||--o{ FAMILY_RECIPE : "has"
     RECIPE ||--o{ FAMILY_RECIPE : "assigned to"
+    RECIPE ||--o{ RECIPE_TAG : "tagged with"
+    TAG ||--o{ RECIPE_TAG : "applied to"
 ```
 
 ## Row Level Security Policies
@@ -146,6 +158,19 @@ erDiagram
 | `family_recipes: authenticated insert` | INSERT | authenticated | Any authenticated user |
 | `family_recipes: authenticated update` | UPDATE | authenticated | Any authenticated user |
 | `family_recipes: authenticated delete` | DELETE | authenticated | Any authenticated user |
+
+### `tags`
+| Policy | Command | Roles | Rule |
+|--------|---------|-------|------|
+| `tags: public read` | SELECT | public | Everyone can read all tags |
+| `tags: authenticated insert` | INSERT | authenticated | Any authenticated user can create tags |
+
+### `recipe_tags`
+| Policy | Command | Roles | Rule |
+|--------|---------|-------|------|
+| `recipe_tags: public read` | SELECT | public | Everyone can read all recipe–tag associations |
+| `recipe_tags: authenticated insert` | INSERT | authenticated | Any authenticated user can insert (recipe RLS controls access) |
+| `recipe_tags: authenticated delete` | DELETE | authenticated | Any authenticated user can delete (recipe RLS controls access) |
 
 ---
 

@@ -19,7 +19,7 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
 
   const { data: recipe, error } = await supabase
     .from("recipes")
-    .select("*, profiles(name)")
+    .select("*, profiles(name), recipe_tags(tags(name))")
     .eq("id", id)
     .single();
 
@@ -29,6 +29,10 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
 
   const isOwner = recipe.created_by === userId;
   const creatorName = (recipe.profiles as unknown as { name: string | null } | null)?.name ?? undefined;
+  const tags: string[] = recipe.recipe_tags?.flatMap(
+    (rt: { tags: { name: string } | { name: string }[] | null }) =>
+      Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
+  ) ?? [];
 
   return (
     <RecipeDetail
@@ -39,6 +43,7 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
       isPublic={recipe.is_public}
       isOwner={isOwner}
       creatorName={creatorName}
+      tags={tags}
       actions={
         isOwner ? (
           <>
