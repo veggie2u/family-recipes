@@ -42,6 +42,10 @@
 ## Recipe
 
     - the recipe is associated to the user that created it
+    - a recipe has a title (required), description, ingredients (required), and instructions (required)
+    - a recipe can be marked public or private (default private)
+    - a recipe can have one or more tags
+    - tags are shared across all recipes (a tag entered on one recipe is available to all users when tagging)
     - a user can add a recipe to a family and/or a cookbook
     - when a cookbook is added to a family, the user can choose if the recipes are editable by family members (modify recipe)
     - can have multiple pictures associated with it

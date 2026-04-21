@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 
 async function RecipeDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -9,7 +10,7 @@ async function RecipeDetail({ params }: { params: Promise<{ id: string }> }) {
 
   const { data: recipe, error } = await supabase
     .from("recipes")
-    .select("id, title, description, ingredients, instructions, created_at")
+    .select("id, title, description, ingredients, instructions, created_at, recipe_tags(tags(name))")
     .eq("id", id)
     .eq("is_public", true)
     .single();
@@ -17,6 +18,11 @@ async function RecipeDetail({ params }: { params: Promise<{ id: string }> }) {
   if (error || !recipe) {
     notFound();
   }
+
+  const tags: string[] = recipe.recipe_tags?.flatMap(
+    (rt: { tags: { name: string } | { name: string }[] | null }) =>
+      Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
+  ) ?? [];
 
   return (
     <article className="flex flex-col gap-8">
@@ -28,6 +34,13 @@ async function RecipeDetail({ params }: { params: Promise<{ id: string }> }) {
           <p className="text-muted-foreground mt-2 text-lg">
             {recipe.description}
           </p>
+        )}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {tags.map((tag) => (
+              <Badge key={tag} variant="outline">{tag}</Badge>
+            ))}
+          </div>
         )}
       </div>
 

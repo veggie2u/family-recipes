@@ -75,3 +75,11 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 - Guest `/recipes` page: searches public recipes only
 - Authenticated `/dashboard` page: searches all accessible recipes (own + public + family, per RLS)
 - Empty state distinguishes between "no results for query" and "no recipes yet"
+
+### ✅ Recipe tags
+- `tags` table (id, name) with `CHECK (name = lower(name))` constraint — tags stored lowercase
+- `recipe_tags` join table linking recipes to tags, with RLS policies
+- `TagInput` component: autocomplete from existing tags, create new tags inline, removable badge pills, keyboard support
+- Tags shown on recipe cards (dashboard + public listing) as Badge pills
+- Tags shown on recipe detail pages (dashboard + public)
+- Server actions sync tags on create and update

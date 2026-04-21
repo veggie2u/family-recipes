@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { BookOpen } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { RecipeSearchInput } from "@/components/recipe-search-input";
 
 async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
@@ -10,7 +11,7 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
 
   let request = supabase
     .from("recipes")
-    .select("id, title, description, created_at")
+    .select("id, title, description, created_at, recipe_tags(tags(name))")
     .eq("is_public", true)
     .order("created_at", { ascending: false });
 
@@ -33,23 +34,38 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
 
   return (
     <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {recipes.map((recipe) => (
-        <li key={recipe.id}>
-          <Link
-            href={`/recipes/${recipe.id}`}
-            className="flex flex-col gap-2 rounded-lg border border-border bg-card p-5 hover:bg-muted transition-colors h-full"
-          >
-            <h2 className="font-semibold text-foreground text-lg leading-snug">
-              {recipe.title}
-            </h2>
-            {recipe.description && (
-              <p className="text-sm text-muted-foreground line-clamp-3">
-                {recipe.description}
-              </p>
-            )}
-          </Link>
-        </li>
-      ))}
+      {recipes.map((recipe) => {
+        const tags: string[] = recipe.recipe_tags?.flatMap(
+          (rt: { tags: { name: string } | { name: string }[] | null }) =>
+            Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
+        ) ?? [];
+        return (
+          <li key={recipe.id}>
+            <Link
+              href={`/recipes/${recipe.id}`}
+              className="flex flex-col gap-2 rounded-lg border border-border bg-card p-5 hover:bg-muted transition-colors h-full"
+            >
+              <h2 className="font-semibold text-foreground text-lg leading-snug">
+                {recipe.title}
+              </h2>
+              {recipe.description && (
+                <p className="text-sm text-muted-foreground line-clamp-3">
+                  {recipe.description}
+                </p>
+              )}
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {tags.map((tag) => (
+                    <Badge key={tag} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </Link>
+          </li>
+        );
+      })}
     </ul>
   );
 }

@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { TagInput } from "@/components/tag-input";
 
 interface RecipeFormValues {
   title: string;
@@ -22,10 +23,12 @@ interface RecipeFormValues {
   ingredients: string;
   instructions: string;
   is_public: boolean;
+  tags: string[];
 }
 
 interface RecipeFormProps {
   defaultValues?: Partial<RecipeFormValues>;
+  allTags?: string[];
   action: (formData: FormData) => Promise<void>;
   submitLabel?: string;
   cancelHref: string;
@@ -33,6 +36,7 @@ interface RecipeFormProps {
 
 export function RecipeForm({
   defaultValues,
+  allTags = [],
   action,
   submitLabel = "Save Recipe",
   cancelHref,
@@ -44,6 +48,7 @@ export function RecipeForm({
       ingredients: "",
       instructions: "",
       is_public: false,
+      tags: [],
       ...defaultValues,
     },
   });
@@ -55,6 +60,7 @@ export function RecipeForm({
     formData.set("ingredients", values.ingredients);
     formData.set("instructions", values.instructions);
     if (values.is_public) formData.set("is_public", "on");
+    formData.set("tags", JSON.stringify(values.tags));
     await action(formData);
   };
 
@@ -126,6 +132,24 @@ export function RecipeForm({
                   placeholder={"Step 1: Preheat oven to 350°F\nStep 2: ..."}
                   rows={8}
                   {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tags</FormLabel>
+              <FormControl>
+                <TagInput
+                  allTags={allTags}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               </FormControl>
               <FormMessage />

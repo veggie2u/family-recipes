@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { Globe, Lock, Pencil } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Suspense } from "react";
 import { DeleteRecipeButton } from "@/components/delete-recipe-button";
 
@@ -18,7 +19,7 @@ async function RecipeDetail({ params }: { params: Promise<{ id: string }> }) {
 
   const { data: recipe, error } = await supabase
     .from("recipes")
-    .select("*")
+    .select("*, recipe_tags(tags(name))")
     .eq("id", id)
     .single();
 
@@ -27,6 +28,10 @@ async function RecipeDetail({ params }: { params: Promise<{ id: string }> }) {
   }
 
   const isOwner = recipe.created_by === userId;
+  const tags: string[] = recipe.recipe_tags?.flatMap(
+    (rt: { tags: { name: string } | { name: string }[] | null }) =>
+      Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
+  ) ?? [];
 
   return (
     <>
@@ -50,6 +55,13 @@ async function RecipeDetail({ params }: { params: Promise<{ id: string }> }) {
           <h1 className="font-display text-3xl font-bold text-foreground">
             {recipe.title}
           </h1>
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map((tag) => (
+                <Badge key={tag} variant="outline">{tag}</Badge>
+              ))}
+            </div>
+          )}
         </div>
         {isOwner && (
           <div className="flex items-center gap-2 shrink-0">
