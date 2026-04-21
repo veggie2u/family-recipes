@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { RecipeCard } from "@/components/recipe-card";
+import { CookbookCard } from "@/components/cookbook-card";
 import { RecipeSearchInput } from "@/components/recipe-search-input";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
@@ -90,6 +91,74 @@ function RecipeListSkeleton() {
   );
 }
 
+async function CookbookList() {
+  const supabase = await createClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+
+  if (!claimsData?.claims) {
+    redirect("/auth/login");
+  }
+
+  const userId = claimsData.claims.sub;
+
+  const { data: cookbooks, error } = await supabase
+    .from("cookbooks")
+    .select("id, name, description, is_public, created_by, cookbook_tags(tags(name))")
+    .eq("created_by", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  if (!cookbooks || cookbooks.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center gap-4 border border-dashed border-border rounded-lg">
+        <p className="text-muted-foreground text-lg">No cookbooks yet.</p>
+        <Link
+          href="/dashboard/cookbooks/new"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+        >
+          <PlusIcon className="w-4 h-4" />
+          Create your first cookbook
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {cookbooks.map((cookbook) => {
+        const tags = cookbook.cookbook_tags?.flatMap((ct: { tags: { name: string } | { name: string }[] | null }) =>
+          Array.isArray(ct.tags) ? ct.tags.map((t) => t.name) : ct.tags ? [ct.tags.name] : []
+        ) ?? [];
+        return (
+          <CookbookCard
+            key={cookbook.id}
+            id={cookbook.id}
+            name={cookbook.name}
+            description={cookbook.description}
+            isPublic={cookbook.is_public}
+            isOwner={cookbook.created_by === userId}
+            tags={tags}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function CookbookListSkeleton() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {[...Array(3)].map((_, i) => (
+        <div
+          key={i}
+          className="h-32 rounded-lg border border-border bg-muted/30 animate-pulse"
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function DashboardPage({
   searchParams,
 }: {
@@ -129,6 +198,28 @@ export default function DashboardPage({
 
       <Suspense fallback={<RecipeListSkeleton />}>
         <RecipeList searchParams={searchParams} />
+      </Suspense>
+
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-display text-2xl font-bold text-foreground">
+            My Cookbooks
+          </h2>
+          <p className="text-muted-foreground mt-1">
+            Your curated collections of recipes
+          </p>
+        </div>
+        <Link
+          href="/dashboard/cookbooks/new"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+        >
+          <PlusIcon className="w-4 h-4" />
+          Add Cookbook
+        </Link>
+      </div>
+
+      <Suspense fallback={<CookbookListSkeleton />}>
+        <CookbookList />
       </Suspense>
     </div>
   );
