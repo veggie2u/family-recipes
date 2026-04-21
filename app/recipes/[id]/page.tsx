@@ -2,66 +2,43 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
+import { RecipeDetail } from "@/components/recipe-detail";
 
-async function RecipeDetail({ params }: { params: Promise<{ id: string }> }) {
+async function RecipeDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: recipe, error } = await supabase
-    .from("recipes")
-    .select("id, title, description, ingredients, instructions, created_at, recipe_tags(tags(name))")
-    .eq("id", id)
-    .eq("is_public", true)
-    .single();
+  const [{ data: { user } }, { data: recipe, error }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from("recipes")
+      .select("id, title, description, ingredients, instructions, created_by, profiles(name), recipe_tags(tags(name))")
+      .eq("id", id)
+      .eq("is_public", true)
+      .single(),
+  ]);
 
   if (error || !recipe) {
     notFound();
   }
 
+  const isOwner = user?.id === recipe.created_by;
+  const creatorName = (recipe.profiles as unknown as { name: string | null } | null)?.name ?? undefined;
   const tags: string[] = recipe.recipe_tags?.flatMap(
     (rt: { tags: { name: string } | { name: string }[] | null }) =>
       Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
   ) ?? [];
 
   return (
-    <article className="flex flex-col gap-8">
-      <div>
-        <h1 className="font-display text-3xl font-bold text-foreground">
-          {recipe.title}
-        </h1>
-        {recipe.description && (
-          <p className="text-muted-foreground mt-2 text-lg">
-            {recipe.description}
-          </p>
-        )}
-        {tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {tags.map((tag) => (
-              <Badge key={tag} variant="outline">{tag}</Badge>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {recipe.ingredients && (
-        <section className="flex flex-col gap-3">
-          <h2 className="font-semibold text-xl text-foreground">Ingredients</h2>
-          <pre className="whitespace-pre-wrap font-mono text-sm bg-muted rounded-lg p-4 leading-relaxed">
-            {recipe.ingredients}
-          </pre>
-        </section>
-      )}
-
-      {recipe.instructions && (
-        <section className="flex flex-col gap-3">
-          <h2 className="font-semibold text-xl text-foreground">Instructions</h2>
-          <div className="whitespace-pre-wrap text-sm text-foreground leading-relaxed bg-muted rounded-lg p-4">
-            {recipe.instructions}
-          </div>
-        </section>
-      )}
-    </article>
+    <RecipeDetail
+      title={recipe.title}
+      description={recipe.description}
+      ingredients={recipe.ingredients}
+      instructions={recipe.instructions}
+      isOwner={isOwner}
+      creatorName={creatorName}
+      tags={tags}
+    />
   );
 }
 
@@ -88,7 +65,7 @@ export default function PublicRecipeDetailPage({
           </div>
         }
       >
-        <RecipeDetail params={params} />
+        <RecipeDetailContent params={params} />
       </Suspense>
     </div>
   );

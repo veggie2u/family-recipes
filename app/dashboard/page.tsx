@@ -19,7 +19,7 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
 
   let request = supabase
     .from("recipes")
-    .select("id, title, description, is_public, created_by, recipe_tags(tags(name))")
+    .select("id, title, description, is_public, created_by, profiles(name), recipe_tags(tags(name))")
     .order("created_at", { ascending: false });
 
   if (query) {
@@ -67,6 +67,7 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
             description={recipe.description}
             isPublic={recipe.is_public}
             isOwner={recipe.created_by === userId}
+            creatorName={(recipe.profiles as unknown as { name: string | null } | null)?.name ?? undefined}
             tags={tags}
           />
         );
