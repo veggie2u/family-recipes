@@ -20,10 +20,7 @@ export async function AuthButton() {
   }
 
   return user ? (
-    <div className="flex items-center gap-4">
-      Hey, {displayName}!
-      <UserMenu />
-    </div>
+    <UserMenu displayName={displayName} />
   ) : (
     <div className="flex gap-2">
       <Button asChild size="sm" variant={"outline"}>
