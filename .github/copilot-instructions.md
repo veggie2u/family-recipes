@@ -40,6 +40,7 @@ All auth UI lives under `app/auth/`: `login`, `sign-up`, `forgot-password`, `upd
 
 ## Key conventions
 
+- **Wrap async server components in `<Suspense>`** — any server component that does uncached async fetching (e.g., Supabase queries) must be extracted into a child component and wrapped with `<Suspense>` in the page. Fetching directly in the page component will cause a build error (`Uncached data was accessed outside of <Suspense>`). See `app/dashboard/profile/page.tsx` for the pattern.
 - **`cn()` for all `className` values** — import from `lib/utils.ts`; it merges Tailwind classes via `clsx` + `tailwind-merge`.
 - **shadcn/ui components** live in `components/ui/` and are added via the CLI (`npx shadcn@latest add <component>`), not written by hand.
 - **Path alias `@/`** maps to the project root.

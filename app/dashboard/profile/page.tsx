@@ -2,8 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { UserCircle } from "lucide-react";
 import { ProfileForm } from "./profile-form";
+import { Suspense } from "react";
 
-export default async function ProfilePage() {
+async function ProfileContent() {
   const supabase = await createClient();
 
   const { data } = await supabase.auth.getClaims();
@@ -37,5 +38,13 @@ export default async function ProfilePage() {
 
       <ProfileForm defaultName={profile?.name ?? ""} />
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense>
+      <ProfileContent />
+    </Suspense>
   );
 }
