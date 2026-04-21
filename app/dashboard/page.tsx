@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { RecipeCard } from "@/components/recipe-card";
+import { RecipeSearchInput } from "@/components/recipe-search-input";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
-async function RecipeList() {
+async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
 
@@ -14,25 +15,40 @@ async function RecipeList() {
   }
 
   const userId = claimsData.claims.sub;
+  const { q: query } = await searchParams;
 
-  const { data: recipes, error } = await supabase
+  let request = supabase
     .from("recipes")
     .select("id, title, description, is_public, created_by")
     .order("created_at", { ascending: false });
+
+  if (query) {
+    request = request.or(
+      `title.ilike.%${query}%,description.ilike.%${query}%`
+    );
+  }
+
+  const { data: recipes, error } = await request;
 
   if (error) throw new Error(error.message);
 
   if (!recipes || recipes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center gap-4 border border-dashed border-border rounded-lg">
-        <p className="text-muted-foreground text-lg">No recipes yet.</p>
-        <Link
-          href="/dashboard/recipes/new"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
-        >
-          <PlusIcon className="w-4 h-4" />
-          Add your first recipe
-        </Link>
+        {query ? (
+          <p className="text-muted-foreground text-lg">No recipes found for &ldquo;{query}&rdquo;</p>
+        ) : (
+          <>
+            <p className="text-muted-foreground text-lg">No recipes yet.</p>
+            <Link
+              href="/dashboard/recipes/new"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+            >
+              <PlusIcon className="w-4 h-4" />
+              Add your first recipe
+            </Link>
+          </>
+        )}
       </div>
     );
   }
@@ -66,7 +82,11 @@ function RecipeListSkeleton() {
   );
 }
 
-export default function DashboardPage() {
+export default function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
@@ -87,8 +107,12 @@ export default function DashboardPage() {
         </Link>
       </div>
 
+      <Suspense>
+        <RecipeSearchInput placeholder="Search your recipes…" />
+      </Suspense>
+
       <Suspense fallback={<RecipeListSkeleton />}>
-        <RecipeList />
+        <RecipeList searchParams={searchParams} />
       </Suspense>
     </div>
   );

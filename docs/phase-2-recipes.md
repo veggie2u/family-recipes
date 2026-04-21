@@ -69,5 +69,9 @@ Users can create, view, edit, and delete their own recipes. Recipes can be marke
 - Shared layout (`app/recipes/layout.tsx`) with same nav/footer as dashboard; shows Sign in / Sign up buttons and theme switcher for guests, user menu for authenticated users
 - `BrandLogo` links to `/` (welcome page) for guests; dashboard layout passes `href="/dashboard"` explicitly
 
-### 🔲 Recipe search
-- Not yet implemented
+### ✅ Recipe search
+- `RecipeSearchInput` client component with 300ms debounce updates `?q=` URL param
+- Filters on title and description using case-insensitive `ilike`
+- Guest `/recipes` page: searches public recipes only
+- Authenticated `/dashboard` page: searches all accessible recipes (own + public + family, per RLS)
+- Empty state distinguishes between "no results for query" and "no recipes yet"

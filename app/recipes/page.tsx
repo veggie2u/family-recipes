@@ -2,21 +2,31 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { BookOpen } from "lucide-react";
+import { RecipeSearchInput } from "@/components/recipe-search-input";
 
-async function RecipeList() {
+async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const supabase = await createClient();
+  const { q: query } = await searchParams;
 
-  const { data: recipes } = await supabase
+  let request = supabase
     .from("recipes")
     .select("id, title, description, created_at")
     .eq("is_public", true)
     .order("created_at", { ascending: false });
 
+  if (query) {
+    request = request.or(
+      `title.ilike.%${query}%,description.ilike.%${query}%`
+    );
+  }
+
+  const { data: recipes } = await request;
+
   if (!recipes?.length) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-muted-foreground gap-3">
         <BookOpen className="w-10 h-10" />
-        <p>No recipes have been shared yet.</p>
+        <p>{query ? `No recipes found for "${query}"` : "No recipes have been shared yet."}</p>
       </div>
     );
   }
@@ -44,7 +54,11 @@ async function RecipeList() {
   );
 }
 
-export default function PublicRecipesPage() {
+export default function PublicRecipesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -56,6 +70,10 @@ export default function PublicRecipesPage() {
         </p>
       </div>
 
+      <Suspense>
+        <RecipeSearchInput />
+      </Suspense>
+
       <Suspense
         fallback={
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -65,7 +83,7 @@ export default function PublicRecipesPage() {
           </div>
         }
       >
-        <RecipeList />
+        <RecipeList searchParams={searchParams} />
       </Suspense>
     </div>
   );
