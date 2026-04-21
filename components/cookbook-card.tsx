@@ -8,6 +8,8 @@ interface CookbookCardProps {
   description: string | null;
   isPublic?: boolean;
   isOwner?: boolean;
+  /** Name of the cookbook creator. Shown when isOwner is false. */
+  creatorName?: string;
   tags?: string[];
 }
 
@@ -17,8 +19,10 @@ export function CookbookCard({
   description,
   isPublic,
   isOwner,
+  creatorName,
   tags = [],
 }: CookbookCardProps) {
+  const byline = isOwner ? "Your cookbook" : creatorName;
   return (
     <Link
       href={`/dashboard/cookbooks/${id}`}
@@ -62,8 +66,8 @@ export function CookbookCard({
           ))}
         </div>
       )}
-      {isOwner && (
-        <p className="text-xs text-accent/70 mt-auto pt-1">Your cookbook</p>
+      {byline && (
+        <p className={`text-xs mt-auto pt-1 ${isOwner ? "text-accent/70" : "text-muted-foreground"}`}>{byline}</p>
       )}
     </Link>
   );
