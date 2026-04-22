@@ -60,20 +60,14 @@ async function CookbookDetailContent({ params }: { params: Promise<{ id: string 
 
   const recipeIdsInCookbook = recipes.map((r) => r.id);
 
-  let availableRecipes: { id: string; title: string; description: string | null }[] = [];
+  let allUserRecipes: { id: string; title: string; description: string | null }[] = [];
   if (isOwner) {
-    const query = supabase
+    const { data } = await supabase
       .from("recipes")
       .select("id, title, description")
       .eq("created_by", userId)
       .order("title");
-
-    if (recipeIdsInCookbook.length > 0) {
-      query.not("id", "in", `(${recipeIdsInCookbook.join(",")})`);
-    }
-
-    const { data } = await query;
-    availableRecipes = data ?? [];
+    allUserRecipes = data ?? [];
   }
 
   return (
@@ -135,7 +129,8 @@ async function CookbookDetailContent({ params }: { params: Promise<{ id: string 
           {isOwner && (
             <AddRecipeToCookbookPanel
               cookbookId={id}
-              availableRecipes={availableRecipes}
+              allRecipes={allUserRecipes}
+              initialSelectedIds={recipeIdsInCookbook}
             />
           )}
         </div>
