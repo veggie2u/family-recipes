@@ -87,10 +87,30 @@ erDiagram
     RECIPE ||--o{ COOKBOOK_RECIPE : "included in"
     FAMILY ||--o{ FAMILY_COOKBOOK : "has"
     COOKBOOK ||--o{ FAMILY_COOKBOOK : "shared with"
+    %% Future/planned additions
+    FAMILY_FOLLOWER {
+        uuid id PK
+        uuid family_id FK
+        uuid user_id FK
+        timestamp followed_at
+    }
+
+    FAMILY_PENDING_EMAIL_INVITE {
+        uuid id PK
+        uuid family_id FK
+        string email
+        string role
+        uuid invited_by FK
+        timestamp created_at
+    }
+
     FAMILY ||--o{ FAMILY_RECIPE : "has"
     RECIPE ||--o{ FAMILY_RECIPE : "assigned to"
     RECIPE ||--o{ RECIPE_TAG : "tagged with"
     TAG ||--o{ RECIPE_TAG : "applied to"
+    FAMILY ||--o{ FAMILY_FOLLOWER : "followed by"
+    USER ||--o{ FAMILY_FOLLOWER : "follows"
+    FAMILY ||--o{ FAMILY_PENDING_EMAIL_INVITE : "has pending invites"
 ```
 
 ## Row Level Security Policies
@@ -183,4 +203,19 @@ Security definer function used in RLS policies to check if `auth.uid()` is a mem
 
 ### `on_auth_user_created` (on `auth.users`)
 After a new user signs up, automatically inserts a row into `public.profiles` with the user's `id`. This ensures the FK constraint on `recipes.created_by → profiles.id` (and similar) is always satisfiable. A one-time backfill migration (`backfill_profiles_for_existing_users`) created profiles for all users who signed up before this trigger was added.
+
+## Future Schema (not yet applied)
+
+### `family_followers`
+| Policy | Command | Roles | Rule |
+|--------|---------|-------|------|
+| `family_followers: public read` | SELECT | public | Visible if associated family is public, or the row is for the current user |
+| `family_followers: authenticated insert` | INSERT | authenticated | User can only insert their own follower row (`user_id = auth.uid()`) |
+| `family_followers: authenticated delete` | DELETE | authenticated | User can only delete their own follower row |
+
+### `family_pending_email_invites`
+| Policy | Command | Roles | Rule |
+|--------|---------|-------|------|
+| `family_pending_email_invites: member read` | SELECT | authenticated | Readable by the user who created the invite (`invited_by = auth.uid()`) |
+| `family_pending_email_invites: authenticated insert` | INSERT | authenticated | Any active family member can insert (`invited_by = auth.uid()`) |
 
