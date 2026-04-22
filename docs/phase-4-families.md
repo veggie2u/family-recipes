@@ -59,3 +59,43 @@ Users can create families, invite other users to join, and add cookbooks to a fa
 - Can a user belong to multiple families? (requirements don't restrict this — assume yes)
 - Can a user leave a family?
 - Who can remove a member from a family?
+
+---
+
+## Progress
+
+### ✅ Family data model — complete
+- `families` table: `name`, `is_public`, `created_by`, `created_at`
+- `family_members` table: `family_id`, `user_id`, `role`, `joined_at`, `status` (`'active'` | `'invited'`)
+- `family_cookbooks` join table: `family_id`, `cookbook_id`, `members_can_edit`, `added_at`
+- `family_recipes` join table: `family_id`, `recipe_id`, `added_at`
+- RLS policies applied (see `database-schema.md`)
+- `is_family_member(p_family_id uuid)` security-definer helper function prevents RLS recursion on `family_members`
+- `lookup_user_id_by_email(p_email text)` security-definer function for email → user ID lookups (used internally)
+
+### ✅ Family management — complete
+- **Create** — `/dashboard/families/new`: form with name (required, max 100 chars) and public/private toggle
+- **Invite by user search** — search-as-you-type name picker on the family detail page; debounced 300ms, excludes existing members; calls `searchUsers(query, familyId)` → `inviteToFamily(familyId, userId)`
+- **Accept invitation** — available on `/dashboard/families` (Pending Invitations section) and on the dashboard home page; sets `status = 'active'`
+- **Decline invitation** — same locations; deletes the `family_members` row
+- Server actions in `app/dashboard/families/actions.ts`: `createFamily`, `inviteToFamily`, `acceptInvitation`, `declineInvitation`, `searchUsers`
+
+### ✅ Family pages — complete
+- `/dashboard/families` — My Families grid (active memberships) + Pending Invitations (invited status) with Accept/Decline; back-to-dashboard link at top
+- `/dashboard/families/new` — create family form
+- `/dashboard/families/[id]` — family detail: name, visibility badge, member list with role/status badges, invite section (active members only)
+
+### ✅ Dashboard integration — complete
+- "My Families" section on the dashboard home shows family cards (name, visibility, member count)
+- "Pending Family Invitations" section on the dashboard home (between search and My Recipes) for quick Accept/Decline without navigating away
+- `FamilyCard` component (`components/family-card.tsx`) used across listings
+
+### 🔲 Adding cookbooks to a family — not yet implemented
+- UI for assigning an existing cookbook to a family
+- DB tables (`family_cookbooks`) are in place; server actions not yet created
+
+### 🔲 Family search — not yet implemented
+- Searchable listing of public families for unauthenticated and authenticated users
+
+### 🔲 Cookbook search update — not yet implemented
+- Finding cookbooks that belong to a family the user is a member of in the broader cookbook browse page (`/dashboard/cookbooks`)

@@ -85,6 +85,10 @@ Users can create cookbooks and organize their recipes into them. Cookbooks are p
 - On the recipe detail page, display which cookbooks the recipe has been added to
 - Note: the definition of "eligible recipes" (recipes a user can add to a cookbook) is currently recipes the user owns; this will need to be revisited when families are implemented (Phase 4)
 
-### 🔲 Cookbook search — not yet implemented
-- Unauthenticated users: search across public cookbooks
-- Authenticated users: search across public + own cookbooks
+### ✅ Cookbook search — complete
+- **Dashboard (`/dashboard`):** `CookbookList` accepts `searchParams` and filters by name, description, and tags; tag search uses a two-step pre-query (tag IDs → cookbook IDs via `cookbook_tags`) since Supabase `.or()` cannot join through junction tables directly
+- **Authenticated users** on the dashboard can search across cookbooks they own plus cookbooks that are part of families they belong to (RLS handles visibility)
+- **Global search input** on the dashboard applies the same `?q=` param to both `RecipeList` and `CookbookList` simultaneously; placeholder updated to "Search recipes and cookbooks…"
+- Empty state distinguishes "no results for query" from "no cookbooks yet"
+
+> ⚠️ **Note:** Unauthenticated public cookbook search (at a dedicated `/cookbooks` route) is not yet implemented. The current search is only available on the authenticated dashboard.
