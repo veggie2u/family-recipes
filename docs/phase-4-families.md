@@ -4,39 +4,44 @@
 
 Users can create families, invite other users to join, and add cookbooks to a family. Family members can view and edit all recipes and cookbooks belonging to the family.
 
+## Status legend
+
+- ✅ Implemented
+- ⬜ Not yet implemented
+
 ## Scope
 
 ### Family data model
-- Name
-- Visibility: public or private
-- Members (collection of users)
-- Cookbooks assigned to the family
-- Created/updated timestamps
+- ✅ Name
+- ✅ Visibility: public or private
+- ✅ Members (collection of users)
+- ✅ Cookbooks assigned to the family (schema only — `family_cookbooks` table with `members_can_edit`)
+- ✅ Created timestamp; no `updated_at`
 
 ### Family management (authenticated users)
-- Create a new family
-- Invite another user to a family they belong to (by searching existing accounts)
-- Accept a family invitation
-- Decline a family invitation
+- ✅ Create a new family (`/dashboard/families/new`)
+- ✅ Invite another user to a family they belong to (by searching existing accounts — debounced name search)
+- ✅ Accept a family invitation (on `/dashboard/families` and `/dashboard`)
+- ✅ Decline a family invitation (on `/dashboard/families` and `/dashboard`)
 
 ### Adding cookbooks to a family
-- A user can add a cookbook to a family they belong to
-- When a cookbook is added to a family, all recipes in that cookbook become visible to family members
+- ✅ A user can add a cookbook to a family they belong to
+- ✅ When a cookbook is added to a family, all recipes in that cookbook become visible to family members
 
 ### Family member access
-- All members of a family can view and edit all recipes assigned to the family
-- All members of a family can view and edit all cookbooks assigned to the family
+- ⬜ All members of a family can view and edit all recipes assigned to the family
+- ⬜ All members of a family can view and edit all cookbooks assigned to the family
 
 ### Family visibility
-- Public families are browsable and searchable by anyone
-- Private families are only visible to their members
+- ⬜ Public families are browsable and searchable by anyone
+- ⬜ Private families are only visible to their members
 
 ### Family search
-- Unauthenticated users: search across public families
-- Authenticated users: search across public families and families they belong to
+- ⬜ Unauthenticated users: search across public families
+- ⬜ Authenticated users: search across public families and families they belong to
 
 ### Cookbook search update
-- Authenticated users can now also find cookbooks that are part of a family they belong to
+- ⬜ Authenticated users can now also find cookbooks that are part of a family they belong to
 
 ## Future features (not yet implemented)
 
