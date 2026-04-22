@@ -60,6 +60,12 @@
         - if the user arrived from a cookbook detail page, back returns them to that cookbook
         - if the user arrived from the dashboard, back returns them to the dashboard
         - if the user arrived from the public recipes browse page, back returns them to that page
+    - the "Members" section on the family detail page (`/dashboard/families/[id]`) must be collapsible/expandable
+        - the section is collapsed by default
+        - the section header always shows the member count (e.g. "Members (4)")
+        - clicking the section header toggles the collapsed/expanded state
+        - individual member rows are only visible when the section is expanded
+        - the toggle state is local UI state (not persisted)
 
 ## Frontend Standards
 

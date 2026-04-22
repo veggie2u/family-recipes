@@ -135,3 +135,33 @@ export async function declineInvitation(memberId: string) {
 
   revalidatePath("/dashboard/families");
 }
+
+export async function addCookbookToFamily(familyId: string, cookbookId: string) {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims?.claims) redirect("/auth/login");
+
+  const { error } = await supabase
+    .from("family_cookbooks")
+    .insert({ family_id: familyId, cookbook_id: cookbookId });
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/dashboard/families/${familyId}`);
+}
+
+export async function removeCookbookFromFamily(familyId: string, cookbookId: string) {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims?.claims) redirect("/auth/login");
+
+  const { error } = await supabase
+    .from("family_cookbooks")
+    .delete()
+    .eq("family_id", familyId)
+    .eq("cookbook_id", cookbookId);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/dashboard/families/${familyId}`);
+}
