@@ -103,7 +103,7 @@ export default function RecipeDetailPage({
           href="/dashboard"
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          ← Back to recipes
+          ← Back to my recipes
         </Link>
       </div>
       <Suspense fallback={<div className="animate-pulse space-y-4"><div className="h-8 bg-muted rounded w-2/3" /><div className="h-4 bg-muted rounded w-full" /><div className="h-32 bg-muted rounded" /></div>}>

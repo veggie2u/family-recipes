@@ -83,7 +83,7 @@ export default function Home() {
               Get Started — It&apos;s Free
             </Link>
             <Link
-              href="/recipes"
+              href="/dashboard"
               className="inline-flex items-center justify-center px-6 py-3 rounded border border-border text-foreground font-medium hover:bg-muted transition-colors"
             >
               Browse Recipes

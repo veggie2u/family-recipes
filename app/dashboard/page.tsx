@@ -1,32 +1,120 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { RecipeCard } from "@/components/recipe-card";
 import { CookbookCard } from "@/components/cookbook-card";
 import { FamilyCard } from "@/components/family-card";
 import { RecipeSearchInput } from "@/components/recipe-search-input";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, BookOpen, Users } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { acceptInvitation, declineInvitation } from "./families/actions";
 
-async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+// ── Skeletons ──────────────────────────────────────────────────────────────────
+
+function CardGridSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="h-32 rounded-lg border border-border bg-muted/30 animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
+// ── My sections (authenticated only) ──────────────────────────────────────────
+
+async function DashboardPendingInvitations() {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
+  if (!claimsData?.claims) return null;
 
-  if (!claimsData?.claims) {
-    redirect("/auth/login");
-  }
+  const userId = claimsData.claims.sub;
+
+  const { data: invitations } = await supabase
+    .from("family_members")
+    .select("id, families(id, name)")
+    .eq("user_id", userId)
+    .eq("status", "invited");
+
+  if (!invitations || invitations.length === 0) return null;
+
+  return (
+    <div className="rounded-lg border border-dashed border-border p-5 flex flex-col gap-3">
+      <h2 className="text-lg font-semibold text-foreground">Family Invitations</h2>
+      {invitations.map((inv) => {
+        const family = inv.families as unknown as { id: string; name: string } | null;
+        if (!family) return null;
+
+        const accept = acceptInvitation.bind(null, inv.id);
+        const decline = declineInvitation.bind(null, inv.id);
+
+        return (
+          <div key={inv.id} className="flex items-center justify-between gap-4">
+            <span className="font-medium text-foreground">{family.name}</span>
+            <div className="flex items-center gap-2 shrink-0">
+              <form action={accept}>
+                <Button type="submit" size="sm">Accept</Button>
+              </form>
+              <form action={decline}>
+                <Button type="submit" size="sm" variant="outline">Decline</Button>
+              </form>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+async function MyRecipeList({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const supabase = await createClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  if (!claimsData?.claims) return null;
 
   const userId = claimsData.claims.sub;
   const { q: query } = await searchParams;
 
+  // Collect recipe IDs accessible via cookbooks the user owns or belongs to through a family.
+  const [{ data: ownCookbooks }, { data: memberships }] = await Promise.all([
+    supabase.from("cookbooks").select("id").eq("created_by", userId),
+    supabase.from("family_members").select("family_id").eq("user_id", userId).eq("status", "active"),
+  ]);
+
+  const ownCookbookIds = ownCookbooks?.map((c) => c.id) ?? [];
+  const familyIds = memberships?.map((m) => m.family_id) ?? [];
+
+  let familyCookbookIds: string[] = [];
+  if (familyIds.length > 0) {
+    const { data: fcRows } = await supabase
+      .from("family_cookbooks")
+      .select("cookbook_id")
+      .in("family_id", familyIds);
+    familyCookbookIds = fcRows?.map((r) => r.cookbook_id) ?? [];
+  }
+
+  const allCookbookIds = [...new Set([...ownCookbookIds, ...familyCookbookIds])];
+
+  let cookbookRecipeIds: string[] = [];
+  if (allCookbookIds.length > 0) {
+    const { data: crRows } = await supabase
+      .from("cookbook_recipes")
+      .select("recipe_id")
+      .in("cookbook_id", allCookbookIds);
+    cookbookRecipeIds = crRows?.map((r) => r.recipe_id) ?? [];
+  }
+
   let request = supabase
     .from("recipes")
     .select("id, title, description, is_public, created_by, profiles(name), recipe_tags(tags(name))")
-    .eq("created_by", userId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  if (cookbookRecipeIds.length > 0) {
+    request = request.or(`created_by.eq.${userId},id.in.(${cookbookRecipeIds.join(",")})`);
+  } else {
+    request = request.eq("created_by", userId);
+  }
 
   if (query) {
     const { data: matchingTags } = await supabase
@@ -52,7 +140,6 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
   }
 
   const { data: recipes, error } = await request;
-
   if (error) throw new Error(error.message);
 
   if (!recipes || recipes.length === 0) {
@@ -99,72 +186,60 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
   );
 }
 
-async function DashboardPendingInvitations() {
+async function MyRecipeCount() {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   if (!claimsData?.claims) return null;
 
   const userId = claimsData.claims.sub;
 
-  const { data: invitations } = await supabase
-    .from("family_members")
-    .select("id, families(id, name)")
-    .eq("user_id", userId)
-    .eq("status", "invited");
+  const [{ data: ownCookbooks }, { data: memberships }] = await Promise.all([
+    supabase.from("cookbooks").select("id").eq("created_by", userId),
+    supabase.from("family_members").select("family_id").eq("user_id", userId).eq("status", "active"),
+  ]);
 
-  if (!invitations || invitations.length === 0) return null;
+  const ownCookbookIds = ownCookbooks?.map((c) => c.id) ?? [];
+  const familyIds = memberships?.map((m) => m.family_id) ?? [];
 
-  return (
-    <div className="rounded-lg border border-dashed border-border p-5 flex flex-col gap-3">
-      <h2 className="text-lg font-semibold text-foreground">Family Invitations</h2>
-      {invitations.map((inv) => {
-        const family = inv.families as unknown as { id: string; name: string } | null;
-        if (!family) return null;
+  let familyCookbookIds: string[] = [];
+  if (familyIds.length > 0) {
+    const { data: fcRows } = await supabase
+      .from("family_cookbooks")
+      .select("cookbook_id")
+      .in("family_id", familyIds);
+    familyCookbookIds = fcRows?.map((r) => r.cookbook_id) ?? [];
+  }
 
-        const accept = acceptInvitation.bind(null, inv.id);
-        const decline = declineInvitation.bind(null, inv.id);
+  const allCookbookIds = [...new Set([...ownCookbookIds, ...familyCookbookIds])];
 
-        return (
-          <div
-            key={inv.id}
-            className="flex items-center justify-between gap-4"
-          >
-            <span className="font-medium text-foreground">{family.name}</span>
-            <div className="flex items-center gap-2 shrink-0">
-              <form action={accept}>
-                <Button type="submit" size="sm">Accept</Button>
-              </form>
-              <form action={decline}>
-                <Button type="submit" size="sm" variant="outline">Decline</Button>
-              </form>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
+  let cookbookRecipeIds: string[] = [];
+  if (allCookbookIds.length > 0) {
+    const { data: crRows } = await supabase
+      .from("cookbook_recipes")
+      .select("recipe_id")
+      .in("cookbook_id", allCookbookIds);
+    cookbookRecipeIds = crRows?.map((r) => r.recipe_id) ?? [];
+  }
+
+  let countQuery = supabase
+    .from("recipes")
+    .select("id", { count: "exact", head: true });
+
+  if (cookbookRecipeIds.length > 0) {
+    countQuery = countQuery.or(`created_by.eq.${userId},id.in.(${cookbookRecipeIds.join(",")})`);
+  } else {
+    countQuery = countQuery.eq("created_by", userId);
+  }
+
+  const { count } = await countQuery;
+  if (count === null) return null;
+  return <span className="text-muted-foreground font-normal">({count})</span>;
 }
 
-function RecipeListSkeleton() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[...Array(6)].map((_, i) => (
-        <div
-          key={i}
-          className="h-32 rounded-lg border border-border bg-muted/30 animate-pulse"
-        />
-      ))}
-    </div>
-  );
-}
-
-async function CookbookList({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+async function MyCookbookList({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
-
-  if (!claimsData?.claims) {
-    redirect("/auth/login");
-  }
+  if (!claimsData?.claims) return null;
 
   const userId = claimsData.claims.sub;
   const { q: query } = await searchParams;
@@ -199,7 +274,6 @@ async function CookbookList({ searchParams }: { searchParams: Promise<{ q?: stri
   }
 
   const { data: cookbooks, error } = await request;
-
   if (error) throw new Error(error.message);
 
   if (!cookbooks || cookbooks.length === 0) {
@@ -246,26 +320,10 @@ async function CookbookList({ searchParams }: { searchParams: Promise<{ q?: stri
   );
 }
 
-function CookbookListSkeleton() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[...Array(3)].map((_, i) => (
-        <div
-          key={i}
-          className="h-32 rounded-lg border border-border bg-muted/30 animate-pulse"
-        />
-      ))}
-    </div>
-  );
-}
-
-async function FamilyList() {
+async function MyFamilyList() {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
-
-  if (!claimsData?.claims) {
-    redirect("/auth/login");
-  }
+  if (!claimsData?.claims) return null;
 
   const userId = claimsData.claims.sub;
 
@@ -314,49 +372,38 @@ async function FamilyList() {
   );
 }
 
-function FamilyListSkeleton() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[...Array(3)].map((_, i) => (
-        <div
-          key={i}
-          className="h-32 rounded-lg border border-border bg-muted/30 animate-pulse"
-        />
-      ))}
-    </div>
-  );
-}
+async function MyContent({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const supabase = await createClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  if (!claimsData?.claims) return null;
 
-export default function DashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
-}) {
   return (
-    <div className="flex flex-col gap-8">
+    <>
       <Suspense>
-        <RecipeSearchInput placeholder="Search recipes and cookbooks…" />
+        <RecipeSearchInput placeholder="Search my recipes and cookbooks…" />
       </Suspense>
 
       <Suspense fallback={null}>
         <DashboardPendingInvitations />
       </Suspense>
 
+      {/* My Recipes */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">
-            My Recipes
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Your collection of family recipes
-          </p>
+          <h2 className="font-display text-2xl font-bold text-foreground">
+            My Recipes{" "}
+            <Suspense fallback={null}>
+              <MyRecipeCount />
+            </Suspense>
+          </h2>
+          <p className="text-muted-foreground mt-1">Showing six of the most recent family recipes.</p>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard/recipes"
             className="inline-flex items-center gap-2 px-4 py-2 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
           >
-            Browse all recipes
+            Browse my recipes
           </Link>
           <Link
             href="/dashboard/recipes/new"
@@ -367,26 +414,22 @@ export default function DashboardPage({
           </Link>
         </div>
       </div>
-
-      <Suspense fallback={<RecipeListSkeleton />}>
-        <RecipeList searchParams={searchParams} />
+      <Suspense fallback={<CardGridSkeleton />}>
+        <MyRecipeList searchParams={searchParams} />
       </Suspense>
 
+      {/* My Cookbooks */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-display text-2xl font-bold text-foreground">
-            My Cookbooks
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            Your curated collections of recipes
-          </p>
+          <h2 className="font-display text-2xl font-bold text-foreground">My Cookbooks</h2>
+          <p className="text-muted-foreground mt-1">Your curated collections of recipes</p>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard/cookbooks"
             className="inline-flex items-center gap-2 px-4 py-2 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
           >
-            Browse all cookbooks
+            Browse my cookbooks
           </Link>
           <Link
             href="/dashboard/cookbooks/new"
@@ -397,26 +440,22 @@ export default function DashboardPage({
           </Link>
         </div>
       </div>
-
-      <Suspense fallback={<CookbookListSkeleton />}>
-        <CookbookList searchParams={searchParams} />
+      <Suspense fallback={<CardGridSkeleton count={3} />}>
+        <MyCookbookList searchParams={searchParams} />
       </Suspense>
 
+      {/* My Families */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-display text-2xl font-bold text-foreground">
-            My Families
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            Your family groups
-          </p>
+          <h2 className="font-display text-2xl font-bold text-foreground">My Families</h2>
+          <p className="text-muted-foreground mt-1">Your family groups</p>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard/families"
             className="inline-flex items-center gap-2 px-4 py-2 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
           >
-            Browse all families
+            Browse my families
           </Link>
           <Link
             href="/dashboard/families/new"
@@ -430,9 +469,190 @@ export default function DashboardPage({
           </Link>
         </div>
       </div>
+      <Suspense fallback={<CardGridSkeleton count={3} />}>
+        <MyFamilyList />
+      </Suspense>
 
-      <Suspense fallback={<FamilyListSkeleton />}>
-        <FamilyList />
+      <hr className="border-border" />
+    </>
+  );
+}
+
+// ── Public sections (always visible) ──────────────────────────────────────────
+
+async function PublicRecipesList() {
+  const supabase = await createClient();
+
+  const { data: recipes } = await supabase
+    .from("recipes")
+    .select("id, title, description, created_by, profiles(name), recipe_tags(tags(name))")
+    .eq("is_public", true)
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  if (!recipes || recipes.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center gap-3 border border-dashed border-border rounded-lg">
+        <BookOpen className="w-8 h-8 text-muted-foreground" />
+        <p className="text-muted-foreground">No public recipes yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {recipes.map((recipe) => {
+        const tags = recipe.recipe_tags?.flatMap((rt: { tags: { name: string } | { name: string }[] | null }) =>
+          Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
+        ) ?? [];
+        return (
+          <RecipeCard
+            key={recipe.id}
+            id={recipe.id}
+            title={recipe.title}
+            description={recipe.description}
+            creatorName={(recipe.profiles as unknown as { name: string | null } | null)?.name ?? undefined}
+            tags={tags}
+            href={`/recipes/${recipe.id}`}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+async function PublicCookbooksList() {
+  const supabase = await createClient();
+
+  const { data: cookbooks } = await supabase
+    .from("cookbooks")
+    .select("id, name, description, is_public, created_by, profiles(name), cookbook_tags(tags(name)), cookbook_recipes(count)")
+    .eq("is_public", true)
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  if (!cookbooks || cookbooks.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center gap-3 border border-dashed border-border rounded-lg">
+        <BookOpen className="w-8 h-8 text-muted-foreground" />
+        <p className="text-muted-foreground">No public cookbooks yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {cookbooks.map((cookbook) => {
+        const tags = cookbook.cookbook_tags?.flatMap((ct: { tags: { name: string } | { name: string }[] | null }) =>
+          Array.isArray(ct.tags) ? ct.tags.map((t) => t.name) : ct.tags ? [ct.tags.name] : []
+        ) ?? [];
+        return (
+          <CookbookCard
+            key={cookbook.id}
+            id={cookbook.id}
+            name={cookbook.name}
+            description={cookbook.description}
+            isPublic={cookbook.is_public}
+            creatorName={(cookbook.profiles as unknown as { name: string | null } | null)?.name ?? undefined}
+            tags={tags}
+            recipeCount={(cookbook.cookbook_recipes as unknown as { count: number }[] | null)?.[0]?.count ?? 0}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+async function PublicFamiliesList() {
+  const supabase = await createClient();
+
+  const { data: families } = await supabase
+    .from("families")
+    .select("id, name, is_public")
+    .eq("is_public", true)
+    .order("name", { ascending: true })
+    .limit(6);
+
+  if (!families || families.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center gap-3 border border-dashed border-border rounded-lg">
+        <Users className="w-8 h-8 text-muted-foreground" />
+        <p className="text-muted-foreground">No public families yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {families.map((family) => (
+        <FamilyCard
+          key={family.id}
+          id={family.id}
+          name={family.name}
+          isPublic={family.is_public}
+          href={`/families/${family.id}`}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+export default function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  return (
+    <div className="flex flex-col gap-8">
+      <Suspense fallback={null}>
+        <MyContent searchParams={searchParams} />
+      </Suspense>
+
+      {/* Public Recipes */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-display text-2xl font-bold text-foreground">Public Recipes</h2>
+          <p className="text-muted-foreground mt-1">Recently shared recipes from the community</p>
+        </div>
+        <Link
+          href="/recipes"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
+        >
+          Browse public recipes
+        </Link>
+      </div>
+      <Suspense fallback={<CardGridSkeleton />}>
+        <PublicRecipesList />
+      </Suspense>
+
+      {/* Public Cookbooks */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-display text-2xl font-bold text-foreground">Public Cookbooks</h2>
+          <p className="text-muted-foreground mt-1">Cookbooks shared by the community</p>
+        </div>
+      </div>
+      <Suspense fallback={<CardGridSkeleton count={3} />}>
+        <PublicCookbooksList />
+      </Suspense>
+
+      {/* Public Families */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-display text-2xl font-bold text-foreground">Public Families</h2>
+          <p className="text-muted-foreground mt-1">Families open to the community</p>
+        </div>
+        <Link
+          href="/families"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
+        >
+          Browse public families
+        </Link>
+      </div>
+      <Suspense fallback={<CardGridSkeleton count={3} />}>
+        <PublicFamiliesList />
       </Suspense>
     </div>
   );

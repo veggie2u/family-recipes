@@ -17,10 +17,45 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
   const userId = claimsData.claims.sub;
   const { q: query } = await searchParams;
 
+  // Collect recipe IDs accessible via cookbooks the user owns or belongs to through a family.
+  const [{ data: ownCookbooks }, { data: memberships }] = await Promise.all([
+    supabase.from("cookbooks").select("id").eq("created_by", userId),
+    supabase.from("family_members").select("family_id").eq("user_id", userId).eq("status", "active"),
+  ]);
+
+  const ownCookbookIds = ownCookbooks?.map((c) => c.id) ?? [];
+  const familyIds = memberships?.map((m) => m.family_id) ?? [];
+
+  let familyCookbookIds: string[] = [];
+  if (familyIds.length > 0) {
+    const { data: fcRows } = await supabase
+      .from("family_cookbooks")
+      .select("cookbook_id")
+      .in("family_id", familyIds);
+    familyCookbookIds = fcRows?.map((r) => r.cookbook_id) ?? [];
+  }
+
+  const allCookbookIds = [...new Set([...ownCookbookIds, ...familyCookbookIds])];
+
+  let cookbookRecipeIds: string[] = [];
+  if (allCookbookIds.length > 0) {
+    const { data: crRows } = await supabase
+      .from("cookbook_recipes")
+      .select("recipe_id")
+      .in("cookbook_id", allCookbookIds);
+    cookbookRecipeIds = crRows?.map((r) => r.recipe_id) ?? [];
+  }
+
   let request = supabase
     .from("recipes")
     .select("id, title, description, is_public, created_by, profiles(name), recipe_tags(tags(name))")
     .order("created_at", { ascending: false });
+
+  if (cookbookRecipeIds.length > 0) {
+    request = request.or(`created_by.eq.${userId},id.in.(${cookbookRecipeIds.join(",")})`);
+  } else {
+    request = request.eq("created_by", userId);
+  }
 
   if (query) {
     request = request.or(
@@ -94,13 +129,13 @@ export default function AllRecipesPage({
             href="/dashboard"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            ← Back to my recipes
+            ← Back to dashboard
           </Link>
           <h1 className="font-display text-3xl font-bold text-foreground mt-3">
-            All Recipes
+            My Recipes
           </h1>
           <p className="text-muted-foreground mt-1">
-            Browse your recipes and public recipes from the community.
+            Browse your families recipes.
           </p>
         </div>
         <Link
