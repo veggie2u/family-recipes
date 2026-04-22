@@ -25,9 +25,26 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
     .order("created_at", { ascending: false });
 
   if (query) {
-    request = request.or(
-      `title.ilike.%${query}%,description.ilike.%${query}%`
-    );
+    const { data: matchingTags } = await supabase
+      .from("tags")
+      .select("id")
+      .ilike("name", `%${query}%`);
+    const matchingTagIds = matchingTags?.map((t) => t.id) ?? [];
+
+    let tagMatchedIds: string[] = [];
+    if (matchingTagIds.length > 0) {
+      const { data: junctionRows } = await supabase
+        .from("recipe_tags")
+        .select("recipe_id")
+        .in("tag_id", matchingTagIds);
+      tagMatchedIds = junctionRows?.map((r) => r.recipe_id) ?? [];
+    }
+
+    const conditions = [`title.ilike.%${query}%`, `description.ilike.%${query}%`];
+    if (tagMatchedIds.length > 0) {
+      conditions.push(`id.in.(${tagMatchedIds.join(",")})`);
+    }
+    request = request.or(conditions.join(","));
   }
 
   const { data: recipes, error } = await request;
@@ -91,7 +108,7 @@ function RecipeListSkeleton() {
   );
 }
 
-async function CookbookList() {
+async function CookbookList({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
 
@@ -100,26 +117,58 @@ async function CookbookList() {
   }
 
   const userId = claimsData.claims.sub;
+  const { q: query } = await searchParams;
 
-  const { data: cookbooks, error } = await supabase
+  let request = supabase
     .from("cookbooks")
     .select("id, name, description, is_public, created_by, cookbook_tags(tags(name))")
     .eq("created_by", userId)
     .order("created_at", { ascending: false });
+
+  if (query) {
+    const { data: matchingTags } = await supabase
+      .from("tags")
+      .select("id")
+      .ilike("name", `%${query}%`);
+    const matchingTagIds = matchingTags?.map((t) => t.id) ?? [];
+
+    let tagMatchedIds: string[] = [];
+    if (matchingTagIds.length > 0) {
+      const { data: junctionRows } = await supabase
+        .from("cookbook_tags")
+        .select("cookbook_id")
+        .in("tag_id", matchingTagIds);
+      tagMatchedIds = junctionRows?.map((r) => r.cookbook_id) ?? [];
+    }
+
+    const conditions = [`name.ilike.%${query}%`, `description.ilike.%${query}%`];
+    if (tagMatchedIds.length > 0) {
+      conditions.push(`id.in.(${tagMatchedIds.join(",")})`);
+    }
+    request = request.or(conditions.join(","));
+  }
+
+  const { data: cookbooks, error } = await request;
 
   if (error) throw new Error(error.message);
 
   if (!cookbooks || cookbooks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center gap-4 border border-dashed border-border rounded-lg">
-        <p className="text-muted-foreground text-lg">No cookbooks yet.</p>
-        <Link
-          href="/dashboard/cookbooks/new"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
-        >
-          <PlusIcon className="w-4 h-4" />
-          Create your first cookbook
-        </Link>
+        {query ? (
+          <p className="text-muted-foreground text-lg">No cookbooks found for &ldquo;{query}&rdquo;</p>
+        ) : (
+          <>
+            <p className="text-muted-foreground text-lg">No cookbooks yet.</p>
+            <Link
+              href="/dashboard/cookbooks/new"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+            >
+              <PlusIcon className="w-4 h-4" />
+              Create your first cookbook
+            </Link>
+          </>
+        )}
       </div>
     );
   }
@@ -166,6 +215,10 @@ export default function DashboardPage({
 }) {
   return (
     <div className="flex flex-col gap-8">
+      <Suspense>
+        <RecipeSearchInput placeholder="Search recipes and cookbooks…" />
+      </Suspense>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold text-foreground">
@@ -191,10 +244,6 @@ export default function DashboardPage({
           </Link>
         </div>
       </div>
-
-      <Suspense>
-        <RecipeSearchInput placeholder="Search your recipes…" />
-      </Suspense>
 
       <Suspense fallback={<RecipeListSkeleton />}>
         <RecipeList searchParams={searchParams} />
@@ -227,7 +276,7 @@ export default function DashboardPage({
       </div>
 
       <Suspense fallback={<CookbookListSkeleton />}>
-        <CookbookList />
+        <CookbookList searchParams={searchParams} />
       </Suspense>
     </div>
   );

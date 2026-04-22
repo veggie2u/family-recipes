@@ -10,7 +10,7 @@ interface RecipeSearchInputProps {
 }
 
 export function RecipeSearchInput({
-  placeholder = "Search recipes…",
+  placeholder = "Search recipes and cookbooks…",
 }: RecipeSearchInputProps) {
   const router = useRouter();
   const pathname = usePathname();
