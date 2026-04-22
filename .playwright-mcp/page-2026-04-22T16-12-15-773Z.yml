@@ -1,0 +1,67 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "Family Recipes logo Family Recipes" [ref=e5] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Family Recipes logo" [ref=e6]
+          - generic [ref=e7]: Family Recipes
+        - button "User menu" [ref=e9] [cursor=pointer]:
+          - img
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - heading "My Recipes" [level=1] [ref=e14]
+          - paragraph [ref=e15]: Your collection of family recipes
+        - generic [ref=e16]:
+          - link "Browse all recipes" [ref=e17] [cursor=pointer]:
+            - /url: /dashboard/recipes
+          - link "Add Recipe" [ref=e18] [cursor=pointer]:
+            - /url: /dashboard/recipes/new
+            - img [ref=e19]
+            - text: Add Recipe
+      - generic [ref=e20]:
+        - img
+        - textbox "Search your recipes…" [ref=e21]
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - heading "My Cookbooks" [level=2] [ref=e31]
+          - paragraph [ref=e32]: Your curated collections of recipes
+        - generic [ref=e33]:
+          - link "Browse all cookbooks" [ref=e34] [cursor=pointer]:
+            - /url: /dashboard/cookbooks
+          - link "Add Cookbook" [ref=e35] [cursor=pointer]:
+            - /url: /dashboard/cookbooks/new
+            - img [ref=e36]
+            - text: Add Cookbook
+      - generic [ref=e37]:
+        - link "My second cookbook an edit Public A cookbook for cooking books 2 books Your cookbook" [ref=e38] [cursor=pointer]:
+          - /url: /dashboard/cookbooks/6b8a54d9-f7fa-4af8-a3c7-b378c400fbef
+          - generic [ref=e39]:
+            - heading "My second cookbook an edit" [level=3] [ref=e40]
+            - generic [ref=e41]:
+              - img [ref=e42]
+              - text: Public
+          - paragraph [ref=e45]: A cookbook for cooking books 2
+          - generic [ref=e47]: books
+          - paragraph [ref=e48]: Your cookbook
+        - link "My first cookbook Private A cookbook for cooking books books Your cookbook" [ref=e49] [cursor=pointer]:
+          - /url: /dashboard/cookbooks/0e319386-f156-4781-9a36-0e0d6022e3b4
+          - generic [ref=e50]:
+            - heading "My first cookbook" [level=3] [ref=e51]
+            - generic [ref=e52]:
+              - img [ref=e53]
+              - text: Private
+          - paragraph [ref=e56]: A cookbook for cooking books
+          - generic [ref=e58]: books
+          - paragraph [ref=e59]: Your cookbook
+    - generic [ref=e61]:
+      - link "Family Recipes logo Family Recipes" [ref=e62] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Family Recipes logo" [ref=e63]
+        - generic [ref=e64]: Family Recipes
+      - paragraph [ref=e65]: © 2024 Family Recipes. All rights reserved.
+    - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e71] [cursor=pointer]:
+    - img [ref=e72]
+  - alert [ref=e75]

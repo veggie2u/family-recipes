@@ -1,0 +1,118 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "Family Recipes logo Family Recipes" [ref=e5] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Family Recipes logo" [ref=e6]
+          - generic [ref=e7]: Family Recipes
+        - button "User menu" [ref=e9] [cursor=pointer]:
+          - img
+    - generic [ref=e11]:
+      - link "← Back to cookbooks" [ref=e13] [cursor=pointer]:
+        - /url: /dashboard/cookbooks
+      - article [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]:
+            - generic [ref=e17]:
+              - img [ref=e18]
+              - text: Public
+            - heading "My second cookbook an edit" [level=1] [ref=e21]
+            - paragraph [ref=e22]: Your cookbook
+            - generic [ref=e24]: books
+          - generic [ref=e25]:
+            - link "Edit" [ref=e26] [cursor=pointer]:
+              - /url: /dashboard/cookbooks/6b8a54d9-f7fa-4af8-a3c7-b378c400fbef/edit
+              - img [ref=e27]
+              - text: Edit
+            - button "Delete" [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+              - text: Delete
+        - paragraph [ref=e34]: A cookbook for cooking books 2
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - heading "Recipes" [level=2] [ref=e37]
+            - button "Add Recipe" [ref=e38] [cursor=pointer]:
+              - img
+              - text: Add Recipe
+          - generic [ref=e39]:
+            - generic [ref=e40]:
+              - link "Secret Spice Chili Private My competition chili. The secret ingredients stay secret — this is just the framework. Your recipe" [ref=e41] [cursor=pointer]:
+                - /url: /dashboard/recipes/9d0545fb-4a10-4848-b175-d58cc08564d4
+                - generic [ref=e42]:
+                  - heading "Secret Spice Chili" [level=3] [ref=e43]
+                  - generic [ref=e44]:
+                    - img [ref=e45]
+                    - text: Private
+                - paragraph [ref=e48]: My competition chili. The secret ingredients stay secret — this is just the framework.
+                - paragraph [ref=e49]: Your recipe
+              - button "Remove" [ref=e51] [cursor=pointer]
+            - generic [ref=e52]:
+              - link "Mom's Chicken Soup Private The exact recipe my mom made whenever anyone got sick. Still cures everything. Your recipe" [ref=e53] [cursor=pointer]:
+                - /url: /dashboard/recipes/bbb404ee-d5b7-4dca-8c07-2be000a1c8dc
+                - generic [ref=e54]:
+                  - heading "Mom's Chicken Soup" [level=3] [ref=e55]
+                  - generic [ref=e56]:
+                    - img [ref=e57]
+                    - text: Private
+                - paragraph [ref=e60]: The exact recipe my mom made whenever anyone got sick. Still cures everything.
+                - paragraph [ref=e61]: Your recipe
+              - button "Remove" [ref=e63] [cursor=pointer]
+            - generic [ref=e64]:
+              - link "Jackson's Hangover Ramen Private A deeply restorative bowl of ramen I make when I need comfort. The broth takes time but it's worth it. meat Your recipe" [ref=e65] [cursor=pointer]:
+                - /url: /dashboard/recipes/d6a754e5-48a9-48b9-bc2d-372b69a89179
+                - generic [ref=e66]:
+                  - heading "Jackson's Hangover Ramen" [level=3] [ref=e67]
+                  - generic [ref=e68]:
+                    - img [ref=e69]
+                    - text: Private
+                - paragraph [ref=e72]: A deeply restorative bowl of ramen I make when I need comfort. The broth takes time but it's worth it.
+                - generic [ref=e74]: meat
+                - paragraph [ref=e75]: Your recipe
+              - button "Remove" [ref=e77] [cursor=pointer]
+            - generic [ref=e78]:
+              - link "Classic Caesar Salad Public Crisp romaine lettuce, homemade croutons and a tangy Caesar dressing — the original crowd-pleaser. healthy salad Your recipe" [ref=e79] [cursor=pointer]:
+                - /url: /dashboard/recipes/681cc99d-c46e-45c2-950e-121d5ff031c2
+                - generic [ref=e80]:
+                  - heading "Classic Caesar Salad" [level=3] [ref=e81]
+                  - generic [ref=e82]:
+                    - img [ref=e83]
+                    - text: Public
+                - paragraph [ref=e86]: Crisp romaine lettuce, homemade croutons and a tangy Caesar dressing — the original crowd-pleaser.
+                - generic [ref=e87]:
+                  - generic [ref=e88]: healthy
+                  - generic [ref=e89]: salad
+                - paragraph [ref=e90]: Your recipe
+              - button "Remove" [ref=e92] [cursor=pointer]
+            - generic [ref=e93]:
+              - link "Chicken Tikka Masala Public Tender marinated chicken in a rich, creamy tomato-spiced sauce. Serve with basmati rice or naan. Your recipe" [ref=e94] [cursor=pointer]:
+                - /url: /dashboard/recipes/fbb4126a-8d93-487a-ba7b-f4bc89d14ef3
+                - generic [ref=e95]:
+                  - heading "Chicken Tikka Masala" [level=3] [ref=e96]
+                  - generic [ref=e97]:
+                    - img [ref=e98]
+                    - text: Public
+                - paragraph [ref=e101]: Tender marinated chicken in a rich, creamy tomato-spiced sauce. Serve with basmati rice or naan.
+                - paragraph [ref=e102]: Your recipe
+              - button "Remove" [ref=e104] [cursor=pointer]
+            - generic [ref=e105]:
+              - link "Beef Tacos with Mango Salsa Public Seasoned ground beef in crispy taco shells topped with a sweet and tangy fresh mango salsa. Your recipe" [ref=e106] [cursor=pointer]:
+                - /url: /dashboard/recipes/af0f61ba-4111-4609-abdb-91c486bc968a
+                - generic [ref=e107]:
+                  - heading "Beef Tacos with Mango Salsa" [level=3] [ref=e108]
+                  - generic [ref=e109]:
+                    - img [ref=e110]
+                    - text: Public
+                - paragraph [ref=e113]: Seasoned ground beef in crispy taco shells topped with a sweet and tangy fresh mango salsa.
+                - paragraph [ref=e114]: Your recipe
+              - button "Remove" [ref=e116] [cursor=pointer]
+    - generic [ref=e118]:
+      - link "Family Recipes logo Family Recipes" [ref=e119] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Family Recipes logo" [ref=e120]
+        - generic [ref=e121]: Family Recipes
+      - paragraph [ref=e122]: © 2024 Family Recipes. All rights reserved.
+    - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e128] [cursor=pointer]:
+    - img [ref=e129]
+  - alert [ref=e132]

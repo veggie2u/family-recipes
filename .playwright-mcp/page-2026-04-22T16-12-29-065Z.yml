@@ -1,0 +1,49 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "Family Recipes logo Family Recipes" [ref=e5] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Family Recipes logo" [ref=e6]
+          - generic [ref=e7]: Family Recipes
+        - button "User menu" [ref=e9] [cursor=pointer]:
+          - img
+    - generic [ref=e136]:
+      - link "← Back to recipes" [ref=e138] [cursor=pointer]:
+        - /url: /dashboard
+      - article [ref=e139]:
+        - generic [ref=e140]:
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - img [ref=e143]
+              - text: Private
+            - heading "Secret Spice Chili" [level=1] [ref=e146]
+            - paragraph [ref=e147]: Your recipe
+          - generic [ref=e148]:
+            - button "Add to cookbook" [ref=e149] [cursor=pointer]:
+              - img [ref=e150]
+              - text: Add to cookbook
+            - link "Edit" [ref=e152] [cursor=pointer]:
+              - /url: /dashboard/recipes/9d0545fb-4a10-4848-b175-d58cc08564d4/edit
+              - img [ref=e153]
+              - text: Edit
+            - button "Delete" [ref=e156] [cursor=pointer]:
+              - img [ref=e157]
+              - text: Delete
+        - paragraph [ref=e160]: My competition chili. The secret ingredients stay secret — this is just the framework.
+        - generic [ref=e161]:
+          - heading "Ingredients" [level=2] [ref=e162]
+          - generic [ref=e163]: 1kg ground beef, 1 large onion (diced), 4 cloves garlic, 2 cans (400g each) kidney beans, 2 cans (400g each) diced tomatoes, 2 tbsp chili powder, 1 tsp cumin, 1 tsp smoked paprika, 1 bottle dark beer, 2 tbsp tomato paste, salt and pepper, [secret spices], sour cream and cheddar to serve
+        - generic [ref=e164]:
+          - heading "Instructions" [level=2] [ref=e165]
+          - generic [ref=e166]: 1. Brown beef in large pot; drain fat. Remove and set aside. 2. Sauté onion until soft; add garlic and tomato paste, cook 2 min. 3. Add chili powder, cumin, paprika and [secret spices]; stir 1 min. 4. Return beef to pot. Add tomatoes, beans and beer. 5. Simmer uncovered 1.5-2 hours stirring occasionally until thick. 6. Serve with sour cream and cheddar.
+    - generic [ref=e61]:
+      - link "Family Recipes logo Family Recipes" [ref=e62] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Family Recipes logo" [ref=e63]
+        - generic [ref=e64]: Family Recipes
+      - paragraph [ref=e65]: © 2024 Family Recipes. All rights reserved.
+    - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e71] [cursor=pointer]:
+    - img [ref=e72]
+  - alert [ref=e75]

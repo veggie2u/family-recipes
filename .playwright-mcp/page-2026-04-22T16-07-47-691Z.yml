@@ -1,0 +1,39 @@
+- generic [active] [ref=e1]:
+  - main [ref=e66]:
+    - navigation [ref=e67]:
+      - generic [ref=e68]:
+        - link "Family Recipes logo Family Recipes" [ref=e69] [cursor=pointer]:
+          - /url: /
+          - img "Family Recipes logo" [ref=e70]
+          - generic [ref=e71]: Family Recipes
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - link "Sign in" [ref=e74] [cursor=pointer]:
+              - /url: /auth/login
+            - link "Sign up" [ref=e75] [cursor=pointer]:
+              - /url: /auth/sign-up
+          - button [ref=e76] [cursor=pointer]:
+            - img
+    - generic [ref=e180]:
+      - link "← Back to recipes" [ref=e181] [cursor=pointer]:
+        - /url: /recipes
+      - article [ref=e182]:
+        - generic [ref=e184]:
+          - heading "Lemon Garlic Roast Chicken" [level=1] [ref=e185]
+          - paragraph [ref=e186]: Chris
+        - paragraph [ref=e187]: A simple yet impressive whole roast chicken with crispy skin and juicy meat, perfumed with lemon and garlic.
+        - generic [ref=e188]:
+          - heading "Ingredients" [level=2] [ref=e189]
+          - generic [ref=e190]: 1 whole chicken (about 1.5kg), 1 lemon (halved), 6 cloves garlic, 3 tbsp butter (softened), 1 tbsp fresh thyme leaves, 1 tbsp fresh rosemary, salt and pepper, 2 tbsp olive oil
+        - generic [ref=e191]:
+          - heading "Instructions" [level=2] [ref=e192]
+          - generic [ref=e193]: 1. Preheat oven to 200°C (400°F). 2. Mix butter with thyme, rosemary, salt and pepper. 3. Loosen chicken skin and rub butter mixture under skin and all over the outside. 4. Stuff cavity with lemon halves and garlic. 5. Drizzle with olive oil. 6. Roast for 1 hour 20 min or until juices run clear. 7. Rest 10 min before carving.
+    - generic [ref=e175]:
+      - link "Family Recipes logo Family Recipes" [ref=e176] [cursor=pointer]:
+        - /url: /
+        - img "Family Recipes logo" [ref=e177]
+        - generic [ref=e178]: Family Recipes
+      - paragraph [ref=e179]: © 2024 Family Recipes. All rights reserved.
+  - button "Open Next.js Dev Tools" [ref=e61] [cursor=pointer]:
+    - img [ref=e62]
+  - alert [ref=e65]

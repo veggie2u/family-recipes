@@ -1,0 +1,46 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e11]:
+      - button "Open issues overlay" [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: "2"
+          - generic [ref=e15]: "3"
+        - generic [ref=e16]:
+          - text: Issue
+          - generic [ref=e17]: s
+      - button "Collapse issues badge" [ref=e18]:
+        - img [ref=e19]
+  - alert [ref=e21]
+  - generic [ref=e22]:
+    - navigation [ref=e23]:
+      - link "Family Recipes logo Family Recipes" [ref=e24] [cursor=pointer]:
+        - /url: /
+        - link "Family Recipes logo Family Recipes" [ref=e25]:
+          - /url: /
+          - img "Family Recipes logo" [ref=e26]
+          - generic [ref=e27]: Family Recipes
+      - button [ref=e28] [cursor=pointer]:
+        - img
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]: Welcome back
+        - generic [ref=e35]: Sign in to your Family Recipes account
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - generic [ref=e40]: Email
+            - textbox "Email" [ref=e41]:
+              - /placeholder: m@example.com
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: Password
+              - link "Forgot your password?" [ref=e45] [cursor=pointer]:
+                - /url: /auth/forgot-password
+            - textbox "Password" [ref=e46]
+          - button "Login" [ref=e47] [cursor=pointer]
+        - generic [ref=e48]:
+          - text: Don't have an account?
+          - link "Sign up" [ref=e49] [cursor=pointer]:
+            - /url: /auth/sign-up
