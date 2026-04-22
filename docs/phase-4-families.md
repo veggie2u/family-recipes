@@ -33,8 +33,8 @@ Users can create families, invite other users to join, and add cookbooks to a fa
 - ⬜ All members of a family can view and edit all cookbooks assigned to the family
 
 ### Family visibility
-- ⬜ Public families are browsable and searchable by anyone
-- ⬜ Private families are only visible to their members
+- ✅ Public families are browsable by anyone (`/families`)
+- ✅ Private families are only visible to their members (enforced by RLS)
 
 ### Family search
 - ⬜ Unauthenticated users: search across public families
