@@ -63,7 +63,7 @@ export async function createCookbook(formData: FormData) {
 
   await syncCookbookTags(supabase, cookbook.id, tags);
 
-  redirect("/dashboard");
+  redirect(`/dashboard/cookbooks/${cookbook.id}`);
 }
 
 export async function updateCookbook(id: string, formData: FormData) {

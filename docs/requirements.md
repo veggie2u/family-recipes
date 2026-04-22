@@ -59,4 +59,5 @@
     - all forms must use react-hook-form for state management and validation
     - all forms must use shadcn Form components (Form, FormField, FormItem, FormLabel, FormControl, FormMessage) for consistent styling and inline field error display
     - browser native validation (e.g. the `required` HTML attribute) must not be used; validation rules are defined in react-hook-form and errors are displayed via FormMessage
+    - after a form is successfully saved, all fields must be reset/cleared to their default values
     - toast notifications use `sonner` (via shadcn); the `<Toaster position="top-right" />` is mounted in the dashboard layout; use `toast.success(...)` / `toast.error(...)` from `sonner` for user feedback after async actions
