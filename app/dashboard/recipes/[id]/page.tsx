@@ -18,11 +18,19 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
 
   const userId = claimsData.claims.sub;
 
-  const { data: recipe, error } = await supabase
-    .from("recipes")
-    .select("*, profiles(name), recipe_tags(tags(name))")
-    .eq("id", id)
-    .single();
+  const [recipeResult, alreadyInResult] = await Promise.all([
+    supabase
+      .from("recipes")
+      .select("*, profiles(name), recipe_tags(tags(name))")
+      .eq("id", id)
+      .single(),
+    supabase
+      .from("cookbook_recipes")
+      .select("cookbook_id")
+      .eq("recipe_id", id),
+  ]);
+
+  const { data: recipe, error } = recipeResult;
 
   if (error || !recipe) {
     notFound();
@@ -32,12 +40,7 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
 
   let eligibleCookbooks: { id: string; name: string }[] = [];
   if (isOwner) {
-    const { data: alreadyIn } = await supabase
-      .from("cookbook_recipes")
-      .select("cookbook_id")
-      .eq("recipe_id", id);
-
-    const excludedIds = (alreadyIn ?? []).map((r) => r.cookbook_id);
+    const excludedIds = (alreadyInResult.data ?? []).map((r) => r.cookbook_id);
 
     const query = supabase
       .from("cookbooks")

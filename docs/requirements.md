@@ -54,6 +54,13 @@
 
 > 🔲 **Future feature:** on the recipe detail page, show which cookbooks the recipe currently belongs to.
 
+## UX / Navigation
+
+    - the "back" link on the recipe detail page must be context-aware — it should return the user to the page they navigated from, not a hardcoded route
+        - if the user arrived from a cookbook detail page, back returns them to that cookbook
+        - if the user arrived from the dashboard, back returns them to the dashboard
+        - if the user arrived from the public recipes browse page, back returns them to that page
+
 ## Frontend Standards
 
     - all forms must use react-hook-form for state management and validation
