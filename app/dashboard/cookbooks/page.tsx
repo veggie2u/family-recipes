@@ -17,7 +17,7 @@ async function CookbookList() {
 
   const { data: cookbooks, error } = await supabase
     .from("cookbooks")
-    .select("id, name, description, is_public, created_by, profiles(name), cookbook_tags(tags(name))")
+    .select("id, name, description, is_public, created_by, profiles(name), cookbook_tags(tags(name)), cookbook_recipes(count)")
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
@@ -47,6 +47,7 @@ async function CookbookList() {
             isOwner={cookbook.created_by === userId}
             creatorName={(cookbook.profiles as unknown as { name: string | null } | null)?.name ?? undefined}
             tags={tags}
+            recipeCount={(cookbook.cookbook_recipes as unknown as { count: number }[] | null)?.[0]?.count ?? 0}
           />
         );
       })}

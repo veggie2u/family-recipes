@@ -121,7 +121,7 @@ async function CookbookList({ searchParams }: { searchParams: Promise<{ q?: stri
 
   let request = supabase
     .from("cookbooks")
-    .select("id, name, description, is_public, created_by, cookbook_tags(tags(name))")
+    .select("id, name, description, is_public, created_by, cookbook_tags(tags(name)), cookbook_recipes(count)")
     .eq("created_by", userId)
     .order("created_at", { ascending: false });
 
@@ -188,6 +188,7 @@ async function CookbookList({ searchParams }: { searchParams: Promise<{ q?: stri
             isPublic={cookbook.is_public}
             isOwner={cookbook.created_by === userId}
             tags={tags}
+            recipeCount={(cookbook.cookbook_recipes as unknown as { count: number }[] | null)?.[0]?.count ?? 0}
           />
         );
       })}

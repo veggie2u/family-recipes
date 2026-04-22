@@ -11,6 +11,7 @@ interface CookbookCardProps {
   /** Name of the cookbook creator. Shown when isOwner is false. */
   creatorName?: string;
   tags?: string[];
+  recipeCount?: number;
 }
 
 export function CookbookCard({
@@ -21,6 +22,7 @@ export function CookbookCard({
   isOwner,
   creatorName,
   tags = [],
+  recipeCount,
 }: CookbookCardProps) {
   const byline = isOwner ? "Your cookbook" : creatorName;
   return (
@@ -68,6 +70,13 @@ export function CookbookCard({
       )}
       {byline && (
         <p className={`text-xs mt-auto pt-1 ${isOwner ? "text-accent/70" : "text-muted-foreground"}`}>{byline}</p>
+      )}
+      {recipeCount !== undefined && (
+        <div className="mt-auto border-t border-border pt-3">
+          <span className="text-xs text-muted-foreground">
+            {recipeCount === 1 ? "1 recipe" : `${recipeCount} recipes`}
+          </span>
+        </div>
       )}
     </Link>
   );
