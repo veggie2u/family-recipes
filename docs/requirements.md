@@ -29,8 +29,9 @@
 
     - a family is a collection of users
     - a family can be public or private
-    - a family's users can view all recipes assigned to the family
-    - a family's users can view all cookbooks assigned to the family
+    - a family's users can view and edit all recipes assigned to the family
+    - a family's users can view and edit all cookbooks assigned to the family
+    - any authenticated user can follow a public family to receive updates (read-only access, future feature)
 
 ## Cookbook
 
