@@ -165,3 +165,33 @@ export async function removeCookbookFromFamily(familyId: string, cookbookId: str
 
   revalidatePath(`/dashboard/families/${familyId}`);
 }
+
+export async function addRecipeToFamily(familyId: string, recipeId: string) {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims?.claims) redirect("/auth/login");
+
+  const { error } = await supabase
+    .from("family_recipes")
+    .insert({ family_id: familyId, recipe_id: recipeId });
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/dashboard/families/${familyId}`);
+}
+
+export async function removeRecipeFromFamily(familyId: string, recipeId: string) {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims?.claims) redirect("/auth/login");
+
+  const { error } = await supabase
+    .from("family_recipes")
+    .delete()
+    .eq("family_id", familyId)
+    .eq("recipe_id", recipeId);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/dashboard/families/${familyId}`);
+}

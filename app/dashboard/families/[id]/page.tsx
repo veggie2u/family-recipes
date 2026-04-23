@@ -9,6 +9,9 @@ import { cn } from "@/lib/utils";
 import { InviteForm } from "./invite-form";
 import AddCookbookToFamilyPanel from "@/components/add-cookbook-to-family-panel";
 import { RemoveCookbookFromFamilyButton } from "@/components/remove-cookbook-from-family-button";
+import AddRecipeToFamilyPanel from "@/components/add-recipe-to-family-panel";
+import { RemoveRecipeFromFamilyButton } from "@/components/remove-recipe-from-family-button";
+import { RecipeCard } from "@/components/recipe-card";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -28,6 +31,15 @@ type CookbookRow = {
   created_by: string;
   cookbook_tags: Array<{ tags: { name: string } | { name: string }[] | null }>;
   cookbook_recipes: { count: number }[];
+};
+
+type RecipeRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  is_public: boolean;
+  created_by: string;
+  recipe_tags: Array<{ tags: { name: string } | { name: string }[] | null }>;
 };
 
 // ── Detail content ─────────────────────────────────────────────────────────────
@@ -90,6 +102,31 @@ async function FamilyDetailContent({
       .eq("created_by", userId)
       .order("name");
     allUserCookbooks = data ?? [];
+  }
+
+  // Recipes already in this family
+  const { data: rawFamilyRecipes } = await supabase
+    .from("family_recipes")
+    .select("recipes(id, title, description, is_public, created_by, recipe_tags(tags(name)))")
+    .eq("family_id", id)
+    .order("added_at", { ascending: false });
+
+  const familyRecipes = (rawFamilyRecipes ?? [])
+    .map((fr) => fr.recipes)
+    .flat()
+    .filter((r): r is NonNullable<typeof r> => r != null) as unknown as RecipeRow[];
+
+  const recipeIdsInFamily = familyRecipes.map((r) => r.id);
+
+  // All recipes owned by the current user (for the add panel)
+  let allUserRecipes: { id: string; title: string; description: string | null }[] = [];
+  if (isActiveMember) {
+    const { data } = await supabase
+      .from("recipes")
+      .select("id, title, description")
+      .eq("created_by", userId)
+      .order("title");
+    allUserRecipes = data ?? [];
   }
 
   return (
@@ -209,6 +246,54 @@ async function FamilyDetailContent({
                   {isActiveMember && (
                     <div className="flex justify-end">
                       <RemoveCookbookFromFamilyButton familyId={id} cookbookId={cookbook.id} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Recipes */}
+      <section className="flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="font-semibold text-xl text-foreground">Recipes</h2>
+          {isActiveMember && (
+            <AddRecipeToFamilyPanel
+              familyId={id}
+              allRecipes={allUserRecipes}
+              initialSelectedIds={recipeIdsInFamily}
+            />
+          )}
+        </div>
+        {familyRecipes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center gap-3 border border-dashed border-border rounded-lg">
+            <p className="text-muted-foreground">
+              No recipes in this family yet.
+              {isActiveMember ? " Use the button above to add your first recipe." : ""}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {familyRecipes.map((recipe) => {
+              const tags = recipe.recipe_tags?.flatMap(
+                (rt: { tags: { name: string } | { name: string }[] | null }) =>
+                  Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
+              ) ?? [];
+              return (
+                <div key={recipe.id} className="flex flex-col gap-1">
+                  <RecipeCard
+                    id={recipe.id}
+                    title={recipe.title}
+                    description={recipe.description}
+                    isPublic={recipe.is_public}
+                    isOwner={recipe.created_by === userId}
+                    tags={tags}
+                  />
+                  {isActiveMember && (
+                    <div className="flex justify-end">
+                      <RemoveRecipeFromFamilyButton familyId={id} recipeId={recipe.id} />
                     </div>
                   )}
                 </div>
