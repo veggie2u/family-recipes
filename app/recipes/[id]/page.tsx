@@ -9,21 +9,53 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: { user } }, { data: recipe, error }] = await Promise.all([
-    supabase.auth.getUser(),
+  const [claimsResult, recipeResult] = await Promise.all([
+    supabase.auth.getClaims(),
     supabase
       .from("recipes")
-      .select("id, title, description, ingredients, instructions, created_by, profiles(name), recipe_tags(tags(name))")
+      .select("id, title, description, ingredients, instructions, is_public, created_by, profiles(name), recipe_tags(tags(name))")
       .eq("id", id)
-      .eq("is_public", true)
       .single(),
   ]);
 
-  if (error || !recipe) {
+  const userId = claimsResult.data?.claims?.sub ?? null;
+  const recipe = recipeResult.data;
+
+  if (!recipe) {
     notFound();
   }
 
-  const isOwner = user?.id === recipe.created_by;
+  // Access check: public recipes are visible to all; private recipes only to
+  // the owner or active members of a family that contains the recipe.
+  if (!recipe.is_public) {
+    if (!userId) notFound();
+
+    if (recipe.created_by !== userId) {
+      // Check if user is an active member of any family that has this recipe
+      const { data: familyRecipes } = await supabase
+        .from("family_recipes")
+        .select("family_id")
+        .eq("recipe_id", id);
+
+      const familyIds = familyRecipes?.map((fr) => fr.family_id) ?? [];
+      let hasAccess = false;
+
+      if (familyIds.length > 0) {
+        const { data: membership } = await supabase
+          .from("family_members")
+          .select("id")
+          .eq("user_id", userId!)
+          .eq("status", "active")
+          .in("family_id", familyIds)
+          .limit(1);
+        hasAccess = (membership?.length ?? 0) > 0;
+      }
+
+      if (!hasAccess) notFound();
+    }
+  }
+
+  const isOwner = userId === recipe.created_by;
   const creatorName = (recipe.profiles as unknown as { name: string | null } | null)?.name ?? undefined;
   const tags: string[] = recipe.recipe_tags?.flatMap(
     (rt: { tags: { name: string } | { name: string }[] | null }) =>

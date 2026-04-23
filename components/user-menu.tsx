@@ -75,15 +75,15 @@ export function UserMenu({ displayName }: UserMenuProps) {
         <DropdownMenuLabel className="font-normal text-xs text-muted-foreground uppercase tracking-wide px-2 pt-1">
           My stuff
         </DropdownMenuLabel>
-        <DropdownMenuItem onSelect={() => router.push("/dashboard/recipes")} className="flex gap-2">
+        <DropdownMenuItem onSelect={() => router.push("/recipes")} className="flex gap-2">
           <BookOpen size={ICON_SIZE} className="text-muted-foreground" />
           My Recipes
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.push("/dashboard/cookbooks")} className="flex gap-2">
+        <DropdownMenuItem onSelect={() => router.push("/cookbooks")} className="flex gap-2">
           <BookMarked size={ICON_SIZE} className="text-muted-foreground" />
           My Cookbooks
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.push("/dashboard/families")} className="flex gap-2">
+        <DropdownMenuItem onSelect={() => router.push("/families")} className="flex gap-2">
           <Users size={ICON_SIZE} className="text-muted-foreground" />
           My Families
         </DropdownMenuItem>

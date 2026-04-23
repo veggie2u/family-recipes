@@ -16,7 +16,12 @@ function sourceContext(event: FeedEvent): React.ReactNode {
     return (
       <>
         Created by{" "}
-        <span className="font-medium text-foreground">{event.actor_name}</span>
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
       </>
     );
   }
@@ -24,11 +29,25 @@ function sourceContext(event: FeedEvent): React.ReactNode {
     return (
       <>
         Added to{" "}
-        <span className="font-semibold text-foreground">
-          {event.family_name}
-        </span>{" "}
+        {event.family_id !== null ? (
+          <Link
+            href={`/families/${event.family_id}`}
+            className="font-semibold hover:underline transition-colors"
+          >
+            {event.family_name}
+          </Link>
+        ) : (
+          <span className="font-semibold text-foreground">
+            {event.family_name}
+          </span>
+        )}{" "}
         by{" "}
-        <span className="font-medium text-foreground">{event.actor_name}</span>
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
       </>
     );
   }
@@ -36,11 +55,25 @@ function sourceContext(event: FeedEvent): React.ReactNode {
     return (
       <>
         Added to{" "}
-        <span className="font-medium text-foreground">
-          {event.cookbook_name}
-        </span>{" "}
+        {event.cookbook_id !== null ? (
+          <Link
+            href={`/cookbooks/${event.cookbook_id}`}
+            className="font-medium hover:underline transition-colors"
+          >
+            {event.cookbook_name}
+          </Link>
+        ) : (
+          <span className="font-medium text-foreground">
+            {event.cookbook_name}
+          </span>
+        )}{" "}
         cookbook by{" "}
-        <span className="font-medium text-foreground">{event.actor_name}</span>
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
       </>
     );
   }
@@ -48,7 +81,12 @@ function sourceContext(event: FeedEvent): React.ReactNode {
     return (
       <>
         Created by{" "}
-        <span className="font-medium text-foreground">{event.actor_name}</span>
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
       </>
     );
   }
@@ -56,11 +94,25 @@ function sourceContext(event: FeedEvent): React.ReactNode {
     return (
       <>
         Added to{" "}
-        <span className="font-semibold text-foreground">
-          {event.family_name}
-        </span>{" "}
+        {event.family_id !== null ? (
+          <Link
+            href={`/families/${event.family_id}`}
+            className="font-semibold hover:underline transition-colors"
+          >
+            {event.family_name}
+          </Link>
+        ) : (
+          <span className="font-semibold text-foreground">
+            {event.family_name}
+          </span>
+        )}{" "}
         family by{" "}
-        <span className="font-medium text-foreground">{event.actor_name}</span>
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
       </>
     );
   }
@@ -89,7 +141,7 @@ export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
           </Link>
         ) : (
           <Link
-            href={`/dashboard/cookbooks/${event.cookbook_id}`}
+            href={`/cookbooks/${event.cookbook_id}`}
             className="font-display font-semibold text-lg text-foreground hover:text-accent transition-colors leading-snug"
           >
             {event.cookbook_name}
