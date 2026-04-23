@@ -62,6 +62,7 @@ async function CookbookContent() {
                     cb.profiles as unknown as { name: string | null } | null
                   )?.name ?? undefined
                 }
+                href={`/cookbooks/${cb.id}?from=cookbooks`}
               />
             ))}
           </div>
@@ -127,6 +128,7 @@ async function CookbookContent() {
                     cb.profiles as unknown as { name: string | null } | null
                   )?.name ?? undefined
                 }
+                href={`/cookbooks/${cb.id}?from=cookbooks`}
               />
               <div className="flex justify-end">
                 <FollowButton

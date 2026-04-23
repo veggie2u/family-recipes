@@ -136,29 +136,29 @@ async function RecipeContent({
                         : []
                 ) ?? [];
               return (
-                <div key={recipe.id} className="flex flex-col gap-1">
-                  <RecipeCard
-                    id={recipe.id}
-                    title={recipe.title}
-                    description={recipe.description}
-                    isPublic={recipe.is_public}
-                    isOwner={recipe.created_by === userId}
-                    creatorName={
-                      (
-                        recipe.profiles as unknown as {
-                          name: string | null;
-                        } | null
-                      )?.name ?? undefined
-                    }
-                    tags={tags}
-                  />
-                  <div className="flex justify-end">
+                <RecipeCard
+                  key={recipe.id}
+                  id={recipe.id}
+                  title={recipe.title}
+                  description={recipe.description}
+                  isPublic={recipe.is_public}
+                  isOwner={recipe.created_by === userId}
+                  creatorName={
+                    (
+                      recipe.profiles as unknown as {
+                        name: string | null;
+                      } | null
+                    )?.name ?? undefined
+                  }
+                  tags={tags}
+                  href={`/recipes/${recipe.id}?from=recipes`}
+                  bookmarkSlot={
                     <BookmarkButton
                       recipeId={recipe.id}
                       initialBookmarked={bookmarkedIds.has(recipe.id)}
                     />
-                  </div>
-                </div>
+                  }
+                />
               );
             })}
           </div>
@@ -232,7 +232,7 @@ async function RecipeContent({
                     )?.name ?? undefined
                   }
                   tags={tags}
-                  href={`/recipes/${recipe.id}`}
+                  href={`/recipes/${recipe.id}?from=recipes`}
                 />
               </li>
             );

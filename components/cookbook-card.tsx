@@ -12,6 +12,10 @@ interface CookbookCardProps {
   creatorName?: string;
   tags?: string[];
   recipeCount?: number;
+  /** Link destination. Defaults to /cookbooks/:id */
+  href?: string;
+  /** Optional slot rendered in the footer row (e.g. remove button). */
+  removeSlot?: React.ReactNode;
 }
 
 export function CookbookCard({
@@ -23,11 +27,13 @@ export function CookbookCard({
   creatorName,
   tags = [],
   recipeCount,
+  href,
+  removeSlot,
 }: CookbookCardProps) {
   const byline = isOwner ? "Your cookbook" : creatorName;
   return (
     <Link
-      href={`/cookbooks/${id}`}
+      href={href ?? `/cookbooks/${id}`}
       className="group flex flex-col gap-2 rounded-lg border border-border bg-card p-5 hover:border-accent/50 hover:shadow-sm transition-all"
     >
       <div className="flex items-start justify-between gap-3">
@@ -68,14 +74,19 @@ export function CookbookCard({
           ))}
         </div>
       )}
-      {byline && (
-        <p className={`text-xs mt-auto pt-1 ${isOwner ? "text-accent/70" : "text-muted-foreground"}`}>{byline}</p>
-      )}
-      {recipeCount !== undefined && (
-        <div className="mt-auto border-t border-border pt-3">
-          <span className="text-xs text-muted-foreground">
-            {recipeCount === 1 ? "1 recipe" : `${recipeCount} recipes`}
-          </span>
+      {(byline || removeSlot || recipeCount !== undefined) && (
+        <div className="flex items-end justify-between mt-auto pt-1">
+          <div className="flex flex-col gap-1">
+            {byline && (
+              <p className={`text-xs ${isOwner ? "text-accent/70" : "text-muted-foreground"}`}>{byline}</p>
+            )}
+            {recipeCount !== undefined && (
+              <span className="text-xs text-muted-foreground">
+                {recipeCount === 1 ? "1 recipe" : `${recipeCount} recipes`}
+              </span>
+            )}
+          </div>
+          {removeSlot}
         </div>
       )}
     </Link>

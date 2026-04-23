@@ -240,35 +240,36 @@ async function CookbookDetailContent({
                         : []
                 ) ?? [];
               return (
-                <div key={recipe.id} className="flex flex-col gap-1">
-                  <RecipeCard
-                    id={recipe.id}
-                    title={recipe.title}
-                    description={recipe.description}
-                    isPublic={recipe.is_public}
-                    isOwner={recipe.created_by === userId}
-                    creatorName={
-                      (
-                        recipe.profiles as unknown as {
-                          name: string | null;
-                        } | null
-                      )?.name ?? undefined
-                    }
-                    tags={recipeTags}
-                    href={`/recipes/${recipe.id}`}
-                  />
-                  <div className="flex justify-end gap-2">
-                    {isOwner && (
+                <RecipeCard
+                  key={recipe.id}
+                  id={recipe.id}
+                  title={recipe.title}
+                  description={recipe.description}
+                  isPublic={recipe.is_public}
+                  isOwner={recipe.created_by === userId}
+                  creatorName={
+                    (
+                      recipe.profiles as unknown as {
+                        name: string | null;
+                      } | null
+                    )?.name ?? undefined
+                  }
+                  tags={recipeTags}
+                  href={`/recipes/${recipe.id}?from=cookbook`}
+                  removeSlot={
+                    isOwner ? (
                       <RemoveRecipeFromCookbookButton cookbookId={id} recipeId={recipe.id} />
-                    )}
-                    {userId && (
+                    ) : undefined
+                  }
+                  bookmarkSlot={
+                    userId ? (
                       <BookmarkButton
                         recipeId={recipe.id}
                         initialBookmarked={bookmarkedIds.has(recipe.id)}
                       />
-                    )}
-                  </div>
-                </div>
+                    ) : undefined
+                  }
+                />
               );
             })}
           </div>
