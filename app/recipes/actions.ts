@@ -67,7 +67,7 @@ export async function createRecipe(formData: FormData) {
 
   await syncRecipeTags(supabase, recipe.id, tags);
 
-  redirect("/dashboard");
+  redirect("/recipes");
 }
 
 export async function updateRecipe(id: string, formData: FormData) {
@@ -92,7 +92,7 @@ export async function updateRecipe(id: string, formData: FormData) {
 
   await syncRecipeTags(supabase, id, tags);
 
-  redirect(`/dashboard/recipes/${id}`);
+  redirect(`/recipes/${id}`);
 }
 
 export async function deleteRecipe(id: string) {
@@ -108,5 +108,5 @@ export async function deleteRecipe(id: string) {
 
   if (error) throw new Error(error.message);
 
-  redirect("/dashboard");
+  redirect("/recipes");
 }

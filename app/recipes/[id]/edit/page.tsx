@@ -50,7 +50,7 @@ async function EditRecipeForm({ params }: { params: Promise<{ id: string }> }) {
         tags: defaultTags,
       }}
       submitLabel="Save Changes"
-      cancelHref={`/dashboard/recipes/${id}`}
+      cancelHref={`/recipes/${id}`}
     />
   );
 }

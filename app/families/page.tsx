@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   acceptInvitation,
   declineInvitation,
-} from "@/app/dashboard/families/actions";
+} from "@/app/families/actions";
 
 // ── Pending Invitations (authenticated only) ──────────────────────────────────
 
@@ -96,8 +96,7 @@ async function FamiliesContent() {
               </p>
             </div>
             <Link
-              href="/dashboard/families/new"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+              href="/families/new"              className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
             >
               <PlusIcon className="w-4 h-4" />
               New Family
@@ -111,7 +110,7 @@ async function FamiliesContent() {
                 You&apos;re not a member of any families yet.
               </p>
               <Button asChild>
-                <Link href="/dashboard/families/new">
+                <Link href="/families/new">
                   Create your first family
                 </Link>
               </Button>

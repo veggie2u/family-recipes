@@ -102,7 +102,7 @@ async function RecipeContent({
             </p>
           </div>
           <Link
-            href="/dashboard/recipes/new"
+            href="/recipes/new"
             className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
           >
             <PlusIcon className="w-4 h-4" />

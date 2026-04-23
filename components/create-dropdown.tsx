@@ -15,17 +15,17 @@ import Link from "next/link";
 const CREATE_ITEMS = [
   {
     label: "New Recipe",
-    href: "/dashboard/recipes/new",
+    href: "/recipes/new",
     icon: UtensilsCrossed,
   },
   {
     label: "New Cookbook",
-    href: "/dashboard/cookbooks/new",
+    href: "/cookbooks/new",
     icon: BookOpen,
   },
   {
     label: "New Family",
-    href: "/dashboard/families/new",
+    href: "/families/new",
     icon: Users,
   },
 ];

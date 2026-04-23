@@ -13,7 +13,7 @@ interface FamilyCardProps {
 export function FamilyCard({ id, name, isPublic, memberCount, href }: FamilyCardProps) {
   return (
     <Link
-      href={href ?? `/dashboard/families/${id}`}
+      href={href ?? `/families/${id}`}
       className={cn(
         "group flex flex-col gap-2 rounded-lg border border-border bg-card p-5",
         "hover:border-accent/50 hover:shadow-sm transition-all"

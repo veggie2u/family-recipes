@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { addRecipeToCookbook } from "@/app/dashboard/cookbooks/actions";
+import { addRecipeToCookbook } from "@/app/cookbooks/actions";
 
 interface Props {
   recipeId: string;

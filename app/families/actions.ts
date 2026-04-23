@@ -34,7 +34,7 @@ export async function createFamily(formData: FormData) {
     status: "active",
   });
 
-  redirect(`/dashboard/families/${family.id}`);
+  redirect(`/families/${family.id}`);
 }
 
 export async function searchUsers(
@@ -97,7 +97,7 @@ export async function inviteToFamily(familyId: string, userId: string) {
   });
 
   if (error) throw new Error(error.message);
-  revalidatePath(`/dashboard/families/${familyId}`);
+  revalidatePath(`/families/${familyId}`);
 }
 
 export async function acceptInvitation(memberId: string) {
@@ -115,7 +115,6 @@ export async function acceptInvitation(memberId: string) {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath("/dashboard/families");
   revalidatePath("/families");
 }
 
@@ -134,7 +133,6 @@ export async function declineInvitation(memberId: string) {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath("/dashboard/families");
   revalidatePath("/families");
 }
 
@@ -149,7 +147,7 @@ export async function addCookbookToFamily(familyId: string, cookbookId: string) 
 
   if (error) throw new Error(error.message);
 
-  revalidatePath(`/dashboard/families/${familyId}`);
+  revalidatePath(`/families/${familyId}`);
 }
 
 export async function removeCookbookFromFamily(familyId: string, cookbookId: string) {
@@ -165,5 +163,5 @@ export async function removeCookbookFromFamily(familyId: string, cookbookId: str
 
   if (error) throw new Error(error.message);
 
-  revalidatePath(`/dashboard/families/${familyId}`);
+  revalidatePath(`/families/${familyId}`);
 }

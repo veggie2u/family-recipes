@@ -1,7 +1,6 @@
 import { createRecipe } from "../actions";
 import { RecipeForm } from "../recipe-form";
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
 import { Suspense } from "react";
 import { BackButton } from "@/components/back-button";
 
@@ -14,7 +13,7 @@ async function NewRecipeForm() {
 
   const allTags = tags?.map((t) => t.name) ?? [];
 
-  return <RecipeForm action={createRecipe} cancelHref="/dashboard" allTags={allTags} />;
+  return <RecipeForm action={createRecipe} cancelHref="/recipes" allTags={allTags} />;
 }
 
 export default function NewRecipePage() {

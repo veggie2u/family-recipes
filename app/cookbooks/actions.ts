@@ -63,7 +63,7 @@ export async function createCookbook(formData: FormData) {
 
   await syncCookbookTags(supabase, cookbook.id, tags);
 
-  redirect(`/dashboard/cookbooks/${cookbook.id}`);
+  redirect(`/cookbooks/${cookbook.id}`);
 }
 
 export async function updateCookbook(id: string, formData: FormData) {
@@ -86,7 +86,7 @@ export async function updateCookbook(id: string, formData: FormData) {
 
   await syncCookbookTags(supabase, id, tags);
 
-  redirect(`/dashboard/cookbooks/${id}`);
+  redirect(`/cookbooks/${id}`);
 }
 
 export async function deleteCookbook(id: string) {
@@ -100,7 +100,9 @@ export async function deleteCookbook(id: string) {
     .eq("id", id)
     .eq("created_by", claims.claims.sub);
 
-  redirect("/dashboard");
+  if (error) throw new Error(error.message);
+
+  redirect("/cookbooks");
 }
 
 export async function addRecipeToCookbook(cookbookId: string, recipeId: string) {
@@ -125,8 +127,8 @@ export async function addRecipeToCookbook(cookbookId: string, recipeId: string) 
 
   if (error) throw new Error(error.message);
 
-  revalidatePath(`/dashboard/cookbooks/${cookbookId}`);
-  revalidatePath(`/dashboard/recipes/${recipeId}`);
+  revalidatePath(`/cookbooks/${cookbookId}`);
+  revalidatePath(`/recipes/${recipeId}`);
 }
 
 export async function removeRecipeFromCookbook(cookbookId: string, recipeId: string) {
@@ -153,6 +155,6 @@ export async function removeRecipeFromCookbook(cookbookId: string, recipeId: str
 
   if (error) throw new Error(error.message);
 
-  revalidatePath(`/dashboard/cookbooks/${cookbookId}`);
-  revalidatePath(`/dashboard/recipes/${recipeId}`);
+  revalidatePath(`/cookbooks/${cookbookId}`);
+  revalidatePath(`/recipes/${recipeId}`);
 }

@@ -1,10 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { Pencil } from "lucide-react";
 import { RecipeDetail } from "@/components/recipe-detail";
 import { BackButton } from "@/components/back-button";
 import { BookmarkButton } from "@/components/bookmark-button";
+import { DeleteRecipeButton } from "@/components/delete-recipe-button";
+import AddToCookbookButton from "@/components/add-to-cookbook-button";
+import { createClient } from "@/lib/supabase/server";
 
 async function RecipeDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -64,14 +67,35 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
   ) ?? [];
 
   let isBookmarked = false;
+  let eligibleCookbooks: { id: string; name: string }[] = [];
+
   if (userId) {
-    const { data: bookmark } = await supabase
-      .from("recipe_bookmarks")
-      .select("recipe_id")
-      .eq("recipe_id", id)
-      .eq("user_id", userId)
-      .maybeSingle();
-    isBookmarked = !!bookmark;
+    const [bookmarkResult, alreadyInResult] = await Promise.all([
+      supabase
+        .from("recipe_bookmarks")
+        .select("recipe_id")
+        .eq("recipe_id", id)
+        .eq("user_id", userId)
+        .maybeSingle(),
+      isOwner
+        ? supabase.from("cookbook_recipes").select("cookbook_id").eq("recipe_id", id)
+        : Promise.resolve({ data: [] }),
+    ]);
+    isBookmarked = !!bookmarkResult.data;
+
+    if (isOwner) {
+      const excludedIds = (alreadyInResult.data ?? []).map((r) => r.cookbook_id);
+      const query = supabase
+        .from("cookbooks")
+        .select("id, name")
+        .eq("created_by", userId)
+        .order("name");
+      if (excludedIds.length > 0) {
+        query.not("id", "in", `(${excludedIds.join(",")})`);
+      }
+      const { data } = await query;
+      eligibleCookbooks = data ?? [];
+    }
   }
 
   return (
@@ -84,7 +108,22 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
       creatorName={creatorName}
       tags={tags}
       actions={
-        userId ? <BookmarkButton recipeId={id} initialBookmarked={isBookmarked} /> : undefined
+        <>
+          {isOwner && (
+            <>
+              <AddToCookbookButton recipeId={id} cookbooks={eligibleCookbooks} />
+              <Link
+                href={`/recipes/${id}/edit`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Edit
+              </Link>
+              <DeleteRecipeButton id={id} />
+            </>
+          )}
+          {userId && <BookmarkButton recipeId={id} initialBookmarked={isBookmarked} />}
+        </>
       }
     />
   );

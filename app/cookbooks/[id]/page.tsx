@@ -1,12 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { Globe, Lock } from "lucide-react";
+import Link from "next/link";
+import { Globe, Lock, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { RecipeCard } from "@/components/recipe-card";
 import { FollowButton } from "@/components/follow-button";
 import { BookmarkButton } from "@/components/bookmark-button";
 import { BackButton } from "@/components/back-button";
+import { DeleteCookbookButton } from "@/components/delete-cookbook-button";
+import AddRecipeToCookbookPanel from "@/components/add-recipe-to-cookbook-panel";
+import { RemoveRecipeFromCookbookButton } from "@/components/remove-recipe-from-cookbook-button";
 import { cn } from "@/lib/utils";
 
 type RecipeRow = {
@@ -97,6 +101,18 @@ async function CookbookDetailContent({
 
   // Owners see all recipes; non-owners only see public ones
   const recipes = isOwner ? allRecipes : allRecipes.filter((r) => r.is_public);
+  const recipeIdsInCookbook = allRecipes.map((r) => r.id);
+
+  // Fetch user's own recipes for the add-to-cookbook panel (owner only)
+  let allUserRecipes: { id: string; title: string; description: string | null }[] = [];
+  if (isOwner && userId) {
+    const { data } = await supabase
+      .from("recipes")
+      .select("id, title, description")
+      .eq("created_by", userId)
+      .order("title");
+    allUserRecipes = data ?? [];
+  }
 
   // Batch-fetch bookmark state for authenticated users
   let bookmarkedIds = new Set<string>();
@@ -154,6 +170,20 @@ async function CookbookDetailContent({
           )}
         </div>
 
+        {/* Owner actions */}
+        {isOwner && (
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href={`/cookbooks/${id}/edit`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Edit
+            </Link>
+            <DeleteCookbookButton id={id} />
+          </div>
+        )}
+
         {/* Follow button — authenticated non-owners only */}
         {userId && !isOwner && (
           <FollowButton
@@ -174,15 +204,24 @@ async function CookbookDetailContent({
 
       {/* Recipes */}
       <section className="flex flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <h2 className="font-semibold text-xl text-foreground">Recipes</h2>
-          <span className="text-sm text-muted-foreground">({recipes.length})</span>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <h2 className="font-semibold text-xl text-foreground">Recipes</h2>
+            <span className="text-sm text-muted-foreground">({recipes.length})</span>
+          </div>
+          {isOwner && (
+            <AddRecipeToCookbookPanel
+              cookbookId={id}
+              allRecipes={allUserRecipes}
+              initialSelectedIds={recipeIdsInCookbook}
+            />
+          )}
         </div>
         {recipes.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center gap-3 border border-dashed border-border rounded-lg">
             <p className="text-muted-foreground">
               {isOwner
-                ? "No recipes in this cookbook yet."
+                ? "No recipes in this cookbook yet. Use the button above to add your first recipe."
                 : "No public recipes in this cookbook yet."}
             </p>
           </div>
@@ -218,14 +257,17 @@ async function CookbookDetailContent({
                     tags={recipeTags}
                     href={`/recipes/${recipe.id}`}
                   />
-                  {userId && (
-                    <div className="flex justify-end">
+                  <div className="flex justify-end gap-2">
+                    {isOwner && (
+                      <RemoveRecipeFromCookbookButton cookbookId={id} recipeId={recipe.id} />
+                    )}
+                    {userId && (
                       <BookmarkButton
                         recipeId={recipe.id}
                         initialBookmarked={bookmarkedIds.has(recipe.id)}
                       />
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               );
             })}
