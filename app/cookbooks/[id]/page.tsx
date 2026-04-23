@@ -19,6 +19,8 @@ type RecipeRow = {
   recipe_tags: Array<{ tags: { name: string } | { name: string }[] | null }>;
 };
 
+// ─── Data-fetching component ──────────────────────────────────────────────────
+
 async function CookbookDetailContent({
   params,
 }: {
@@ -34,7 +36,6 @@ async function CookbookDetailContent({
         "id, name, description, is_public, created_by, profiles(name), cookbook_tags(tags(name))"
       )
       .eq("id", id)
-      .eq("is_public", true)
       .single(),
     supabase.auth.getClaims(),
   ]);
@@ -44,9 +45,13 @@ async function CookbookDetailContent({
   const userId = claimsData?.claims?.sub ?? null;
   const isOwner = userId === cookbook.created_by;
 
+  // Private cookbooks are only visible to the creator
+  if (!cookbook.is_public && !isOwner) notFound();
+
   const creatorName =
     (cookbook.profiles as unknown as { name: string | null } | null)?.name ??
     undefined;
+
   const tags: string[] =
     cookbook.cookbook_tags?.flatMap(
       (ct: { tags: { name: string } | { name: string }[] | null }) =>
@@ -57,7 +62,7 @@ async function CookbookDetailContent({
             : []
     ) ?? [];
 
-  // Parallel: follower count, user follow row, recipes
+  // Parallel: follower count, user follow row, recipes (with tags + creator)
   const [
     { count: followerCount },
     { data: userFollowRow },
@@ -85,10 +90,13 @@ async function CookbookDetailContent({
   ]);
 
   const isFollowing = !!userFollowRow;
-  const recipes = (cookbookRecipes ?? [])
+  const allRecipes = (cookbookRecipes ?? [])
     .map((cr) => cr.recipes)
     .flat()
     .filter((r): r is NonNullable<typeof r> => r != null) as unknown as RecipeRow[];
+
+  // Owners see all recipes; non-owners only see public ones
+  const recipes = isOwner ? allRecipes : allRecipes.filter((r) => r.is_public);
 
   // Batch-fetch bookmark state for authenticated users
   let bookmarkedIds = new Set<string>();
@@ -132,7 +140,7 @@ async function CookbookDetailContent({
             <p
               className={`text-sm ${isOwner ? "text-accent/70" : "text-muted-foreground"}`}
             >
-              {isOwner ? "Your cookbook" : creatorName}
+              {isOwner ? "Your cookbook" : `By ${creatorName}`}
             </p>
           )}
           {tags.length > 0 && (
@@ -166,11 +174,16 @@ async function CookbookDetailContent({
 
       {/* Recipes */}
       <section className="flex flex-col gap-4">
-        <h2 className="font-semibold text-xl text-foreground">Recipes</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold text-xl text-foreground">Recipes</h2>
+          <span className="text-sm text-muted-foreground">({recipes.length})</span>
+        </div>
         {recipes.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center gap-3 border border-dashed border-border rounded-lg">
             <p className="text-muted-foreground">
-              No recipes in this cookbook yet.
+              {isOwner
+                ? "No recipes in this cookbook yet."
+                : "No public recipes in this cookbook yet."}
             </p>
           </div>
         ) : (
@@ -223,6 +236,26 @@ async function CookbookDetailContent({
   );
 }
 
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function CookbookDetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-6 animate-pulse">
+      <div className="h-5 w-16 rounded-full bg-muted" />
+      <div className="h-9 w-2/3 rounded bg-muted" />
+      <div className="h-4 w-1/4 rounded bg-muted" />
+      <div className="h-16 rounded bg-muted" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="h-32 rounded-lg bg-muted" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function PublicCookbookDetailPage({
   params,
 }: {
@@ -231,16 +264,7 @@ export default function PublicCookbookDetailPage({
   return (
     <div className="max-w-4xl flex flex-col gap-6">
       <BackButton label="← Back to cookbooks" />
-
-      <Suspense
-        fallback={
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-muted rounded w-2/3" />
-            <div className="h-4 bg-muted rounded w-1/3" />
-            <div className="h-32 bg-muted rounded" />
-          </div>
-        }
-      >
+      <Suspense fallback={<CookbookDetailSkeleton />}>
         <CookbookDetailContent params={params} />
       </Suspense>
     </div>

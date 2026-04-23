@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +11,7 @@ interface FeedCardProps {
   event: FeedEvent;
   userId: string | null;
   isBookmarked: boolean;
+  onTagClick?: (tag: string) => void;
 }
 
 function sourceContext(event: FeedEvent): React.ReactNode {
@@ -16,7 +19,12 @@ function sourceContext(event: FeedEvent): React.ReactNode {
     return (
       <>
         Created by{" "}
-        <span className="font-medium text-foreground">{event.actor_name}</span>
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
       </>
     );
   }
@@ -24,11 +32,25 @@ function sourceContext(event: FeedEvent): React.ReactNode {
     return (
       <>
         Added to{" "}
-        <span className="font-semibold text-foreground">
-          {event.family_name}
-        </span>{" "}
+        {event.family_id !== null ? (
+          <Link
+            href={`/families/${event.family_id}`}
+            className="font-semibold hover:underline transition-colors"
+          >
+            {event.family_name}
+          </Link>
+        ) : (
+          <span className="font-semibold text-foreground">
+            {event.family_name}
+          </span>
+        )}{" "}
         by{" "}
-        <span className="font-medium text-foreground">{event.actor_name}</span>
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
       </>
     );
   }
@@ -36,11 +58,25 @@ function sourceContext(event: FeedEvent): React.ReactNode {
     return (
       <>
         Added to{" "}
-        <span className="font-medium text-foreground">
-          {event.cookbook_name}
-        </span>{" "}
+        {event.cookbook_id !== null ? (
+          <Link
+            href={`/cookbooks/${event.cookbook_id}`}
+            className="font-medium hover:underline transition-colors"
+          >
+            {event.cookbook_name}
+          </Link>
+        ) : (
+          <span className="font-medium text-foreground">
+            {event.cookbook_name}
+          </span>
+        )}{" "}
         cookbook by{" "}
-        <span className="font-medium text-foreground">{event.actor_name}</span>
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
       </>
     );
   }
@@ -48,7 +84,12 @@ function sourceContext(event: FeedEvent): React.ReactNode {
     return (
       <>
         Created by{" "}
-        <span className="font-medium text-foreground">{event.actor_name}</span>
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
       </>
     );
   }
@@ -56,18 +97,34 @@ function sourceContext(event: FeedEvent): React.ReactNode {
     return (
       <>
         Added to{" "}
-        <span className="font-semibold text-foreground">
-          {event.family_name}
-        </span>{" "}
+        {event.family_id !== null ? (
+          <Link
+            href={`/families/${event.family_id}`}
+            className="font-semibold hover:underline transition-colors"
+          >
+            {event.family_name}
+          </Link>
+        ) : (
+          <span className="font-semibold text-foreground">
+            {event.family_name}
+          </span>
+        )}{" "}
         family by{" "}
-        <span className="font-medium text-foreground">{event.actor_name}</span>
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
       </>
     );
   }
   return null;
 }
 
-export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
+export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardProps) {
+  const isRecipeEvent = event.event_type.startsWith("recipe_");
+
   return (
     <div
       className={cn(
@@ -75,8 +132,21 @@ export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
         "hover:border-accent/50 hover:shadow-sm transition-all"
       )}
     >
-      {/* Source context */}
-      <p className="text-xs text-muted-foreground">{sourceContext(event)}</p>
+      {/* Entity type badge + source context */}
+      <div className="flex items-center gap-2">
+        <Badge
+          variant="outline"
+          className={cn(
+            "text-xs shrink-0",
+            isRecipeEvent
+              ? "border-orange-300 text-orange-700 dark:border-orange-700 dark:text-orange-400"
+              : "border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-400"
+          )}
+        >
+          {isRecipeEvent ? "Recipe" : "Cookbook"}
+        </Badge>
+        <p className="text-xs text-muted-foreground">{sourceContext(event)}</p>
+      </div>
 
       {/* Title + description */}
       <div className="flex flex-col gap-1">
@@ -109,12 +179,21 @@ export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
       </div>
 
       {/* Tags */}
-      {event.recipe_id !== null && event.tags.length > 0 && (
+      {event.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {event.tags.map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
+            <button
+              key={tag}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onTagClick?.(tag);
+              }}
+              className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-border text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+            >
               {tag}
-            </Badge>
+            </button>
           ))}
         </div>
       )}

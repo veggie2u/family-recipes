@@ -116,6 +116,7 @@ export async function acceptInvitation(memberId: string) {
   if (error) throw new Error(error.message);
 
   revalidatePath("/dashboard/families");
+  revalidatePath("/families");
 }
 
 export async function declineInvitation(memberId: string) {
@@ -134,6 +135,7 @@ export async function declineInvitation(memberId: string) {
   if (error) throw new Error(error.message);
 
   revalidatePath("/dashboard/families");
+  revalidatePath("/families");
 }
 
 export async function addCookbookToFamily(familyId: string, cookbookId: string) {
