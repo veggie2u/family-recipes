@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { addRecipeToCookbook, removeRecipeFromCookbook } from "@/app/dashboard/cookbooks/actions";
+import { addRecipeToCookbook, removeRecipeFromCookbook } from "@/app/cookbooks/actions";
 
 interface Props {
   cookbookId: string;

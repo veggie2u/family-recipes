@@ -1,6 +1,5 @@
 import { createFamily } from "../actions";
 import { FamilyForm } from "../family-form";
-import Link from "next/link";
 import { Suspense } from "react";
 import { BackButton } from "@/components/back-button";
 
@@ -22,7 +21,7 @@ export default function NewFamilyPage() {
           </div>
         }
       >
-        <FamilyForm action={createFamily} cancelHref="/dashboard/families" />
+        <FamilyForm action={createFamily} cancelHref="/families" />
       </Suspense>
     </div>
   );

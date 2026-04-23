@@ -49,7 +49,7 @@ async function EditCookbookForm({ params }: { params: Promise<{ id: string }> })
         tags: defaultTags,
       }}
       submitLabel="Save Changes"
-      cancelHref={`/dashboard/cookbooks/${id}`}
+      cancelHref={`/cookbooks/${id}`}
     />
   );
 }

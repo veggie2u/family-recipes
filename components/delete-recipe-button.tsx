@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { deleteRecipe } from "@/app/dashboard/recipes/actions";
+import { deleteRecipe } from "@/app/recipes/actions";
 
 export function DeleteRecipeButton({ id }: { id: string }) {
   const [open, setOpen] = useState(false);

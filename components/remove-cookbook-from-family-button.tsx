@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { removeCookbookFromFamily } from "@/app/dashboard/families/actions";
+import { removeCookbookFromFamily } from "@/app/families/actions";
 
 interface Props {
   familyId: string;

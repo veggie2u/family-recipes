@@ -92,7 +92,7 @@ export function UserMenu({ displayName }: UserMenuProps) {
           Bookmarks
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => router.push("/dashboard/profile")}>
+        <DropdownMenuItem onSelect={() => router.push("/profile")}>
           Profile
         </DropdownMenuItem>
         <DropdownMenuSeparator />

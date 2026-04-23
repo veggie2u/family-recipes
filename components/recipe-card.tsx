@@ -12,7 +12,7 @@ interface RecipeCardProps {
   isOwner?: boolean;
   /** Name of the recipe creator. Shown when isOwner is false. */
   creatorName?: string;
-  /** Link destination. Defaults to /dashboard/recipes/:id */
+  /** Link destination. Defaults to /recipes/:id */
   href?: string;
   tags?: string[];
 }
@@ -31,7 +31,7 @@ export function RecipeCard({
 
   return (
     <Link
-      href={href ?? `/dashboard/recipes/${id}`}
+      href={href ?? `/recipes/${id}`}
       className="group flex flex-col gap-2 rounded-lg border border-border bg-card p-5 hover:border-accent/50 hover:shadow-sm transition-all"
     >
       <div className="flex items-start justify-between gap-3">

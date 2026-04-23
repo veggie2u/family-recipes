@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { removeRecipeFromCookbook } from "@/app/dashboard/cookbooks/actions";
+import { removeRecipeFromCookbook } from "@/app/cookbooks/actions";
 
 interface Props {
   cookbookId: string;

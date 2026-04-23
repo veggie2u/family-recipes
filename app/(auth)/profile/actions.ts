@@ -18,6 +18,5 @@ export async function updateProfile(formData: FormData) {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath("/dashboard/profile");
-  revalidatePath("/dashboard", "layout");
+  revalidatePath("/profile");
 }

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { addCookbookToFamily, removeCookbookFromFamily } from "@/app/dashboard/families/actions";
+import { addCookbookToFamily, removeCookbookFromFamily } from "@/app/families/actions";
 
 interface Props {
   familyId: string;

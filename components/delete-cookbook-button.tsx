@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { deleteCookbook } from "@/app/dashboard/cookbooks/actions";
+import { deleteCookbook } from "@/app/cookbooks/actions";
 
 export function DeleteCookbookButton({ id }: { id: string }) {
   const [open, setOpen] = useState(false);
