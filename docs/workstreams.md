@@ -92,12 +92,12 @@ Stream A (DB)  ─────────────────────�
 - `app/dashboard/layout.tsx` (nav + post-login redirect)
 
 ### Checklist
-- [ ] `/feed` route (shell)
-- [ ] `/bookmarks` route (protected shell)
-- [ ] `/profile/[userId]` route (public shell)
-- [ ] Middleware updated for new protected routes
-- [ ] Post-login redirect changed to `/feed`
-- [ ] Nav links updated to feed-filter model
+- ✅ `/feed` route (shell)
+- ✅ `/bookmarks` route (protected shell)
+- ✅ `/profile/[userId]` route (public shell)
+- ✅ Middleware updated for new protected routes
+- ✅ Post-login redirect changed to `/feed`
+- ✅ Nav links updated to feed-filter model (`AppNav` component shared across all layouts)
 
 ---
 

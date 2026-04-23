@@ -96,7 +96,7 @@ A separate query, independent of the user's relationships:
 
 ### Feed UI
 
-#### Feed page — `/dashboard/feed`
+#### Feed page — `/feed`
 
 - Full-width card list, replacing or supplementing the current dashboard home
 - Source filter tabs at the top:
@@ -119,7 +119,7 @@ A separate query, independent of the user's relationships:
 - **Follow cookbook**: Follow button on public cookbook detail page and cookbook cards; shows follower count
 - **Save recipe**: Bookmark icon on recipe cards everywhere in the app (feed, cookbook detail, family detail, recipe detail); toggled state persists instantly (optimistic update)
 
-#### Saved recipes page — `/dashboard/saved`
+#### Saved recipes page — `/bookmarks`
 
 - Grid of bookmarked recipes, most recently saved first
 - Search/filter by tag
@@ -131,15 +131,14 @@ A separate query, independent of the user's relationships:
 
 - Replace the current recipe list on `/dashboard` with a prominent "Go to your Feed" card/CTA
 - Keep "My Recipes", "My Cookbooks", and "My Families" sections on the dashboard as management surfaces (not discovery)
-- Surface the feed as the primary destination after login (consider making `/dashboard/feed` the post-login redirect once Phase 6 ships)
+- `/feed` is the post-login redirect (implemented in Stream B)
 
 ---
 
 ## Open questions
 
-- Should the feed tab be the new default page after login, or remain secondary to the dashboard?
 - Should we show "recipe updated" events, or only "recipe created / added" events? (Updates can be noisy.)
-- Should saved recipes count toward the feed score, or only appear on the `/dashboard/saved` page?
+- Should saved recipes count toward the feed score, or only appear on the `/bookmarks` page?
 - Should cookbook follows require the cookbook to be public, or can a family member follow a private family cookbook?
 - Should there be a per-user setting to opt out of the algorithmic ranking and always see chronological?
 - Should a user's own activity (recipes they created) appear in their own feed?
@@ -170,9 +169,19 @@ A separate query, independent of the user's relationships:
 - `feed_events` table + triggers on `recipes`, `family_recipes`, `cookbook_recipes`
 - `get_feed()` Postgres function
 
-### ⬜ Feed page — not yet implemented
-- `/dashboard/feed` route with filter tabs
+### ✅ Route infrastructure — implemented (Stream B)
+- `/feed` route shell at `app/(public)/feed/page.tsx`
+  - Authenticated: filter tabs (All / My Families / Following / Public) + personalized feed placeholder
+  - Unauthenticated: public feed placeholder + sign-up CTA
+- `/bookmarks` protected route shell at `app/(auth)/bookmarks/page.tsx`
+- `/profile/[userId]` public route shell at `app/(public)/profile/[userId]/page.tsx`
+- `AppNav` shared nav component with feed filter links
+- Post-login redirect → `/feed`
+- Proxy allows `/feed` and `/profile` for unauthenticated users
+
+### ⬜ Feed page content — not yet implemented (Stream C)
 - Feed card component
+- Server action wrapping `get_feed()`
 - Infinite scroll with `IntersectionObserver` + cursor pagination
 - Empty states per tab
 
@@ -182,8 +191,7 @@ A separate query, independent of the user's relationships:
 
 ### ⬜ Recipe save (bookmark) UX — not yet implemented
 - Save/unsave button on recipe cards and detail pages
-- `/dashboard/saved` page
+- `/bookmarks` page content (shell exists)
 
 ### ⬜ Dashboard integration — not yet implemented
 - Feed CTA on dashboard home
-- Post-login redirect update (pending open question resolution)
