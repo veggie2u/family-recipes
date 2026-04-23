@@ -108,7 +108,7 @@ export function FeedList({
               key={event.event_id}
               event={event}
               userId={userId}
-              isBookmarked={bookmarkedIds.has(event.recipe_id)}
+              isBookmarked={event.recipe_id !== null && bookmarkedIds.has(event.recipe_id)}
             />
           ))}
         </div>

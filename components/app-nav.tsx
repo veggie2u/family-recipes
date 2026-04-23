@@ -5,9 +5,9 @@ import { AuthButton } from "@/components/auth-button";
 
 const NAV_LINKS = [
   { label: "Feed", href: "/feed" },
-  { label: "Recipes", href: "/feed?filter=recipes" },
-  { label: "Cookbooks", href: "/feed?filter=cookbooks" },
-  { label: "Families", href: "/feed?filter=families" },
+  { label: "Recipes", href: "/recipes" },
+  { label: "Cookbooks", href: "/cookbooks" },
+  { label: "Families", href: "/families" },
 ];
 
 export function AppNav() {

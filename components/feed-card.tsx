@@ -44,6 +44,26 @@ function sourceContext(event: FeedEvent): React.ReactNode {
       </>
     );
   }
+  if (event.event_type === "cookbook_created") {
+    return (
+      <>
+        Created by{" "}
+        <span className="font-medium text-foreground">{event.actor_name}</span>
+      </>
+    );
+  }
+  if (event.event_type === "cookbook_added_to_family") {
+    return (
+      <>
+        Added to{" "}
+        <span className="font-semibold text-foreground">
+          {event.family_name}
+        </span>{" "}
+        family by{" "}
+        <span className="font-medium text-foreground">{event.actor_name}</span>
+      </>
+    );
+  }
   return null;
 }
 
@@ -60,21 +80,36 @@ export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
 
       {/* Title + description */}
       <div className="flex flex-col gap-1">
-        <Link
-          href={`/recipes/${event.recipe_id}`}
-          className="font-display font-semibold text-lg text-foreground hover:text-accent transition-colors leading-snug"
-        >
-          {event.recipe_title}
-        </Link>
-        {event.recipe_desc && (
-          <p className="text-sm text-muted-foreground line-clamp-3">
-            {event.recipe_desc}
-          </p>
+        {event.recipe_id !== null ? (
+          <Link
+            href={`/recipes/${event.recipe_id}`}
+            className="font-display font-semibold text-lg text-foreground hover:text-accent transition-colors leading-snug"
+          >
+            {event.recipe_title}
+          </Link>
+        ) : (
+          <Link
+            href={`/dashboard/cookbooks/${event.cookbook_id}`}
+            className="font-display font-semibold text-lg text-foreground hover:text-accent transition-colors leading-snug"
+          >
+            {event.cookbook_name}
+          </Link>
         )}
+        {event.recipe_id !== null
+          ? event.recipe_desc && (
+              <p className="text-sm text-muted-foreground line-clamp-3">
+                {event.recipe_desc}
+              </p>
+            )
+          : event.cookbook_desc && (
+              <p className="text-sm text-muted-foreground line-clamp-3">
+                {event.cookbook_desc}
+              </p>
+            )}
       </div>
 
       {/* Tags */}
-      {event.tags.length > 0 && (
+      {event.recipe_id !== null && event.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {event.tags.map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs">
@@ -91,9 +126,9 @@ export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
             addSuffix: true,
           })}
         </span>
-        {userId !== null && (
+        {userId !== null && event.recipe_id !== null && (
           <BookmarkButton
-            recipeId={event.recipe_id}
+            recipeId={event.recipe_id!}
             initialBookmarked={isBookmarked}
           />
         )}

@@ -22,24 +22,29 @@ async function FeedContent({ filter }: { filter: string | undefined }) {
 
   let eventsWithTags: FeedEvent[] = [];
   if (events.length > 0) {
-    const recipeIds = events.map((e) => e.recipe_id);
-    const { data: tagRows } = await supabase
-      .from("recipe_tags")
-      .select("recipe_id, tags(name)")
-      .in("recipe_id", recipeIds);
+    const recipeIds = events
+      .map((e) => e.recipe_id)
+      .filter((id): id is string => id !== null);
 
     const tagMap = new Map<string, string[]>();
-    for (const row of tagRows ?? []) {
-      const tagName = (row.tags as unknown as { name: string } | null)?.name;
-      if (tagName) {
-        const existing = tagMap.get(row.recipe_id) ?? [];
-        existing.push(tagName);
-        tagMap.set(row.recipe_id, existing);
+    if (recipeIds.length > 0) {
+      const { data: tagRows } = await supabase
+        .from("recipe_tags")
+        .select("recipe_id, tags(name)")
+        .in("recipe_id", recipeIds);
+
+      for (const row of tagRows ?? []) {
+        const tagName = (row.tags as unknown as { name: string } | null)?.name;
+        if (tagName) {
+          const existing = tagMap.get(row.recipe_id) ?? [];
+          existing.push(tagName);
+          tagMap.set(row.recipe_id, existing);
+        }
       }
     }
     eventsWithTags = events.map((e) => ({
       ...e,
-      tags: tagMap.get(e.recipe_id) ?? [],
+      tags: e.recipe_id !== null ? (tagMap.get(e.recipe_id) ?? []) : [],
     }));
   }
 
