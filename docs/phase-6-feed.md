@@ -131,13 +131,12 @@ A separate query, independent of the user's relationships:
 
 - Replace the current recipe list on `/dashboard` with a prominent "Go to your Feed" card/CTA
 - Keep "My Recipes", "My Cookbooks", and "My Families" sections on the dashboard as management surfaces (not discovery)
-- Surface the feed as the primary destination after login (post-login redirect → `/feed` once Phase 6 ships)
+- `/feed` is the post-login redirect (implemented in Stream B)
 
 ---
 
 ## Open questions
 
-- Should the feed tab be the new default page after login, or remain secondary to the dashboard?
 - Should we show "recipe updated" events, or only "recipe created / added" events? (Updates can be noisy.)
 - Should bookmarked recipes count toward the feed score, or only appear on the `/bookmarks` page?
 - Should cookbook follows require the cookbook to be public, or can a family member follow a private family cookbook?
@@ -170,9 +169,19 @@ A separate query, independent of the user's relationships:
 - `feed_events` table + indexes + RLS + triggers on `recipes`, `family_recipes`, `cookbook_recipes`
 - `get_feed(p_user_id, p_cursor, p_limit, p_filter)` Postgres function (SECURITY DEFINER, `SET search_path = ''`)
 
-### ⬜ Feed page — not yet implemented
-- `/feed` route with source filters (All / My Families / Following / Public)
+### ✅ Route infrastructure — implemented (Stream B)
+- `/feed` route shell at `app/(public)/feed/page.tsx`
+  - Authenticated: filter tabs (All / My Families / Following / Public) + personalized feed placeholder
+  - Unauthenticated: public feed placeholder + sign-up CTA
+- `/bookmarks` protected route shell at `app/(auth)/bookmarks/page.tsx`
+- `/profile/[userId]` public route shell at `app/(public)/profile/[userId]/page.tsx`
+- `AppNav` shared nav component with feed filter links
+- Post-login redirect → `/feed`
+- Proxy allows `/feed` and `/profile` for unauthenticated users
+
+### ⬜ Feed page content — not yet implemented (Stream C)
 - Feed card component
+- Server action wrapping `get_feed()`
 - Infinite scroll with `IntersectionObserver` + cursor pagination
 - Empty states per filter
 
@@ -182,8 +191,7 @@ A separate query, independent of the user's relationships:
 
 ### ⬜ Recipe bookmark UX — not yet implemented
 - Bookmark button on recipe cards and detail pages
-- `/bookmarks` page
+- `/bookmarks` page content (shell exists)
 
 ### ⬜ Dashboard integration — not yet implemented
 - Feed CTA on dashboard home
-- Post-login redirect update (pending open question resolution)

@@ -1,10 +1,8 @@
-import { AuthButton } from "@/components/auth-button";
+import { AppNav } from "@/components/app-nav";
 import { BrandLogo } from "@/components/brand-logo";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { BookOpen, Heart, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense } from "react";
 
 const features = [
   {
@@ -30,18 +28,7 @@ const features = [
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col bg-background">
-      {/* Navigation */}
-      <nav className="w-full border-b border-border">
-        <div className="max-w-5xl mx-auto flex justify-between items-center px-6 py-4">
-          <BrandLogo />
-          <div className="flex items-center gap-5">
-            <Suspense>
-              <AuthButton />
-            </Suspense>
-            <ThemeSwitcher />
-          </div>
-        </div>
-      </nav>
+      <AppNav />
 
       {/* Hero */}
       <section className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 md:py-28">
@@ -83,7 +70,7 @@ export default function Home() {
               Get Started — It&apos;s Free
             </Link>
             <Link
-              href="/dashboard"
+              href="/feed"
               className="inline-flex items-center justify-center px-6 py-3 rounded border border-border text-foreground font-medium hover:bg-muted transition-colors"
             >
               Browse Recipes
