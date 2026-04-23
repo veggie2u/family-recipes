@@ -1,6 +1,6 @@
 "use client";
 
-import { Laptop, Moon, Sun, UserCircle } from "lucide-react";
+import { BookMarked, BookOpen, Laptop, Moon, Sun, UserCircle, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -71,6 +71,22 @@ export function UserMenu({ displayName }: UserMenuProps) {
         <DropdownMenuLabel className="font-normal">
           <span className="block font-medium">{displayName}</span>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="font-normal text-xs text-muted-foreground uppercase tracking-wide px-2 pt-1">
+          My stuff
+        </DropdownMenuLabel>
+        <DropdownMenuItem onSelect={() => router.push("/dashboard/recipes")} className="flex gap-2">
+          <BookOpen size={ICON_SIZE} className="text-muted-foreground" />
+          My Recipes
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => router.push("/dashboard/cookbooks")} className="flex gap-2">
+          <BookMarked size={ICON_SIZE} className="text-muted-foreground" />
+          My Cookbooks
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => router.push("/dashboard/families")} className="flex gap-2">
+          <Users size={ICON_SIZE} className="text-muted-foreground" />
+          My Families
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => router.push("/dashboard/profile")}>
           Profile

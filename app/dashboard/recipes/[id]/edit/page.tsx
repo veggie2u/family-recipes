@@ -2,20 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { updateRecipe } from "../../actions";
 import { RecipeForm } from "../../recipe-form";
-import Link from "next/link";
 import { Suspense } from "react";
-
-async function BackLink({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  return (
-    <Link
-      href={`/dashboard/recipes/${id}`}
-      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-    >
-      ← Back to recipe
-    </Link>
-  );
-}
+import { BackButton } from "@/components/back-button";
 
 async function EditRecipeForm({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -75,9 +63,7 @@ export default function EditRecipePage({
   return (
     <div className="max-w-2xl">
       <div className="mb-8">
-        <Suspense>
-          <BackLink params={params} />
-        </Suspense>
+        <BackButton label="← Back to recipe" />
         <h1 className="font-display text-3xl font-bold text-foreground mt-3">
           Edit Recipe
         </h1>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { RecipeDetail } from "@/components/recipe-detail";
+import { BackButton } from "@/components/back-button";
 
 async function RecipeDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -49,12 +50,7 @@ export default function PublicRecipeDetailPage({
 }) {
   return (
     <div className="max-w-3xl flex flex-col gap-8">
-      <Link
-        href="/recipes"
-        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        ← Back to recipes
-      </Link>
+      <BackButton label="← Back to recipes" />
 
       <Suspense
         fallback={

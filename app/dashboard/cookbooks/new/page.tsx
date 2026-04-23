@@ -3,6 +3,7 @@ import { CookbookForm } from "../cookbook-form";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
+import { BackButton } from "@/components/back-button";
 
 async function NewCookbookForm() {
   const supabase = await createClient();
@@ -20,12 +21,7 @@ export default function NewCookbookPage() {
   return (
     <div className="max-w-2xl">
       <div className="mb-8">
-        <Link
-          href="/dashboard"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          ← Back to dashboard
-        </Link>
+        <BackButton label="← Back to dashboard" />
         <h1 className="font-display text-3xl font-bold text-foreground mt-3">
           New Cookbook
         </h1>

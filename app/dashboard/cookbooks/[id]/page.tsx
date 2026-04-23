@@ -8,6 +8,7 @@ import { RecipeCard } from "@/components/recipe-card";
 import { DeleteCookbookButton } from "@/components/delete-cookbook-button";
 import AddRecipeToCookbookPanel from "@/components/add-recipe-to-cookbook-panel";
 import { RemoveRecipeFromCookbookButton } from "@/components/remove-recipe-from-cookbook-button";
+import { BackButton } from "@/components/back-button";
 
 async function CookbookDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -179,12 +180,7 @@ export default function CookbookDetailPage({
   return (
     <div className="max-w-4xl">
       <div className="mb-6">
-        <Link
-          href="/dashboard/cookbooks"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          ← Back to cookbooks
-        </Link>
+        <BackButton label="← Back to cookbooks" />
       </div>
       <Suspense fallback={<div className="animate-pulse space-y-4"><div className="h-8 bg-muted rounded w-2/3" /><div className="h-4 bg-muted rounded w-full" /><div className="h-32 bg-muted rounded" /></div>}>
         <CookbookDetailContent params={params} />

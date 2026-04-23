@@ -43,8 +43,9 @@ Rather than polling raw tables, a `feed_events` table records discrete activity.
 - RLS: users can only read/insert/delete their own rows
 
 #### `feed_events` *(implemented)*
-- `id`, `event_type` (`recipe_created` | `recipe_added_to_family` | `recipe_added_to_cookbook`), `recipe_id` (FK → recipes), `actor_id` (FK → profiles), `family_id` (nullable FK → families), `cookbook_id` (nullable FK → cookbooks), `created_at`
-- Populated by `SECURITY DEFINER` Postgres triggers on `recipes`, `family_recipes`, and `cookbook_recipes`
+- `id`, `event_type` (`recipe_created` | `recipe_added_to_family` | `recipe_added_to_cookbook` | `cookbook_created` | `cookbook_added_to_family`), `recipe_id` (nullable FK → recipes), `actor_id` (FK → profiles), `family_id` (nullable FK → families), `cookbook_id` (nullable FK → cookbooks), `created_at`
+- `recipe_id` is nullable — cookbook events carry no recipe reference
+- Populated by `SECURITY DEFINER` Postgres triggers on `recipes`, `family_recipes`, `cookbook_recipes`, `cookbooks`, `family_cookbooks`
 - RLS: readable by any authenticated user (recipe-level visibility is enforced in `get_feed()`)
 - Indexes on `created_at DESC`, `recipe_id`, `actor_id`, `family_id`, `cookbook_id`
 
@@ -170,28 +171,40 @@ A separate query, independent of the user's relationships:
 - `get_feed(p_user_id, p_cursor, p_limit, p_filter)` Postgres function (SECURITY DEFINER, `SET search_path = ''`)
 
 ### ✅ Route infrastructure — implemented (Stream B)
-- `/feed` route shell at `app/(public)/feed/page.tsx`
-  - Authenticated: filter tabs (All / My Families / Following / Public) + personalized feed placeholder
-  - Unauthenticated: public feed placeholder + sign-up CTA
+- `/feed` route at `app/(public)/feed/page.tsx` — fully implemented (Stream C)
 - `/bookmarks` protected route shell at `app/(auth)/bookmarks/page.tsx`
 - `/profile/[userId]` public route shell at `app/(public)/profile/[userId]/page.tsx`
 - `AppNav` shared nav component with feed filter links
 - Post-login redirect → `/feed`
 - Proxy allows `/feed` and `/profile` for unauthenticated users
 
-### ⬜ Feed page content — not yet implemented (Stream C)
-- Feed card component
-- Server action wrapping `get_feed()`
-- Infinite scroll with `IntersectionObserver` + cursor pagination
-- Empty states per filter
+### ✅ Feed page content — complete (Stream C)
+- `app/(public)/feed/actions.ts` — `getFeed()` server action wrapping `get_feed()` RPC + batch tag query; exports `FeedEvent` type (supports recipe + cookbook events)
+- `components/feed-card.tsx` — card with source context, title link, description, tags, `date-fns` relative timestamp, `BookmarkButton`; handles `cookbook_created` and `cookbook_added_to_family` event types
+- `components/feed-list.tsx` — `"use client"` infinite scroll via `IntersectionObserver`, filter tabs (auth only), per-filter empty states, loading skeletons
+- `app/(public)/feed/page.tsx` — SSR initial data (RPC + tags + bookmarks), auth-gated Create dropdown in header
+- `components/create-dropdown.tsx` — Create button (Recipe / Cookbook / Family) shown to authenticated users
+- `components/back-button.tsx` — `router.back()` component used on all detail/edit/new pages app-wide
+- **DB:** `backfill_feed_events` migration applied — 50 events seeded from existing recipe data
+- **DB:** `backfill_cookbook_feed_events` migration applied — 10 cookbook events seeded (7 `cookbook_created`, 3 `cookbook_added_to_family`)
+
+### ✅ Navigation fixes — complete (Stream C addendum)
+- **AppNav**: Recipes → `/recipes`, Cookbooks → `/cookbooks`, Families → `/families` (removed broken `?filter=` params)
+- **UserMenu**: "My stuff" section added with My Recipes / My Cookbooks / My Families quick links (above Profile)
+- **Public `/cookbooks` page**: `app/cookbooks/layout.tsx` + `app/cookbooks/page.tsx` listing all public cookbooks
+
+### ✅ Bookmark actions — complete (Stream C)
+- `app/(auth)/bookmarks/actions.ts` — `bookmarkRecipe`, `removeBookmark` server actions
+- `components/bookmark-button.tsx` — optimistic toggle, sonner error feedback; used in feed cards
 
 ### ⬜ Cookbook follow UX — not yet implemented
 - Follow/unfollow button on cookbook detail and cards
 - Follower count display
 
-### ⬜ Recipe bookmark UX — not yet implemented
-- Bookmark button on recipe cards and detail pages
-- `/bookmarks` page content (shell exists)
+### ⬜ Recipe bookmark UX — partially complete
+- ✅ Bookmark button on feed cards
+- [ ] BookmarkButton on recipe detail, cookbook detail, family detail pages
+- [ ] `/bookmarks` page content (shell exists at `app/(auth)/bookmarks/page.tsx`)
 
 ### ⬜ Dashboard integration — not yet implemented
 - Feed CTA on dashboard home

@@ -104,10 +104,10 @@ erDiagram
     FEED_EVENTS {
         uuid id PK
         string event_type
-        uuid recipe_id FK
+        uuid recipe_id FK "nullable"
         uuid actor_id FK
-        uuid family_id FK
-        uuid cookbook_id FK
+        uuid family_id FK "nullable"
+        uuid cookbook_id FK "nullable"
         timestamp created_at
     }
 
@@ -263,21 +263,31 @@ Security definer function used in RLS policies to check if `auth.uid()` is a mem
 - **W (relationship weight):** member of source family = 4 · following source family = 3 · following source cookbook = 2 · bookmarked the recipe = 1 · no relationship = 0
 - **D (recency decay):** `1 / (1 + hours_since_event / 48)`
 
-Sorted `score DESC, created_at DESC`. Visibility enforced in the WHERE clause (public recipes, own recipes, or recipes in a family the caller belongs to).
+Sorted `score DESC, created_at DESC`. Visibility enforced in the WHERE clause (public recipes, own recipes, or recipes in a family the caller belongs to; cookbook events visible if cookbook is public or user is actor/family member).
+
+**Return columns (as of latest migration):** `event_id, event_type, recipe_id, recipe_title, recipe_desc, recipe_is_public, actor_id, actor_name, family_id, family_name, cookbook_id, cookbook_name, cookbook_desc, event_created_at, score`. Recipe columns are `NULL` for cookbook events; `cookbook_desc` was added to support cookbook event cards.
 
 ## Triggers
 
 ### `on_auth_user_created` (on `auth.users`)
 After a new user signs up, automatically inserts a row into `public.profiles` with the user's `id`. This ensures the FK constraint on `recipes.created_by → profiles.id` (and similar) is always satisfiable. A one-time backfill migration (`backfill_profiles_for_existing_users`) created profiles for all users who signed up before this trigger was added.
 
-### Phase 6 feed triggers (on `public.recipes`, `public.family_recipes`, `public.cookbook_recipes`)
-All three are `SECURITY DEFINER`, `SET search_path = ''` to safely write into `feed_events` bypassing RLS.
+### Phase 6 feed triggers (on `public.recipes`, `public.family_recipes`, `public.cookbook_recipes`, `public.cookbooks`, `public.family_cookbooks`)
+All are `SECURITY DEFINER`, `SET search_path = ''` to safely write into `feed_events` bypassing RLS.
 
 | Trigger | Table | Event | Feed event type |
 |---------|-------|-------|-----------------|
 | `trg_feed_event_recipe_created` | `recipes` | AFTER INSERT | `recipe_created` |
 | `trg_feed_event_recipe_added_to_family` | `family_recipes` | AFTER INSERT | `recipe_added_to_family` |
 | `trg_feed_event_recipe_added_to_cookbook` | `cookbook_recipes` | AFTER INSERT | `recipe_added_to_cookbook` |
+| `trg_cookbook_created` | `cookbooks` | AFTER INSERT | `cookbook_created` |
+| `trg_cookbook_added_to_family` | `family_cookbooks` | AFTER INSERT | `cookbook_added_to_family` (only when `added_by IS NOT NULL`) |
+
+> **Note:** `feed_events.recipe_id` is nullable — cookbook events (`cookbook_created`, `cookbook_added_to_family`) store no `recipe_id`. The `event_type` check constraint was expanded to include the two new cookbook event types.
+
+> **Note:** `family_cookbooks.added_by uuid REFERENCES auth.users(id)` was added to track who added a cookbook to a family (used by the feed trigger as `actor_id`).
+
+> **Note:** Two backfill migrations were applied: `backfill_feed_events` seeded 50 recipe events (29 `recipe_created`, 20 `recipe_added_to_cookbook`, 1 `recipe_added_to_family`) for pre-trigger data; `backfill_cookbook_feed_events` seeded 10 cookbook events (7 `cookbook_created`, 3 `cookbook_added_to_family`) for existing cookbooks and family_cookbooks rows.
 
 ## Future Schema (not yet applied)
 

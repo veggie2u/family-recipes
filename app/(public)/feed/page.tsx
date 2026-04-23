@@ -1,68 +1,92 @@
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
+import { FeedList } from "@/components/feed-list";
+import { CreateDropdown } from "@/components/create-dropdown";
+import type { FeedEvent } from "@/app/(public)/feed/actions";
 
-const FILTER_LABELS: Record<string, string> = {
-  recipes: "Recipes",
-  cookbooks: "Cookbooks",
-  families: "Families",
-};
+async function FeedContent({ filter }: { filter: string | undefined }) {
+  const supabase = await createClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub ?? null;
+  const activeFilter = filter ?? "all";
 
-const AUTH_FILTERS = ["all", "families", "following", "public"] as const;
-type AuthFilter = (typeof AUTH_FILTERS)[number];
+  const { data: rawEvents, error } = await supabase.rpc("get_feed", {
+    p_user_id: userId,
+    p_cursor: new Date().toISOString(),
+    p_limit: 20,
+    p_filter: userId ? activeFilter : "all",
+  });
+  if (error) throw error;
 
-const AUTH_FILTER_LABELS: Record<AuthFilter, string> = {
-  all: "All",
-  families: "My Families",
-  following: "Following",
-  public: "Public",
-};
+  const events = (rawEvents ?? []) as Omit<FeedEvent, "tags">[];
 
-async function FeedContent({
-  filter,
-}: {
-  filter: string | undefined;
-}) {
+  let eventsWithTags: FeedEvent[] = [];
+  if (events.length > 0) {
+    const recipeIds = events
+      .map((e) => e.recipe_id)
+      .filter((id): id is string => id !== null);
+
+    const tagMap = new Map<string, string[]>();
+    if (recipeIds.length > 0) {
+      const { data: tagRows } = await supabase
+        .from("recipe_tags")
+        .select("recipe_id, tags(name)")
+        .in("recipe_id", recipeIds);
+
+      for (const row of tagRows ?? []) {
+        const tagName = (row.tags as unknown as { name: string } | null)?.name;
+        if (tagName) {
+          const existing = tagMap.get(row.recipe_id) ?? [];
+          existing.push(tagName);
+          tagMap.set(row.recipe_id, existing);
+        }
+      }
+    }
+    eventsWithTags = events.map((e) => ({
+      ...e,
+      tags: e.recipe_id !== null ? (tagMap.get(e.recipe_id) ?? []) : [],
+    }));
+  }
+
+  const nextCursor =
+    events.length === 20
+      ? events[events.length - 1].event_created_at
+      : null;
+
+  let initialBookmarkedIds: string[] = [];
+  if (userId) {
+    const { data: bookmarks } = await supabase
+      .from("recipe_bookmarks")
+      .select("recipe_id")
+      .eq("user_id", userId);
+    initialBookmarkedIds = bookmarks?.map((b) => b.recipe_id) ?? [];
+  }
+
+  return (
+    <FeedList
+      initialEvents={eventsWithTags}
+      initialCursor={nextCursor}
+      filter={activeFilter}
+      userId={userId}
+      initialBookmarkedIds={initialBookmarkedIds}
+    />
+  );
+}
+
+async function FeedHeader() {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   const isAuthenticated = !!claimsData?.claims;
 
-  const activeFilter = (filter ?? "all") as AuthFilter;
-
   return (
-    <div className="flex flex-col gap-6">
-      {isAuthenticated && (
-        <div className="flex items-center gap-2 border-b border-border pb-4">
-          {AUTH_FILTERS.map((f) => (
-            <a
-              key={f}
-              href={f === "all" ? "/feed" : `/feed?filter=${f}`}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                activeFilter === f
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              {AUTH_FILTER_LABELS[f]}
-            </a>
-          ))}
-        </div>
-      )}
-
-      <div className="flex flex-col items-center justify-center py-24 text-center gap-4 border border-dashed border-border rounded-lg">
-        <p className="text-muted-foreground text-lg">
-          {isAuthenticated
-            ? `Your personalized ${filter ? FILTER_LABELS[filter] ?? "feed" : "feed"} is coming soon.`
-            : "Public recipes, cookbooks, and families will appear here."}
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <h1 className="font-display text-3xl font-bold text-foreground">Feed</h1>
+        <p className="text-muted-foreground mt-1">
+          Discover recipes from your families and the community.
         </p>
-        {!isAuthenticated && (
-          <a
-            href="/auth/sign-up"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity text-sm"
-          >
-            Sign up to see your personalized feed
-          </a>
-        )}
       </div>
+      {isAuthenticated && <CreateDropdown />}
     </div>
   );
 }
@@ -74,18 +98,29 @@ export default function FeedPage({
 }) {
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="font-display text-3xl font-bold text-foreground">Feed</h1>
-        <p className="text-muted-foreground mt-1">
-          Discover recipes from your families and the community.
-        </p>
-      </div>
+      <Suspense
+        fallback={
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="font-display text-3xl font-bold text-foreground">Feed</h1>
+              <p className="text-muted-foreground mt-1">
+                Discover recipes from your families and the community.
+              </p>
+            </div>
+          </div>
+        }
+      >
+        <FeedHeader />
+      </Suspense>
 
       <Suspense
         fallback={
           <div className="flex flex-col gap-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-24 rounded-lg border border-border bg-muted/30 animate-pulse" />
+              <div
+                key={i}
+                className="h-32 rounded-lg border border-border bg-muted/30 animate-pulse"
+              />
             ))}
           </div>
         }

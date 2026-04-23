@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { DeleteRecipeButton } from "@/components/delete-recipe-button";
 import { RecipeDetail } from "@/components/recipe-detail";
 import AddToCookbookButton from "@/components/add-to-cookbook-button";
+import { BackButton } from "@/components/back-button";
 
 async function RecipeDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -99,12 +100,7 @@ export default function RecipeDetailPage({
   return (
     <div className="max-w-2xl">
       <div className="mb-6">
-        <Link
-          href="/dashboard"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          ← Back to my recipes
-        </Link>
+        <BackButton label="← Back to my recipes" />
       </div>
       <Suspense fallback={<div className="animate-pulse space-y-4"><div className="h-8 bg-muted rounded w-2/3" /><div className="h-4 bg-muted rounded w-full" /><div className="h-32 bg-muted rounded" /></div>}>
         <RecipeDetailContent params={params} />

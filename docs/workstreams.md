@@ -46,20 +46,20 @@ Stream A (DB)  ─────────────────────�
 - RLS: `SELECT`/`INSERT`/`DELETE` own rows only (bookmarks are private)
 
 #### `feed_events`
-- `id uuid PK`, `event_type text` (`recipe_created` | `recipe_added_to_family` | `recipe_added_to_cookbook`), `recipe_id uuid → recipes`, `actor_id uuid → profiles`, `family_id uuid → families (nullable)`, `cookbook_id uuid → cookbooks (nullable)`, `created_at timestamptz`
-- Postgres triggers populate this table on INSERT into `recipes`, `family_recipes`, `cookbook_recipes`
+- `id uuid PK`, `event_type text` (`recipe_created` | `recipe_added_to_family` | `recipe_added_to_cookbook` | `cookbook_created` | `cookbook_added_to_family`), `recipe_id uuid → recipes (nullable)`, `actor_id uuid → profiles`, `family_id uuid → families (nullable)`, `cookbook_id uuid → cookbooks (nullable)`, `created_at timestamptz`
+- Postgres triggers populate this table on INSERT into `recipes`, `family_recipes`, `cookbook_recipes`, `cookbooks`, `family_cookbooks`
+- `recipe_id` is nullable — cookbook events have no associated recipe
+- `family_cookbooks.added_by uuid` column added to track actor for cookbook-to-family events
 - Indexes on `created_at DESC`, `recipe_id`, `actor_id`, `family_id`, `cookbook_id`
 - RLS: `SELECT` for `authenticated` only; no INSERT/DELETE from app (triggers only)
 
 #### `get_feed()` Postgres function
 - Signature: `get_feed(p_user_id uuid, p_cursor timestamptz, p_limit int, p_filter text)`
 - `p_filter` values: `'all'` | `'families'` | `'following'` | `'public'`; defaults to `'all'`
-- Returns ranked `feed_events` joined with recipe/actor/family/cookbook data:
-  - **Relationship weight (W):** member of source family → 4, following source family → 3, following source cookbook → 2, bookmarked the recipe → 1, no relationship → 0
-  - **Recency decay (D):** `1 / (1 + hours_since_event / 48)`
-  - **Score:** `W + D`, sorted `score DESC, created_at DESC`
-- Cursor-based pagination on `created_at`
-- `SECURITY DEFINER` + `SET search_path = ''`
+- Returns ranked `feed_events` joined with recipe/actor/family/cookbook data including `cookbook_desc`
+- Recipe columns (`recipe_title`, `recipe_desc`, `recipe_is_public`) are `NULL` for cookbook events
+- Cookbook events visible if `cookbook.is_public = true` or caller is actor/active family member
+- Uses LEFT JOIN on recipes (was inner JOIN) to support cookbook-only events
 
 ### Checklist
 - [x] `family_followers` migration + RLS
@@ -69,6 +69,10 @@ Stream A (DB)  ─────────────────────�
 - [x] `get_feed()` function
 - [x] Run `supabase-get_advisors` (security + performance) after migrations
 - [x] *(bonus)* `fix_feed_functions_search_path_and_indexes` — `SET search_path = ''` on all 4 functions; added missing FK indexes on `feed_events(family_id)` and `feed_events(cookbook_id)`
+- [x] `cookbook_created` + `cookbook_added_to_family` event types + triggers
+- [x] `feed_events.recipe_id` made nullable; `family_cookbooks.added_by` added
+- [x] `get_feed()` updated for cookbook events (LEFT JOIN, `cookbook_desc`, cookbook visibility)
+- [x] Backfill cookbook feed events (7 `cookbook_created`, 3 `cookbook_added_to_family`)
 
 ---
 
@@ -111,6 +115,7 @@ Stream A (DB)  ─────────────────────�
 ## Stream C — Feed UI: /feed Page
 
 **Start:** After Streams A and B are merged  
+**Status: ✅ Complete**  
 **Depends on:** Stream A (`feed_events`, `get_feed()`), Stream B (`/feed` route exists)  
 **Reference docs:** `phase-6-feed.md`, `requirements.md` (Feed section)
 
@@ -120,29 +125,45 @@ Stream A (DB)  ─────────────────────�
   - Options for authenticated users: All / My Families / Following / Public
   - Unauthenticated users: no filter controls (public content only)
 - **`FeedCard` component** — displays:
-  - Recipe title, description excerpt, cover image (if available)
+  - Recipe title (link to `/recipes/:id`), description excerpt
   - Source context ("Added to *Smith Family* by *Grandma Rose*")
-  - Relative timestamp ("3 hours ago")
-  - Bookmark button (delegates to Stream D's `BookmarkButton` component)
+  - Relative timestamp via `date-fns` `formatDistanceToNow`
+  - Bookmark button (authenticated users only)
   - Tags
-- **Infinite scroll** — `IntersectionObserver` triggers next-page fetch; cursor passed from last card's `(score, created_at)`
-- **Server action** — wraps `get_feed()` call; returns paginated feed events with recipe join data
+- **Infinite scroll** — `IntersectionObserver` triggers next-page fetch; cursor is last event's `created_at`
+- **Server action** — `getFeed()` in `app/(public)/feed/actions.ts` wraps `get_feed()` RPC + batch tag query
 - **Empty states** — per filter, with contextual CTAs (e.g. "Follow a family to see their recipes here")
 - **Loading skeleton** — shown while next page loads
+- **Create dropdown** — authenticated users see a "Create" button (Recipe / Cookbook / Family) in the feed header
 
 ### Key files
-- `app/(public)/feed/page.tsx`
+- `app/(public)/feed/page.tsx` (updated — real data, `FeedHeader` with create button)
+- `app/(public)/feed/actions.ts` (new — `getFeed()` server action + `FeedEvent` type)
 - `components/feed-card.tsx` (new)
-- `app/(public)/feed/actions.ts` (new server action)
+- `components/feed-list.tsx` (new — `"use client"` infinite scroll)
+- `components/bookmark-button.tsx` (new — implemented here; Stream D will extend)
+- `app/(auth)/bookmarks/actions.ts` (new — `bookmarkRecipe`, `removeBookmark`)
+- `components/create-dropdown.tsx` (new)
+- `components/back-button.tsx` (new — `router.back()` used app-wide)
 
 ### Checklist
-- [ ] Filter control component
-- [ ] `FeedCard` component
-- [ ] Server action for `get_feed()`
-- [ ] Infinite scroll with IntersectionObserver
-- [ ] Unauthenticated public view
-- [ ] Empty states per filter
-- [ ] Loading skeleton
+- ✅ Filter control component
+- ✅ `FeedCard` component (recipe events + cookbook events)
+- ✅ Server action for `get_feed()`
+- ✅ Infinite scroll with IntersectionObserver
+- ✅ Unauthenticated public view
+- ✅ Empty states per filter
+- ✅ Loading skeleton
+- ✅ Bookmark button on feed cards
+- ✅ Create dropdown (Recipe / Cookbook / Family)
+- ✅ Back button (`router.back()`) used on all detail/edit/new pages
+- ✅ Cookbook feed events (`cookbook_created`, `cookbook_added_to_family`) rendered in feed
+- ✅ AppNav links fixed: Recipes → `/recipes`, Cookbooks → `/cookbooks`, Families → `/families`
+- ✅ "My stuff" section in UserMenu (My Recipes / My Cookbooks / My Families)
+- ✅ Public `/cookbooks` listing page (`app/cookbooks/`)
+
+### DB note
+A `backfill_feed_events` migration was applied to populate `feed_events` for all data that existed before the triggers were created (29 `recipe_created`, 20 `recipe_added_to_cookbook`, 1 `recipe_added_to_family`).
 
 ---
 
@@ -181,8 +202,9 @@ Stream A (DB)  ─────────────────────�
 - [ ] `FollowButton` component + server actions (family)
 - [ ] `FollowButton` component + server actions (cookbook)
 - [ ] Follower count on family + cookbook pages
-- [ ] `BookmarkButton` component + server actions
-- [ ] BookmarkButton on feed cards (coordinate with Stream C)
+- ✅ `BookmarkButton` component (`components/bookmark-button.tsx`) — implemented in Stream C
+- ✅ `bookmarkRecipe` / `removeBookmark` server actions (`app/(auth)/bookmarks/actions.ts`) — implemented in Stream C
+- ✅ BookmarkButton on feed cards — implemented in Stream C
 - [ ] BookmarkButton on recipe detail, cookbook detail, family detail
 - [ ] `/bookmarks` page with tag filter
 - [ ] Remove bookmark from `/bookmarks` page
