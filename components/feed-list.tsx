@@ -145,7 +145,7 @@ export function FeedList({
 
       {/* Search results */}
       {searchQuery.trim() ? (
-        <SearchResultsList results={searchResults} isSearching={isSearching} />
+        <SearchResultsList results={searchResults} isSearching={isSearching} onTagClick={setSearchQuery} />
       ) : (
         <>
           {/* Event list */}
@@ -157,6 +157,7 @@ export function FeedList({
                   event={event}
                   userId={userId}
                   isBookmarked={event.recipe_id !== null && bookmarkedIds.has(event.recipe_id)}
+                  onTagClick={setSearchQuery}
                 />
               ))}
             </div>
@@ -229,7 +230,7 @@ function getResultHref(result: SearchResult): string {
   }
 }
 
-function SearchResultCard({ result }: { result: SearchResult }) {
+function SearchResultCard({ result, onTagClick }: { result: SearchResult; onTagClick: (tag: string) => void }) {
   return (
     <Link
       href={getResultHref(result)}
@@ -258,6 +259,25 @@ function SearchResultCard({ result }: { result: SearchResult }) {
       {result.creator_name && (
         <p className="text-xs text-muted-foreground">by {result.creator_name}</p>
       )}
+      {(result.result_type === "recipe" || result.result_type === "cookbook") &&
+        result.tags?.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-0.5" onClick={(e) => e.preventDefault()}>
+            {result.tags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onTagClick(tag);
+                }}
+                className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-border text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
     </Link>
   );
 }
@@ -265,9 +285,11 @@ function SearchResultCard({ result }: { result: SearchResult }) {
 function SearchResultsList({
   results,
   isSearching,
+  onTagClick,
 }: {
   results: SearchResult[];
   isSearching: boolean;
+  onTagClick: (tag: string) => void;
 }) {
   if (isSearching) {
     return (
@@ -292,7 +314,7 @@ function SearchResultsList({
     <ul className="flex flex-col gap-3">
       {results.map((result) => (
         <li key={result.id}>
-          <SearchResultCard result={result} />
+          <SearchResultCard result={result} onTagClick={onTagClick} />
         </li>
       ))}
     </ul>

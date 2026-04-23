@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +11,7 @@ interface FeedCardProps {
   event: FeedEvent;
   userId: string | null;
   isBookmarked: boolean;
+  onTagClick?: (tag: string) => void;
 }
 
 function sourceContext(event: FeedEvent): React.ReactNode {
@@ -119,7 +122,7 @@ function sourceContext(event: FeedEvent): React.ReactNode {
   return null;
 }
 
-export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
+export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardProps) {
   const isRecipeEvent = event.event_type.startsWith("recipe_");
 
   return (
@@ -179,9 +182,18 @@ export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
       {event.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {event.tags.map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
+            <button
+              key={tag}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onTagClick?.(tag);
+              }}
+              className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-border text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+            >
               {tag}
-            </Badge>
+            </button>
           ))}
         </div>
       )}
