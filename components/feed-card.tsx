@@ -15,6 +15,19 @@ interface FeedCardProps {
 }
 
 function sourceContext(event: FeedEvent): React.ReactNode {
+  if (event.event_type === "family_created") {
+    return (
+      <>
+        Created by{" "}
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
+      </>
+    );
+  }
   if (event.event_type === "recipe_created") {
     return (
       <>
@@ -124,6 +137,7 @@ function sourceContext(event: FeedEvent): React.ReactNode {
 
 export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardProps) {
   const isRecipeEvent = event.event_type.startsWith("recipe_");
+  const isFamilyEvent = event.event_type === "family_created";
 
   return (
     <div
@@ -140,10 +154,12 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardPr
             "text-xs shrink-0",
             isRecipeEvent
               ? "border-orange-300 text-orange-700 dark:border-orange-700 dark:text-orange-400"
+              : isFamilyEvent
+              ? "border-green-300 text-green-700 dark:border-green-700 dark:text-green-400"
               : "border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-400"
           )}
         >
-          {isRecipeEvent ? "Recipe" : "Cookbook"}
+          {isRecipeEvent ? "Recipe" : isFamilyEvent ? "Family" : "Cookbook"}
         </Badge>
         <p className="text-xs text-muted-foreground">{sourceContext(event)}</p>
       </div>
@@ -156,6 +172,13 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardPr
             className="font-display font-semibold text-lg text-foreground hover:text-accent transition-colors leading-snug"
           >
             {event.recipe_title}
+          </Link>
+        ) : isFamilyEvent ? (
+          <Link
+            href={`/families/${event.family_id}?from=feed`}
+            className="font-display font-semibold text-lg text-foreground hover:text-accent transition-colors leading-snug"
+          >
+            {event.family_name}
           </Link>
         ) : (
           <Link
@@ -171,7 +194,7 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardPr
                 {event.recipe_desc}
               </p>
             )
-          : event.cookbook_desc && (
+          : !isFamilyEvent && event.cookbook_desc && (
               <p className="text-sm text-muted-foreground line-clamp-3">
                 {event.cookbook_desc}
               </p>

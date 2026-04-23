@@ -9,7 +9,8 @@ export type FeedEvent = {
     | "recipe_added_to_family"
     | "recipe_added_to_cookbook"
     | "cookbook_created"
-    | "cookbook_added_to_family";
+    | "cookbook_added_to_family"
+    | "family_created";
   recipe_id: string | null;
   recipe_title: string | null;
   recipe_desc: string | null;
