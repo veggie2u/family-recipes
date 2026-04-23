@@ -207,7 +207,6 @@ const TYPE_LABELS: Record<string, string> = {
   cookbook: "Cookbook",
   family: "Family",
   user: "Person",
-  tag: "Tag",
 };
 
 const TYPE_BADGE_CLASSES: Record<string, string> = {
@@ -215,7 +214,6 @@ const TYPE_BADGE_CLASSES: Record<string, string> = {
   cookbook: "border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-400",
   family: "border-green-300 text-green-700 dark:border-green-700 dark:text-green-400",
   user: "border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-400",
-  tag: "border-pink-300 text-pink-700 dark:border-pink-700 dark:text-pink-400",
 };
 
 function getResultHref(result: SearchResult): string {
@@ -228,8 +226,6 @@ function getResultHref(result: SearchResult): string {
       return `/families/${result.id}`;
     case "user":
       return `/profile/${result.id}`;
-    case "tag":
-      return `/recipes?q=${encodeURIComponent(result.name)}`;
   }
 }
 

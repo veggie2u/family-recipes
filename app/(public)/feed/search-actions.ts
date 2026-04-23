@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-export type SearchResultType = "recipe" | "cookbook" | "family" | "user" | "tag";
+export type SearchResultType = "recipe" | "cookbook" | "family" | "user";
 
 export type SearchResult = {
   result_type: SearchResultType;
@@ -10,6 +10,7 @@ export type SearchResult = {
   name: string;
   description: string | null;
   creator_name: string | null;
+  tags: string[];
   score: number;
 };
 

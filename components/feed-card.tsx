@@ -120,6 +120,8 @@ function sourceContext(event: FeedEvent): React.ReactNode {
 }
 
 export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
+  const isRecipeEvent = event.event_type.startsWith("recipe_");
+
   return (
     <div
       className={cn(
@@ -127,8 +129,21 @@ export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
         "hover:border-accent/50 hover:shadow-sm transition-all"
       )}
     >
-      {/* Source context */}
-      <p className="text-xs text-muted-foreground">{sourceContext(event)}</p>
+      {/* Entity type badge + source context */}
+      <div className="flex items-center gap-2">
+        <Badge
+          variant="outline"
+          className={cn(
+            "text-xs shrink-0",
+            isRecipeEvent
+              ? "border-orange-300 text-orange-700 dark:border-orange-700 dark:text-orange-400"
+              : "border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-400"
+          )}
+        >
+          {isRecipeEvent ? "Recipe" : "Cookbook"}
+        </Badge>
+        <p className="text-xs text-muted-foreground">{sourceContext(event)}</p>
+      </div>
 
       {/* Title + description */}
       <div className="flex flex-col gap-1">
@@ -161,7 +176,7 @@ export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
       </div>
 
       {/* Tags */}
-      {event.recipe_id !== null && event.tags.length > 0 && (
+      {event.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {event.tags.map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs">
