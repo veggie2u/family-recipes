@@ -18,6 +18,7 @@
     - a user can create a cookbook
     - a user can create a recipe
     - a user can add a cookbook to a family
+    - a user can add a recipe directly to a family they belong to
     - a user can invite another user to a family they belong to
     - a user can choose whether a recipe they own is publicly visible
     - a user can share a recipe that is publicly visible
