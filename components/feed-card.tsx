@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import { BookmarkButton } from "@/components/bookmark-button";
 import { cn } from "@/lib/utils";
 import type { FeedEvent } from "@/app/(public)/feed/actions";
@@ -18,7 +17,7 @@ function sourceContext(event: FeedEvent): React.ReactNode {
   if (event.event_type === "family_created") {
     return (
       <>
-        Created by{" "}
+        Family created by{" "}
         <Link
           href={`/profile/${event.actor_id}`}
           className="font-medium hover:underline transition-colors"
@@ -31,7 +30,7 @@ function sourceContext(event: FeedEvent): React.ReactNode {
   if (event.event_type === "recipe_created") {
     return (
       <>
-        Created by{" "}
+        Recipe created by{" "}
         <Link
           href={`/profile/${event.actor_id}`}
           className="font-medium hover:underline transition-colors"
@@ -44,7 +43,7 @@ function sourceContext(event: FeedEvent): React.ReactNode {
   if (event.event_type === "recipe_added_to_family") {
     return (
       <>
-        Added to{" "}
+        Recipe added to{" "}
         {event.family_id !== null ? (
           <Link
             href={`/families/${event.family_id}`}
@@ -70,7 +69,7 @@ function sourceContext(event: FeedEvent): React.ReactNode {
   if (event.event_type === "recipe_added_to_cookbook") {
     return (
       <>
-        Added to{" "}
+        Recipe added to{" "}
         {event.cookbook_id !== null ? (
           <Link
             href={`/cookbooks/${event.cookbook_id}`}
@@ -96,7 +95,7 @@ function sourceContext(event: FeedEvent): React.ReactNode {
   if (event.event_type === "cookbook_created") {
     return (
       <>
-        Created by{" "}
+        Cookbook created by{" "}
         <Link
           href={`/profile/${event.actor_id}`}
           className="font-medium hover:underline transition-colors"
@@ -109,7 +108,7 @@ function sourceContext(event: FeedEvent): React.ReactNode {
   if (event.event_type === "cookbook_added_to_family") {
     return (
       <>
-        Added to{" "}
+        Cookbook added to{" "}
         {event.family_id !== null ? (
           <Link
             href={`/families/${event.family_id}`}
@@ -136,7 +135,6 @@ function sourceContext(event: FeedEvent): React.ReactNode {
 }
 
 export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardProps) {
-  const isRecipeEvent = event.event_type.startsWith("recipe_");
   const isFamilyEvent = event.event_type === "family_created";
 
   return (
@@ -146,23 +144,8 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardPr
         "hover:border-accent/50 hover:shadow-sm transition-all"
       )}
     >
-      {/* Entity type badge + source context */}
-      <div className="flex items-center gap-2">
-        <Badge
-          variant="outline"
-          className={cn(
-            "text-xs shrink-0",
-            isRecipeEvent
-              ? "border-orange-300 text-orange-700 dark:border-orange-700 dark:text-orange-400"
-              : isFamilyEvent
-              ? "border-green-300 text-green-700 dark:border-green-700 dark:text-green-400"
-              : "border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-400"
-          )}
-        >
-          {isRecipeEvent ? "Recipe" : isFamilyEvent ? "Family" : "Cookbook"}
-        </Badge>
-        <p className="text-xs text-muted-foreground">{sourceContext(event)}</p>
-      </div>
+      {/* Source context */}
+      <p className="text-xs text-muted-foreground">{sourceContext(event)}</p>
 
       {/* Title + description */}
       <div className="flex flex-col gap-1">
