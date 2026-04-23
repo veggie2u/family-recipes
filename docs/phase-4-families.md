@@ -15,7 +15,8 @@ Users can create families, invite other users to join, and add cookbooks to a fa
 - ✅ Name
 - ✅ Visibility: public or private
 - ✅ Members (collection of users)
-- ✅ Cookbooks assigned to the family (schema only — `family_cookbooks` table with `members_can_edit`)
+- ✅ Cookbooks assigned to the family (`family_cookbooks` table with `members_can_edit`)
+- ✅ Recipes assigned directly to the family (`family_recipes` table)
 - ✅ Created timestamp; no `updated_at`
 
 ### Family management (authenticated users)
@@ -27,6 +28,10 @@ Users can create families, invite other users to join, and add cookbooks to a fa
 ### Adding cookbooks to a family
 - ✅ A user can add a cookbook to a family they belong to
 - ✅ When a cookbook is added to a family, all recipes in that cookbook become visible to family members
+
+### Adding recipes to a family
+- ✅ A user can add any recipe they own directly to a family they belong to
+- ✅ A user can remove a recipe they added from a family
 
 ### Family member access
 - ⬜ All members of a family can view and edit all recipes assigned to the family
@@ -88,16 +93,24 @@ Users can create families, invite other users to join, and add cookbooks to a fa
 ### ✅ Family pages — complete
 - `/dashboard/families` — My Families grid (active memberships) + Pending Invitations (invited status) with Accept/Decline; back-to-dashboard link at top
 - `/dashboard/families/new` — create family form
-- `/dashboard/families/[id]` — family detail: name, visibility badge, member list with role/status badges, invite section (active members only)
+- `/dashboard/families/[id]` — family detail: name, visibility badge, member list with role/status badges, invite section (active members only), Cookbooks section, Recipes section
+
+### ✅ Adding cookbooks to a family — complete
+- `AddCookbookToFamilyPanel` component (`components/add-cookbook-to-family-panel.tsx`) — popover with search + checkbox toggle, optimistic UI with rollback
+- `RemoveCookbookFromFamilyButton` component (`components/remove-cookbook-from-family-button.tsx`) — confirmation dialog
+- Server actions `addCookbookToFamily`, `removeCookbookFromFamily` in `app/dashboard/families/actions.ts`
+- Cookbooks section on the family detail page; add/remove controls visible to active members only
+
+### ✅ Adding recipes to a family — complete
+- `AddRecipeToFamilyPanel` component (`components/add-recipe-to-family-panel.tsx`) — popover with search + checkbox toggle, optimistic UI with rollback; shows recipes owned by the current user
+- `RemoveRecipeFromFamilyButton` component (`components/remove-recipe-from-family-button.tsx`) — confirmation dialog
+- Server actions `addRecipeToFamily`, `removeRecipeFromFamily` in `app/dashboard/families/actions.ts`
+- Recipes section on the family detail page (below Cookbooks); add/remove controls visible to active members only
 
 ### ✅ Dashboard integration — complete
 - "My Families" section on the dashboard home shows family cards (name, visibility, member count)
 - "Pending Family Invitations" section on the dashboard home (between search and My Recipes) for quick Accept/Decline without navigating away
 - `FamilyCard` component (`components/family-card.tsx`) used across listings
-
-### 🔲 Adding cookbooks to a family — not yet implemented
-- UI for assigning an existing cookbook to a family
-- DB tables (`family_cookbooks`) are in place; server actions not yet created
 
 ### 🔲 Family search — not yet implemented
 - Searchable listing of public families for unauthenticated and authenticated users
