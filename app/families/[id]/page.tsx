@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Globe, Lock, Users, BookOpen } from "lucide-react";
 import { Suspense } from "react";
 import { BackButton } from "@/components/back-button";
+import { FollowButton } from "@/components/follow-button";
 import { cn } from "@/lib/utils";
 
 async function FamilyPublicContent({
@@ -22,7 +23,7 @@ async function FamilyPublicContent({
 
   if (error || !family) notFound();
 
-  const [{ count: memberCount }, { count: cookbookCount }, { data: claimsData }] =
+  const [{ count: memberCount }, { count: cookbookCount }, { data: claimsData }, { count: followerCount }] =
     await Promise.all([
       supabase
         .from("family_members")
@@ -34,20 +35,34 @@ async function FamilyPublicContent({
         .select("*", { count: "exact", head: true })
         .eq("family_id", id),
       supabase.auth.getClaims(),
+      supabase
+        .from("family_followers")
+        .select("*", { count: "exact", head: true })
+        .eq("family_id", id),
     ]);
 
   const userId = claimsData?.claims?.sub;
 
   let isActiveMember = false;
+  let isFollowing = false;
   if (userId) {
-    const { data: membership } = await supabase
-      .from("family_members")
-      .select("id")
-      .eq("family_id", id)
-      .eq("user_id", userId)
-      .eq("status", "active")
-      .maybeSingle();
+    const [{ data: membership }, { data: followRow }] = await Promise.all([
+      supabase
+        .from("family_members")
+        .select("id")
+        .eq("family_id", id)
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .maybeSingle(),
+      supabase
+        .from("family_followers")
+        .select("id")
+        .eq("family_id", id)
+        .eq("user_id", userId)
+        .maybeSingle(),
+    ]);
     isActiveMember = !!membership;
+    isFollowing = !!followRow;
   }
 
   return (
@@ -78,7 +93,7 @@ async function FamilyPublicContent({
       </div>
 
       {/* Stats */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-6 flex-wrap">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Users className="w-4 h-4" />
           <span className="text-sm">
@@ -91,6 +106,14 @@ async function FamilyPublicContent({
             {cookbookCount ?? 0} {cookbookCount === 1 ? "cookbook" : "cookbooks"}
           </span>
         </div>
+        {userId && !isActiveMember && family.is_public && (
+          <FollowButton
+            type="family"
+            targetId={id}
+            initialFollowing={isFollowing}
+            followerCount={followerCount ?? 0}
+          />
+        )}
       </div>
 
       {/* Manage link for active members */}

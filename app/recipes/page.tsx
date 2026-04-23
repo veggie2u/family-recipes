@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
 import { BookOpen } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { RecipeSearchInput } from "@/components/recipe-search-input";
 import { RecipeCard } from "@/components/recipe-card";
+import { BookmarkButton } from "@/components/bookmark-button";
 
 async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const supabase = await createClient();
@@ -39,6 +39,18 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
     );
   }
 
+  // Batch-fetch bookmark state for authenticated users
+  let bookmarkedIds = new Set<string>();
+  if (user) {
+    const recipeIds = recipes.map((r) => r.id);
+    const { data: bookmarks } = await supabase
+      .from("recipe_bookmarks")
+      .select("recipe_id")
+      .eq("user_id", user.id)
+      .in("recipe_id", recipeIds);
+    bookmarkedIds = new Set((bookmarks ?? []).map((b) => b.recipe_id));
+  }
+
   return (
     <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {recipes.map((recipe) => {
@@ -49,7 +61,7 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
             Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
         ) ?? [];
         return (
-          <li key={recipe.id}>
+          <li key={recipe.id} className="flex flex-col gap-1">
             <RecipeCard
               id={recipe.id}
               title={recipe.title}
@@ -59,6 +71,14 @@ async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string
               tags={tags}
               href={`/recipes/${recipe.id}`}
             />
+            {user && (
+              <div className="flex justify-end">
+                <BookmarkButton
+                  recipeId={recipe.id}
+                  initialBookmarked={bookmarkedIds.has(recipe.id)}
+                />
+              </div>
+            )}
           </li>
         );
       })}

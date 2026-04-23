@@ -2,19 +2,25 @@ import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
 import { BookMarked } from "lucide-react";
 import { CookbookCard } from "@/components/cookbook-card";
+import { FollowButton } from "@/components/follow-button";
 
 async function CookbookList() {
   const supabase = await createClient();
 
-  const { data: cookbooks, error } = await supabase
-    .from("cookbooks")
-    .select(
-      "id, name, description, is_public, created_by, profiles(name), cookbook_tags(tags(name)), cookbook_recipes(count)"
-    )
-    .eq("is_public", true)
-    .order("created_at", { ascending: false });
+  const [{ data: cookbooks, error }, { data: claimsData }] = await Promise.all([
+    supabase
+      .from("cookbooks")
+      .select(
+        "id, name, description, is_public, created_by, profiles(name), cookbook_tags(tags(name)), cookbook_recipes(count)"
+      )
+      .eq("is_public", true)
+      .order("created_at", { ascending: false }),
+    supabase.auth.getClaims(),
+  ]);
 
   if (error) throw new Error(error.message);
+
+  const userId = claimsData?.claims?.sub ?? null;
 
   if (!cookbooks?.length) {
     return (
@@ -24,6 +30,28 @@ async function CookbookList() {
       </div>
     );
   }
+
+  // Batch-fetch follow counts + current user's follows
+  const cookbookIds = cookbooks.map((c) => c.id);
+  const [{ data: followCounts }, { data: userFollows }] = await Promise.all([
+    supabase
+      .from("cookbook_follows")
+      .select("cookbook_id")
+      .in("cookbook_id", cookbookIds),
+    userId
+      ? supabase
+          .from("cookbook_follows")
+          .select("cookbook_id")
+          .eq("user_id", userId)
+          .in("cookbook_id", cookbookIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  const countMap = new Map<string, number>();
+  for (const row of followCounts ?? []) {
+    countMap.set(row.cookbook_id, (countMap.get(row.cookbook_id) ?? 0) + 1);
+  }
+  const followedSet = new Set((userFollows ?? []).map((r) => r.cookbook_id));
 
   return (
     <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -48,10 +76,10 @@ async function CookbookList() {
               | { count: number }[]
               | null
           )?.[0]?.count ?? 0;
+        const isOwner = userId === cookbook.created_by;
 
         return (
-          <li key={cookbook.id}>
-            {/* No public single-cookbook view yet — links to dashboard view for now */}
+          <li key={cookbook.id} className="flex flex-col gap-1">
             <CookbookCard
               id={cookbook.id}
               name={cookbook.name}
@@ -61,6 +89,16 @@ async function CookbookList() {
               tags={tags}
               recipeCount={recipeCount}
             />
+            {userId && !isOwner && (
+              <div className="flex justify-end">
+                <FollowButton
+                  type="cookbook"
+                  targetId={cookbook.id}
+                  initialFollowing={followedSet.has(cookbook.id)}
+                  followerCount={countMap.get(cookbook.id) ?? 0}
+                />
+              </div>
+            )}
           </li>
         );
       })}

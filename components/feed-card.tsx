@@ -89,7 +89,7 @@ export function FeedCard({ event, userId, isBookmarked }: FeedCardProps) {
           </Link>
         ) : (
           <Link
-            href={`/dashboard/cookbooks/${event.cookbook_id}`}
+            href={`/cookbooks/${event.cookbook_id}`}
             className="font-display font-semibold text-lg text-foreground hover:text-accent transition-colors leading-snug"
           >
             {event.cookbook_name}

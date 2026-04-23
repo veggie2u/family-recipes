@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { RecipeDetail } from "@/components/recipe-detail";
 import { BackButton } from "@/components/back-button";
+import { BookmarkButton } from "@/components/bookmark-button";
 
 async function RecipeDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -30,6 +31,17 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
       Array.isArray(rt.tags) ? rt.tags.map((t) => t.name) : rt.tags ? [rt.tags.name] : []
   ) ?? [];
 
+  let isBookmarked = false;
+  if (user) {
+    const { data: bookmark } = await supabase
+      .from("recipe_bookmarks")
+      .select("recipe_id")
+      .eq("recipe_id", id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    isBookmarked = !!bookmark;
+  }
+
   return (
     <RecipeDetail
       title={recipe.title}
@@ -39,6 +51,9 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
       isOwner={isOwner}
       creatorName={creatorName}
       tags={tags}
+      actions={
+        user ? <BookmarkButton recipeId={id} initialBookmarked={isBookmarked} /> : undefined
+      }
     />
   );
 }

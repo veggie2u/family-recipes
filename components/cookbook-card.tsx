@@ -27,7 +27,7 @@ export function CookbookCard({
   const byline = isOwner ? "Your cookbook" : creatorName;
   return (
     <Link
-      href={`/dashboard/cookbooks/${id}`}
+      href={`/cookbooks/${id}`}
       className="group flex flex-col gap-2 rounded-lg border border-border bg-card p-5 hover:border-accent/50 hover:shadow-sm transition-all"
     >
       <div className="flex items-start justify-between gap-3">
