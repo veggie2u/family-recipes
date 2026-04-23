@@ -1,69 +1,66 @@
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
+import { FeedList } from "@/components/feed-list";
+import type { FeedEvent } from "@/app/(public)/feed/actions";
 
-const FILTER_LABELS: Record<string, string> = {
-  recipes: "Recipes",
-  cookbooks: "Cookbooks",
-  families: "Families",
-};
-
-const AUTH_FILTERS = ["all", "families", "following", "public"] as const;
-type AuthFilter = (typeof AUTH_FILTERS)[number];
-
-const AUTH_FILTER_LABELS: Record<AuthFilter, string> = {
-  all: "All",
-  families: "My Families",
-  following: "Following",
-  public: "Public",
-};
-
-async function FeedContent({
-  filter,
-}: {
-  filter: string | undefined;
-}) {
+async function FeedContent({ filter }: { filter: string | undefined }) {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
-  const isAuthenticated = !!claimsData?.claims;
+  const userId = claimsData?.claims?.sub ?? null;
+  const activeFilter = filter ?? "all";
 
-  const activeFilter = (filter ?? "all") as AuthFilter;
+  const { data: rawEvents, error } = await supabase.rpc("get_feed", {
+    p_user_id: userId,
+    p_cursor: new Date().toISOString(),
+    p_limit: 20,
+    p_filter: userId ? activeFilter : "all",
+  });
+  if (error) throw error;
+
+  const events = (rawEvents ?? []) as Omit<FeedEvent, "tags">[];
+
+  let eventsWithTags: FeedEvent[] = [];
+  if (events.length > 0) {
+    const recipeIds = events.map((e) => e.recipe_id);
+    const { data: tagRows } = await supabase
+      .from("recipe_tags")
+      .select("recipe_id, tags(name)")
+      .in("recipe_id", recipeIds);
+
+    const tagMap = new Map<string, string[]>();
+    for (const row of tagRows ?? []) {
+      const names =
+        (row.tags as unknown as { name: string }[])?.map((t) => t.name) ?? [];
+      tagMap.set(row.recipe_id, names);
+    }
+    eventsWithTags = events.map((e) => ({
+      ...e,
+      tags: tagMap.get(e.recipe_id) ?? [],
+    }));
+  }
+
+  const nextCursor =
+    events.length === 20
+      ? events[events.length - 1].event_created_at
+      : null;
+
+  let initialBookmarkedIds: string[] = [];
+  if (userId) {
+    const { data: bookmarks } = await supabase
+      .from("recipe_bookmarks")
+      .select("recipe_id")
+      .eq("user_id", userId);
+    initialBookmarkedIds = bookmarks?.map((b) => b.recipe_id) ?? [];
+  }
 
   return (
-    <div className="flex flex-col gap-6">
-      {isAuthenticated && (
-        <div className="flex items-center gap-2 border-b border-border pb-4">
-          {AUTH_FILTERS.map((f) => (
-            <a
-              key={f}
-              href={f === "all" ? "/feed" : `/feed?filter=${f}`}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                activeFilter === f
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              {AUTH_FILTER_LABELS[f]}
-            </a>
-          ))}
-        </div>
-      )}
-
-      <div className="flex flex-col items-center justify-center py-24 text-center gap-4 border border-dashed border-border rounded-lg">
-        <p className="text-muted-foreground text-lg">
-          {isAuthenticated
-            ? `Your personalized ${filter ? FILTER_LABELS[filter] ?? "feed" : "feed"} is coming soon.`
-            : "Public recipes, cookbooks, and families will appear here."}
-        </p>
-        {!isAuthenticated && (
-          <a
-            href="/auth/sign-up"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity text-sm"
-          >
-            Sign up to see your personalized feed
-          </a>
-        )}
-      </div>
-    </div>
+    <FeedList
+      initialEvents={eventsWithTags}
+      initialCursor={nextCursor}
+      filter={activeFilter}
+      userId={userId}
+      initialBookmarkedIds={initialBookmarkedIds}
+    />
   );
 }
 
@@ -85,7 +82,10 @@ export default function FeedPage({
         fallback={
           <div className="flex flex-col gap-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-24 rounded-lg border border-border bg-muted/30 animate-pulse" />
+              <div
+                key={i}
+                className="h-32 rounded-lg border border-border bg-muted/30 animate-pulse"
+              />
             ))}
           </div>
         }
