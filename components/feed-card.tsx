@@ -152,14 +152,14 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardPr
       <div className="flex flex-col gap-1">
         {event.recipe_id !== null ? (
           <Link
-            href={`/recipes/${event.recipe_id}`}
+            href={`/recipes/${event.recipe_id}?from=feed`}
             className="font-display font-semibold text-lg text-foreground hover:text-accent transition-colors leading-snug"
           >
             {event.recipe_title}
           </Link>
         ) : (
           <Link
-            href={`/cookbooks/${event.cookbook_id}`}
+            href={`/cookbooks/${event.cookbook_id}?from=feed`}
             className="font-display font-semibold text-lg text-foreground hover:text-accent transition-colors leading-snug"
           >
             {event.cookbook_name}

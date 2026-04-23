@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Globe, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface RecipeCardProps {
   id: string;
@@ -15,6 +16,12 @@ interface RecipeCardProps {
   /** Link destination. Defaults to /recipes/:id */
   href?: string;
   tags?: string[];
+  /** Extra classes merged onto the root Link element (e.g. "flex-1" for equal-height grids). */
+  className?: string;
+  /** Optional slot rendered inline on the right of the bottom row (e.g. BookmarkButton). */
+  bookmarkSlot?: React.ReactNode;
+  /** Optional slot rendered left of bookmarkSlot in the bottom row (e.g. remove button). */
+  removeSlot?: React.ReactNode;
 }
 
 export function RecipeCard({
@@ -26,13 +33,17 @@ export function RecipeCard({
   creatorName,
   href,
   tags = [],
+  className,
+  bookmarkSlot,
+  removeSlot,
 }: RecipeCardProps) {
   const byline = isOwner ? "Your recipe" : creatorName;
+  const hasFooter = byline || bookmarkSlot || removeSlot;
 
   return (
     <Link
       href={href ?? `/recipes/${id}`}
-      className="group flex flex-col gap-2 rounded-lg border border-border bg-card p-5 hover:border-accent/50 hover:shadow-sm transition-all"
+      className={cn("group flex flex-col gap-2 rounded-lg border border-border bg-card p-5 hover:border-accent/50 hover:shadow-sm transition-all", className)}
     >
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-display font-semibold text-lg text-foreground group-hover:text-accent transition-colors leading-snug">
@@ -72,8 +83,22 @@ export function RecipeCard({
           ))}
         </div>
       )}
-      {byline && (
-        <p className={`text-xs mt-auto pt-1 ${isOwner ? "text-accent/70" : "text-muted-foreground"}`}>{byline}</p>
+      {hasFooter && (
+        <div className="flex items-center justify-between mt-auto pt-1">
+          {byline ? (
+            <p className={`text-xs ${isOwner ? "text-accent/70" : "text-muted-foreground"}`}>
+              {byline}
+            </p>
+          ) : (
+            <span />
+          )}
+          {(removeSlot || bookmarkSlot) && (
+            <div className="flex items-center gap-1">
+              {removeSlot}
+              {bookmarkSlot}
+            </div>
+          )}
+        </div>
       )}
     </Link>
   );

@@ -147,23 +147,20 @@ async function BookmarksContent({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((recipe) => (
-            <div key={recipe.id} className="flex flex-col gap-1">
-              <RecipeCard
-                id={recipe.id}
-                title={recipe.title}
-                description={recipe.description}
-                isOwner={recipe.created_by === userId}
-                creatorName={
-                  (recipe.profiles as unknown as { name: string | null } | null)
-                    ?.name ?? undefined
-                }
-                tags={recipe.tags}
-                href={`/recipes/${recipe.id}`}
-              />
-              <div className="flex justify-end">
-                <BookmarkButton recipeId={recipe.id} initialBookmarked={true} />
-              </div>
-            </div>
+            <RecipeCard
+              key={recipe.id}
+              id={recipe.id}
+              title={recipe.title}
+              description={recipe.description}
+              isOwner={recipe.created_by === userId}
+              creatorName={
+                (recipe.profiles as unknown as { name: string | null } | null)
+                  ?.name ?? undefined
+              }
+              tags={recipe.tags}
+              href={`/recipes/${recipe.id}?from=bookmarks`}
+              bookmarkSlot={<BookmarkButton recipeId={recipe.id} initialBookmarked={true} />}
+            />
           ))}
         </div>
       )}

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -31,8 +33,16 @@ export function RemoveCookbookFromFamilyButton({ familyId, cookbookId }: Props) 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-destructive/40 text-destructive text-xs font-medium hover:bg-destructive/10 transition-colors">
-          Remove
+        <button
+          onClick={(e) => e.preventDefault()}
+          className={cn(
+            "flex items-center justify-center rounded p-1 transition-colors",
+            "text-muted-foreground hover:text-destructive",
+            isPending && "opacity-50 cursor-not-allowed"
+          )}
+          aria-label="Remove cookbook from family"
+        >
+          <Trash2 className="h-4 w-4" />
         </button>
       </DialogTrigger>
       <DialogContent>

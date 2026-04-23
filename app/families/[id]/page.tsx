@@ -4,9 +4,8 @@ import { Globe, Lock } from "lucide-react";
 import { Suspense } from "react";
 import { BackButton } from "@/components/back-button";
 import { FollowButton } from "@/components/follow-button";
-import { Badge } from "@/components/ui/badge";
 import { CookbookCard } from "@/components/cookbook-card";
-import { InviteForm } from "./invite-form";
+import { MembersCollapsible } from "./members-collapsible";
 import AddCookbookToFamilyPanel from "@/components/add-cookbook-to-family-panel";
 import { RemoveCookbookFromFamilyButton } from "@/components/remove-cookbook-from-family-button";
 import { cn } from "@/lib/utils";
@@ -144,43 +143,14 @@ async function FamilyDetailContent({
         )}
       </div>
 
-      {/* Members */}
-      <section className="flex flex-col gap-4">
-        <h2 className="font-semibold text-xl text-foreground">Members</h2>
-        {members.filter((m) => m.status === "active" || m.status === "invited").length === 0 ? (
-          <p className="text-muted-foreground">No members yet.</p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {members.map((member) => {
-              const displayName = member.profiles?.name ?? "Unknown";
-              return (
-                <li
-                  key={member.id}
-                  className="flex items-center justify-between gap-4 rounded-lg border border-border bg-card px-5 py-3"
-                >
-                  <span className="text-foreground font-medium">{displayName}</span>
-                  <div className="flex items-center gap-2">
-                    {member.role === "admin" && (
-                      <Badge variant="default" className="text-xs">Admin</Badge>
-                    )}
-                    {member.status === "invited" && (
-                      <Badge variant="outline" className="text-xs text-muted-foreground">Invited</Badge>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+      {/* Members (collapsible, collapsed by default) */}
+      <section>
+        <MembersCollapsible
+          members={members}
+          isActiveMember={isActiveMember}
+          familyId={id}
+        />
       </section>
-
-      {/* Invite form — active members only */}
-      {isActiveMember && (
-        <section className="flex flex-col gap-4">
-          <h2 className="font-semibold text-xl text-foreground">Invite Someone</h2>
-          <InviteForm familyId={id} />
-        </section>
-      )}
 
       {/* Cookbooks */}
       <section className="flex flex-col gap-4">
@@ -209,22 +179,22 @@ async function FamilyDetailContent({
                   Array.isArray(ct.tags) ? ct.tags.map((t) => t.name) : ct.tags ? [ct.tags.name] : []
               ) ?? [];
               return (
-                <div key={cookbook.id} className="flex flex-col gap-1">
-                  <CookbookCard
-                    id={cookbook.id}
-                    name={cookbook.name}
-                    description={cookbook.description}
-                    isPublic={cookbook.is_public}
-                    isOwner={cookbook.created_by === userId}
-                    recipeCount={(cookbook.cookbook_recipes as unknown as { count: number }[] | null)?.[0]?.count ?? 0}
-                    tags={tags}
-                  />
-                  {isActiveMember && (
-                    <div className="flex justify-end">
+                <CookbookCard
+                  key={cookbook.id}
+                  id={cookbook.id}
+                  name={cookbook.name}
+                  description={cookbook.description}
+                  isPublic={cookbook.is_public}
+                  isOwner={cookbook.created_by === userId}
+                  recipeCount={(cookbook.cookbook_recipes as unknown as { count: number }[] | null)?.[0]?.count ?? 0}
+                  tags={tags}
+                  href={`/cookbooks/${cookbook.id}?from=family`}
+                  removeSlot={
+                    isActiveMember ? (
                       <RemoveCookbookFromFamilyButton familyId={id} cookbookId={cookbook.id} />
-                    </div>
-                  )}
-                </div>
+                    ) : undefined
+                  }
+                />
               );
             })}
           </div>
