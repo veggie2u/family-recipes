@@ -20,8 +20,8 @@ Give authenticated users a personalized, scrollable feed of recipes from the com
 ### Cookbook follows
 Users can follow any public cookbook (similar to how they follow families). Following a cookbook surfaces new recipes added to it in the feed.
 
-### Recipe saves (bookmarks)
-Users can save/bookmark any recipe they can see. Saved recipes live in a dedicated `/dashboard/saved` page and optionally surface in feed ranking (a recipe you saved will re-surface when it gets new activity).
+### Recipe bookmarks
+Users can bookmark any recipe they can see. Bookmarked recipes live at `/bookmarks` and optionally surface in feed ranking (a recipe you bookmarked will re-surface when it gets new activity).
 
 ### Feed activity events
 Rather than polling raw tables, a `feed_events` table records discrete activity. This keeps feed queries fast and makes the ranking algorithm straightforward.
@@ -37,20 +37,20 @@ Rather than polling raw tables, a `feed_events` table records discrete activity.
 - Unique constraint on `(cookbook_id, user_id)`
 - RLS: users can only read/insert/delete their own rows; anyone can read follow counts
 
-#### `recipe_saves`
-- `id`, `recipe_id` (FK → recipes), `user_id` (FK → profiles), `saved_at`
+#### `recipe_bookmarks` *(implemented; originally spec'd as `recipe_saves`)*
+- `id`, `recipe_id` (FK → recipes), `user_id` (FK → profiles), `bookmarked_at`
 - Unique constraint on `(recipe_id, user_id)`
 - RLS: users can only read/insert/delete their own rows
 
-#### `feed_events`
-- `id`, `event_type` (`recipe_created` | `recipe_updated` | `recipe_added_to_family` | `recipe_added_to_cookbook`), `recipe_id` (FK → recipes), `actor_id` (FK → profiles), `family_id` (nullable FK → families), `cookbook_id` (nullable FK → cookbooks), `created_at`
-- Populated by Postgres triggers on `recipes`, `family_recipes`, and `cookbook_recipes`
-- RLS: readable by any authenticated user (recipe-level visibility is enforced in the feed query)
-- Index on `created_at DESC` for fast pagination
+#### `feed_events` *(implemented)*
+- `id`, `event_type` (`recipe_created` | `recipe_added_to_family` | `recipe_added_to_cookbook`), `recipe_id` (FK → recipes), `actor_id` (FK → profiles), `family_id` (nullable FK → families), `cookbook_id` (nullable FK → cookbooks), `created_at`
+- Populated by `SECURITY DEFINER` Postgres triggers on `recipes`, `family_recipes`, and `cookbook_recipes`
+- RLS: readable by any authenticated user (recipe-level visibility is enforced in `get_feed()`)
+- Indexes on `created_at DESC`, `recipe_id`, `actor_id`, `family_id`, `cookbook_id`
 
-#### `family_followers` (already planned in Phase 4)
+#### `family_followers` *(implemented)*
 - `id`, `family_id`, `user_id`, `followed_at`
-- Implement here if not done in Phase 4/5
+- Implemented as part of this phase (Stream A)
 
 ---
 
@@ -96,22 +96,22 @@ A separate query, independent of the user's relationships:
 
 ### Feed UI
 
-#### Feed page — `/dashboard/feed`
+#### Feed page — `/feed`
 
 - Full-width card list, replacing or supplementing the current dashboard home
-- Source filter tabs at the top:
+- Source filter controls at the top:
   - **All** — full ranked feed
   - **My Families** — only events from families the user is a member of
   - **Following** — events from followed families and cookbooks
-  - **Discover** — public recipes, chronological
+  - **Public** — public recipes, chronological
 - Each card shows:
   - Recipe title, description excerpt, cover image (if available)
   - Source context ("Added to _Smith Family_ by _Grandma Rose_" or "Added to _Summer Grilling_ cookbook")
   - Relative timestamp ("3 hours ago")
-  - Save/bookmark button (toggles `recipe_saves`)
+  - Bookmark button (toggles `recipe_bookmarks`)
   - Tags
 - Infinite scroll via `IntersectionObserver`; loads next cursor on reaching the bottom sentinel
-- Empty state per tab with contextual CTAs (e.g., "Follow a family to see their recipes here")
+- Empty state per filter with contextual CTAs (e.g., "Follow a family to see their recipes here")
 
 #### Follow/save UX
 
@@ -119,7 +119,7 @@ A separate query, independent of the user's relationships:
 - **Follow cookbook**: Follow button on public cookbook detail page and cookbook cards; shows follower count
 - **Save recipe**: Bookmark icon on recipe cards everywhere in the app (feed, cookbook detail, family detail, recipe detail); toggled state persists instantly (optimistic update)
 
-#### Saved recipes page — `/dashboard/saved`
+#### Bookmarks page — `/bookmarks`
 
 - Grid of bookmarked recipes, most recently saved first
 - Search/filter by tag
@@ -131,7 +131,7 @@ A separate query, independent of the user's relationships:
 
 - Replace the current recipe list on `/dashboard` with a prominent "Go to your Feed" card/CTA
 - Keep "My Recipes", "My Cookbooks", and "My Families" sections on the dashboard as management surfaces (not discovery)
-- Surface the feed as the primary destination after login (consider making `/dashboard/feed` the post-login redirect once Phase 6 ships)
+- Surface the feed as the primary destination after login (post-login redirect → `/feed` once Phase 6 ships)
 
 ---
 
@@ -139,7 +139,7 @@ A separate query, independent of the user's relationships:
 
 - Should the feed tab be the new default page after login, or remain secondary to the dashboard?
 - Should we show "recipe updated" events, or only "recipe created / added" events? (Updates can be noisy.)
-- Should saved recipes count toward the feed score, or only appear on the `/dashboard/saved` page?
+- Should bookmarked recipes count toward the feed score, or only appear on the `/bookmarks` page?
 - Should cookbook follows require the cookbook to be public, or can a family member follow a private family cookbook?
 - Should there be a per-user setting to opt out of the algorithmic ranking and always see chronological?
 - Should a user's own activity (recipes they created) appear in their own feed?
@@ -163,26 +163,26 @@ A separate query, independent of the user's relationships:
 
 ## Progress
 
-### ⬜ Data model — not yet implemented
-- `family_followers` table (if not completed in Phase 4/5)
-- `cookbook_follows` table
-- `recipe_saves` table
-- `feed_events` table + triggers on `recipes`, `family_recipes`, `cookbook_recipes`
-- `get_feed()` Postgres function
+### ✅ Data model — complete
+- `family_followers` table + RLS + indexes
+- `cookbook_follows` table + RLS + indexes
+- `recipe_bookmarks` table + RLS + index on `(user_id, bookmarked_at DESC)`
+- `feed_events` table + indexes + RLS + triggers on `recipes`, `family_recipes`, `cookbook_recipes`
+- `get_feed(p_user_id, p_cursor, p_limit, p_filter)` Postgres function (SECURITY DEFINER, `SET search_path = ''`)
 
 ### ⬜ Feed page — not yet implemented
-- `/dashboard/feed` route with filter tabs
+- `/feed` route with source filters (All / My Families / Following / Public)
 - Feed card component
 - Infinite scroll with `IntersectionObserver` + cursor pagination
-- Empty states per tab
+- Empty states per filter
 
 ### ⬜ Cookbook follow UX — not yet implemented
 - Follow/unfollow button on cookbook detail and cards
 - Follower count display
 
-### ⬜ Recipe save (bookmark) UX — not yet implemented
-- Save/unsave button on recipe cards and detail pages
-- `/dashboard/saved` page
+### ⬜ Recipe bookmark UX — not yet implemented
+- Bookmark button on recipe cards and detail pages
+- `/bookmarks` page
 
 ### ⬜ Dashboard integration — not yet implemented
 - Feed CTA on dashboard home
