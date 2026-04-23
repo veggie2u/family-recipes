@@ -1,0 +1,191 @@
+# Team Workstreams — Phase 6 + Route Refactor
+
+## Overview
+
+The remaining implementation work is split across four parallel streams. Streams A and B can begin immediately. Streams C and D begin once their dependencies are merged.
+
+---
+
+## Dependency order
+
+```
+Stream A (DB)  ──────────────────────────────────┐
+                                                  ├──► Stream C (Feed UI)
+Stream B (Routing)  ──────────────────────────────┘
+
+Stream A (DB)  ──────────────────────────────────► Stream D (Social UI)
+```
+
+---
+
+## Stream A — Database: Phase 6 Data Model
+
+**Start:** Immediately  
+**Unblocks:** Streams C and D  
+**Reference docs:** `phase-6-feed.md`, `phase-4-families.md`
+
+### Deliverables
+
+#### `family_followers`
+- `id uuid PK`, `family_id uuid → families`, `user_id uuid → profiles`, `followed_at timestamptz`
+- Unique constraint on `(family_id, user_id)`
+- RLS: authenticated users can insert/delete their own rows; anyone can read follower counts
+
+#### `cookbook_follows`
+- `id uuid PK`, `cookbook_id uuid → cookbooks`, `user_id uuid → profiles`, `followed_at timestamptz`
+- Unique constraint on `(cookbook_id, user_id)`
+- RLS: authenticated users can insert/delete their own rows; anyone can read follow counts
+
+#### `recipe_saves`
+- `id uuid PK`, `recipe_id uuid → recipes`, `user_id uuid → profiles`, `saved_at timestamptz`
+- Unique constraint on `(recipe_id, user_id)`
+- RLS: authenticated users can insert/delete/select their own rows only
+
+#### `feed_events`
+- `id uuid PK`, `event_type text` (`recipe_created` | `recipe_updated` | `recipe_added_to_family` | `recipe_added_to_cookbook`), `recipe_id uuid → recipes`, `actor_id uuid → profiles`, `family_id uuid → families (nullable)`, `cookbook_id uuid → cookbooks (nullable)`, `created_at timestamptz`
+- Postgres triggers populate this table on INSERT into `recipes`, `family_recipes`, `cookbook_recipes`
+- Index on `created_at DESC` for pagination
+- RLS: readable by any authenticated user (recipe visibility enforced in `get_feed()`)
+
+#### `get_feed()` Postgres function
+- Signature: `get_feed(p_user_id uuid, p_cursor timestamptz, p_limit int)`
+- Returns ranked `feed_events` using:
+  - **Relationship weight (W):** member of source family → 4, following source family → 3, following source cookbook → 2, saved the recipe → 1, no relationship → 0
+  - **Recency decay (D):** `1 / (1 + hours_since_event / 48)`
+  - **Score:** `W + D`, sorted `score DESC, created_at DESC`
+- Cursor-based pagination on `(score, created_at)`
+
+### Checklist
+- [ ] `family_followers` migration + RLS
+- [ ] `cookbook_follows` migration + RLS
+- [ ] `recipe_saves` migration + RLS
+- [ ] `feed_events` migration + triggers + indexes + RLS
+- [ ] `get_feed()` function
+- [ ] Run `supabase-get_advisors` (security + performance) after each migration
+
+---
+
+## Stream B — Routing: Route Architecture Refactor
+
+**Start:** Immediately  
+**Unblocks:** Stream C  
+**Reference docs:** `requirements.md` (UX / Navigation section), `permissions.md`
+
+### Deliverables
+
+- **`/feed`** — new top-level route accessible to both personas (no `/dashboard/` prefix)
+  - `app/(public)/feed/page.tsx` — shell; unauthenticated users see public content
+- **`/bookmarks`** — protected route (authenticated only)
+  - `app/(auth)/bookmarks/page.tsx` — shell; redirect to login if unauthenticated
+- **`/profile/[userId]`** — public user profile page
+  - `app/(public)/profile/[userId]/page.tsx`
+- **Middleware update** — add `/bookmarks` to the list of protected routes
+- **Post-login redirect** — change from `/dashboard` → `/feed`
+- **Nav link updates** — in the dashboard layout, update "Recipes", "Cookbooks", "Families" nav items to link to `/feed` with the appropriate filter query param (e.g. `?filter=recipes`), not standalone listing pages
+- **Remove or alias `/dashboard/families`** — keep existing pages working during transition; `/families/[id]` can alias `/dashboard/families/[id]` via a redirect if needed
+
+### Key files
+- `app/(public)/feed/page.tsx` (new)
+- `app/(auth)/bookmarks/page.tsx` (new)
+- `app/(public)/profile/[userId]/page.tsx` (new)
+- `middleware.ts`
+- `app/dashboard/layout.tsx` (nav + post-login redirect)
+
+### Checklist
+- [ ] `/feed` route (shell)
+- [ ] `/bookmarks` route (protected shell)
+- [ ] `/profile/[userId]` route (public shell)
+- [ ] Middleware updated for new protected routes
+- [ ] Post-login redirect changed to `/feed`
+- [ ] Nav links updated to feed-filter model
+
+---
+
+## Stream C — Feed UI: /feed Page
+
+**Start:** After Streams A and B are merged  
+**Depends on:** Stream A (`feed_events`, `get_feed()`), Stream B (`/feed` route exists)  
+**Reference docs:** `phase-6-feed.md`, `requirements.md` (Feed section)
+
+### Deliverables
+
+- **Filter controls** — source selector at the top of the feed
+  - Options for authenticated users: All / My Families / Following / Public
+  - Unauthenticated users: no filter controls (public content only)
+- **`FeedCard` component** — displays:
+  - Recipe title, description excerpt, cover image (if available)
+  - Source context ("Added to *Smith Family* by *Grandma Rose*")
+  - Relative timestamp ("3 hours ago")
+  - Bookmark button (delegates to Stream D's `BookmarkButton` component)
+  - Tags
+- **Infinite scroll** — `IntersectionObserver` triggers next-page fetch; cursor passed from last card's `(score, created_at)`
+- **Server action** — wraps `get_feed()` call; returns paginated feed events with recipe join data
+- **Empty states** — per filter, with contextual CTAs (e.g. "Follow a family to see their recipes here")
+- **Loading skeleton** — shown while next page loads
+
+### Key files
+- `app/(public)/feed/page.tsx`
+- `components/feed-card.tsx` (new)
+- `app/(public)/feed/actions.ts` (new server action)
+
+### Checklist
+- [ ] Filter control component
+- [ ] `FeedCard` component
+- [ ] Server action for `get_feed()`
+- [ ] Infinite scroll with IntersectionObserver
+- [ ] Unauthenticated public view
+- [ ] Empty states per filter
+- [ ] Loading skeleton
+
+---
+
+## Stream D — Social Features: Following + Bookmarks UI
+
+**Start:** After Stream A is merged (can use mock server actions before A lands)  
+**Depends on:** Stream A (`family_followers`, `cookbook_follows`, `recipe_saves` tables)  
+**Reference docs:** `requirements.md` (Following, Bookmarks sections), `phase-6-feed.md`
+
+### Deliverables
+
+#### Following
+- **`FollowButton` component** (`components/follow-button.tsx`)
+  - Props: `type: 'family' | 'cookbook'`, `targetId`, `initialFollowing`, `followerCount`
+  - Optimistic toggle with rollback on error
+  - Used on family detail page, cookbook detail page, and cookbook cards
+- **Server actions** — `followFamily`, `unfollowFamily`, `followCookbook`, `unfollowCookbook` in relevant `actions.ts` files
+- **Follower count** — displayed on family and cookbook detail pages + cookbook cards
+
+#### Bookmarks
+- **`BookmarkButton` component** (`components/bookmark-button.tsx`)
+  - Optimistic toggle; shows filled/outline bookmark icon
+  - Used on: feed cards, recipe cards, recipe detail page, cookbook detail page (per-recipe), family detail page (per-recipe)
+- **Server actions** — `bookmarkRecipe`, `removeBookmark` in `app/(auth)/bookmarks/actions.ts`
+- **`/bookmarks` page** — grid of saved recipes, most recently saved first; filter by tag; remove bookmark button per card
+
+### Key files
+- `components/follow-button.tsx` (new)
+- `components/bookmark-button.tsx` (new)
+- `app/(auth)/bookmarks/page.tsx`
+- `app/(auth)/bookmarks/actions.ts` (new)
+- `app/dashboard/families/[id]/page.tsx` (add FollowButton)
+- `app/dashboard/cookbooks/[id]/page.tsx` (add FollowButton + per-recipe BookmarkButton)
+
+### Checklist
+- [ ] `FollowButton` component + server actions (family)
+- [ ] `FollowButton` component + server actions (cookbook)
+- [ ] Follower count on family + cookbook pages
+- [ ] `BookmarkButton` component + server actions
+- [ ] BookmarkButton on feed cards (coordinate with Stream C)
+- [ ] BookmarkButton on recipe detail, cookbook detail, family detail
+- [ ] `/bookmarks` page with tag filter
+- [ ] Remove bookmark from `/bookmarks` page
+
+---
+
+## Coordination notes
+
+- Stream D's `BookmarkButton` will be used inside Stream C's `FeedCard`. Coordinate the component interface early so Stream C can import it as soon as Stream D ships it.
+- Stream B creates the `/bookmarks` page shell; Stream D fills in the content.
+- All new forms must use **react-hook-form + shadcn Form** per Frontend Standards in `requirements.md`.
+- All async actions must show feedback via **sonner** toasts (`toast.success` / `toast.error`).
+- Use `(select auth.uid())` in all new RLS policies (not bare `auth.uid()`) per the performance fix already applied to existing tables.
