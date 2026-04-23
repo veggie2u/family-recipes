@@ -2,20 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { updateCookbook } from "../../actions";
 import { CookbookForm } from "../../cookbook-form";
-import Link from "next/link";
 import { Suspense } from "react";
-
-async function BackLink({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  return (
-    <Link
-      href={`/dashboard/cookbooks/${id}`}
-      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-    >
-      ← Back to cookbook
-    </Link>
-  );
-}
+import { BackButton } from "@/components/back-button";
 
 async function EditCookbookForm({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -74,9 +62,7 @@ export default function EditCookbookPage({
   return (
     <div className="max-w-2xl">
       <div className="mb-8">
-        <Suspense>
-          <BackLink params={params} />
-        </Suspense>
+        <BackButton label="← Back to cookbook" />
         <h1 className="font-display text-3xl font-bold text-foreground mt-3">
           Edit Cookbook
         </h1>

@@ -170,28 +170,34 @@ A separate query, independent of the user's relationships:
 - `get_feed(p_user_id, p_cursor, p_limit, p_filter)` Postgres function (SECURITY DEFINER, `SET search_path = ''`)
 
 ### ✅ Route infrastructure — implemented (Stream B)
-- `/feed` route shell at `app/(public)/feed/page.tsx`
-  - Authenticated: filter tabs (All / My Families / Following / Public) + personalized feed placeholder
-  - Unauthenticated: public feed placeholder + sign-up CTA
+- `/feed` route at `app/(public)/feed/page.tsx` — fully implemented (Stream C)
 - `/bookmarks` protected route shell at `app/(auth)/bookmarks/page.tsx`
 - `/profile/[userId]` public route shell at `app/(public)/profile/[userId]/page.tsx`
 - `AppNav` shared nav component with feed filter links
 - Post-login redirect → `/feed`
 - Proxy allows `/feed` and `/profile` for unauthenticated users
 
-### ⬜ Feed page content — not yet implemented (Stream C)
-- Feed card component
-- Server action wrapping `get_feed()`
-- Infinite scroll with `IntersectionObserver` + cursor pagination
-- Empty states per filter
+### ✅ Feed page content — complete (Stream C)
+- `app/(public)/feed/actions.ts` — `getFeed()` server action wrapping `get_feed()` RPC + batch tag query; exports `FeedEvent` type
+- `components/feed-card.tsx` — card with source context, title link, description, tags, `date-fns` relative timestamp, `BookmarkButton`
+- `components/feed-list.tsx` — `"use client"` infinite scroll via `IntersectionObserver`, filter tabs (auth only), per-filter empty states, loading skeletons
+- `app/(public)/feed/page.tsx` — SSR initial data (RPC + tags + bookmarks), auth-gated Create dropdown in header
+- `components/create-dropdown.tsx` — Create button (Recipe / Cookbook / Family) shown to authenticated users
+- `components/back-button.tsx` — `router.back()` component used on all detail/edit/new pages app-wide
+- **DB:** `backfill_feed_events` migration applied — 50 events seeded from existing data
+
+### ✅ Bookmark actions — complete (Stream C)
+- `app/(auth)/bookmarks/actions.ts` — `bookmarkRecipe`, `removeBookmark` server actions
+- `components/bookmark-button.tsx` — optimistic toggle, sonner error feedback; used in feed cards
 
 ### ⬜ Cookbook follow UX — not yet implemented
 - Follow/unfollow button on cookbook detail and cards
 - Follower count display
 
-### ⬜ Recipe bookmark UX — not yet implemented
-- Bookmark button on recipe cards and detail pages
-- `/bookmarks` page content (shell exists)
+### ⬜ Recipe bookmark UX — partially complete
+- ✅ Bookmark button on feed cards
+- [ ] BookmarkButton on recipe detail, cookbook detail, family detail pages
+- [ ] `/bookmarks` page content (shell exists at `app/(auth)/bookmarks/page.tsx`)
 
 ### ⬜ Dashboard integration — not yet implemented
 - Feed CTA on dashboard home

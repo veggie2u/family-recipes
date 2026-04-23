@@ -279,6 +279,8 @@ All three are `SECURITY DEFINER`, `SET search_path = ''` to safely write into `f
 | `trg_feed_event_recipe_added_to_family` | `family_recipes` | AFTER INSERT | `recipe_added_to_family` |
 | `trg_feed_event_recipe_added_to_cookbook` | `cookbook_recipes` | AFTER INSERT | `recipe_added_to_cookbook` |
 
+> **Note:** A one-time `backfill_feed_events` migration was applied to seed `feed_events` for all data that existed before these triggers were created (29 `recipe_created`, 20 `recipe_added_to_cookbook`, 1 `recipe_added_to_family`).
+
 ## Future Schema (not yet applied)
 
 ### `family_pending_email_invites`

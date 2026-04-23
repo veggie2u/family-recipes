@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CookbookCard } from "@/components/cookbook-card";
 import { BookOpen, PlusIcon } from "lucide-react";
 import Link from "next/link";
+import { BackButton } from "@/components/back-button";
 import { Suspense } from "react";
 
 async function CookbookList() {
@@ -73,12 +74,7 @@ export default function AllCookbooksPage() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div>
-          <Link
-            href="/dashboard"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ← Back to my cookbooks
-          </Link>
+          <BackButton label="← Back to my cookbooks" />
           <h1 className="font-display text-3xl font-bold text-foreground mt-3">
             All Cookbooks
           </h1>

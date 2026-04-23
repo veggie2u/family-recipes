@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { Globe, Lock } from "lucide-react";
 import { Suspense } from "react";
+import { BackButton } from "@/components/back-button";
 import { Badge } from "@/components/ui/badge";
 import { CookbookCard } from "@/components/cookbook-card";
 import { cn } from "@/lib/utils";
@@ -231,12 +232,7 @@ export default function FamilyDetailPage({
   return (
     <div className="max-w-4xl">
       <div className="mb-6">
-        <Link
-          href="/dashboard/families"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          ← Back to families
-        </Link>
+        <BackButton label="← Back to families" />
       </div>
       <Suspense
         fallback={

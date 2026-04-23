@@ -5,6 +5,7 @@ import { RecipeSearchInput } from "@/components/recipe-search-input";
 import { BookOpen, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { BackButton } from "@/components/back-button";
 
 async function RecipeList({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const supabase = await createClient();
@@ -125,12 +126,7 @@ export default function AllRecipesPage({
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div>
-          <Link
-            href="/dashboard"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ← Back to dashboard
-          </Link>
+          <BackButton label="← Back to dashboard" />
           <h1 className="font-display text-3xl font-bold text-foreground mt-3">
             My Recipes
           </h1>

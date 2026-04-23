@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Globe, Lock, Users, BookOpen } from "lucide-react";
 import { Suspense } from "react";
+import { BackButton } from "@/components/back-button";
 import { cn } from "@/lib/utils";
 
 async function FamilyPublicContent({
@@ -112,12 +113,7 @@ export default function PublicFamilyDetailPage({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <Link
-        href="/families"
-        className="text-sm text-muted-foreground hover:text-foreground transition-colors self-start"
-      >
-        ← Back to families
-      </Link>
+      <BackButton label="← Back to families" className="self-start" />
 
       <Suspense
         fallback={

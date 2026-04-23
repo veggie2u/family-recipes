@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { FamilyCard } from "@/components/family-card";
 import { Users, PlusIcon } from "lucide-react";
 import Link from "next/link";
+import { BackButton } from "@/components/back-button";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { acceptInvitation, declineInvitation } from "./actions";
@@ -137,12 +138,7 @@ async function PendingInvitations() {
 export default function FamiliesPage() {
   return (
     <div className="flex flex-col gap-10">
-      <Link
-        href="/dashboard"
-        className="text-sm text-muted-foreground hover:text-foreground transition-colors self-start"
-      >
-        ← Back to dashboard
-      </Link>
+      <BackButton label="← Back to dashboard" className="self-start" />
 
       {/* My Families */}
       <div className="flex flex-col gap-6">

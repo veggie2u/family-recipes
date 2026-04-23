@@ -57,9 +57,12 @@ export async function getFeed({
 
   const tagMap = new Map<string, string[]>();
   for (const row of tagRows ?? []) {
-    const names =
-      (row.tags as unknown as { name: string }[])?.map((t) => t.name) ?? [];
-    tagMap.set(row.recipe_id, names);
+    const tagName = (row.tags as unknown as { name: string } | null)?.name;
+    if (tagName) {
+      const existing = tagMap.get(row.recipe_id) ?? [];
+      existing.push(tagName);
+      tagMap.set(row.recipe_id, existing);
+    }
   }
 
   const eventsWithTags: FeedEvent[] = events.map((e) => ({
