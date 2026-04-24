@@ -25,19 +25,21 @@ interface ReactionButtonProps {
 
 const REACTION_CONFIG: Record<
   ReactionType,
-  { emoji: string; label: string; tooltip: string; activeClass: string }
+  { emoji: string; label: string; tooltip: string; activeClass: string; activeBgClass: string }
 > = {
   chefs_kiss: {
     emoji: "👨‍🍳",
     label: "Chef's kiss reaction",
     tooltip: "Chef's kiss",
-    activeClass: "text-amber-500",
+    activeClass: "text-primary border-primary font-medium",
+    activeBgClass: "bg-primary/10",
   },
   made_it: {
     emoji: "🍽️",
     label: "Made it reaction",
     tooltip: "I made this",
-    activeClass: "text-emerald-600",
+    activeClass: "text-secondary border-secondary font-medium",
+    activeBgClass: "bg-secondary/10",
   },
 };
 
@@ -54,7 +56,7 @@ export function ReactionButton({
   const [count, setCount] = useState(initialCount);
   const [isPending, setIsPending] = useState(false);
 
-  const { emoji, label, tooltip, activeClass } = REACTION_CONFIG[reactionType];
+  const { emoji, label, tooltip, activeClass, activeBgClass } = REACTION_CONFIG[reactionType];
 
   async function handleClick(e: React.MouseEvent) {
     e.preventDefault();
@@ -98,12 +100,14 @@ export function ReactionButton({
           aria-pressed={active}
           className={cn(
             "flex items-center gap-1.5 transition-colors",
-            active ? cn("font-medium", activeClass) : "text-muted-foreground",
+            className,
+            active
+              ? cn(activeClass, activeBgClass)
+              : "text-muted-foreground",
             isPending && "opacity-50 cursor-not-allowed",
-            className
           )}
         >
-          <span>{emoji}</span>
+          <span className="[filter:drop-shadow(0_0_1px_rgba(0,0,0,0.35))]">{emoji}</span>
           <span className="text-xs tabular-nums">{count}</span>
         </button>
       </TooltipTrigger>

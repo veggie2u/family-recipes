@@ -15,6 +15,8 @@ interface RecipeDetailProps {
   tags?: string[];
   /** Optional action buttons (e.g. Edit / Delete) rendered in the header. */
   actions?: React.ReactNode;
+  /** Optional reaction buttons rendered at the bottom of the article. */
+  reactions?: React.ReactNode;
 }
 
 export function RecipeDetail({
@@ -27,6 +29,7 @@ export function RecipeDetail({
   creatorName,
   tags = [],
   actions,
+  reactions,
 }: RecipeDetailProps) {
   const byline = isOwner ? "Your recipe" : creatorName;
 
@@ -92,6 +95,10 @@ export function RecipeDetail({
             {instructions}
           </div>
         </section>
+      )}
+
+      {reactions && (
+        <div className="flex items-center gap-3">{reactions}</div>
       )}
     </article>
   );

@@ -136,30 +136,32 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
               className="border border-border hover:bg-muted hover:text-foreground"
             />
           )}
-          {userId && (
-            <>
-              <ReactionButton
-                entityType="recipe"
-                entityId={id}
-                reactionType="chefs_kiss"
-                initialActive={reactionData.user_chefs_kiss}
-                initialCount={reactionData.chefs_kiss_count}
-                userId={userId}
-                className="border border-border hover:bg-muted p-1.5 rounded"
-              />
-              <ReactionButton
-                entityType="recipe"
-                entityId={id}
-                reactionType="made_it"
-                initialActive={reactionData.user_made_it}
-                initialCount={reactionData.made_it_count}
-                userId={userId}
-                className="border border-border hover:bg-muted p-1.5 rounded"
-              />
-            </>
-          )}
           {isOwner && <RecipeActionsMenu recipeId={id} />}
         </>
+      }
+      reactions={
+        userId ? (
+          <>
+            <ReactionButton
+              entityType="recipe"
+              entityId={id}
+              reactionType="chefs_kiss"
+              initialActive={reactionData.user_chefs_kiss}
+              initialCount={reactionData.chefs_kiss_count}
+              userId={userId}
+              className="border border-border hover:bg-muted p-1.5 rounded"
+            />
+            <ReactionButton
+              entityType="recipe"
+              entityId={id}
+              reactionType="made_it"
+              initialActive={reactionData.user_made_it}
+              initialCount={reactionData.made_it_count}
+              userId={userId}
+              className="border border-border hover:bg-muted p-1.5 rounded"
+            />
+          </>
+        ) : null
       }
     />
   );
