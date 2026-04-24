@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +18,7 @@ interface BackButtonProps {
   className?: string;
 }
 
-export function BackButton({ label = "← Back", className }: BackButtonProps) {
+function BackButtonInner({ label = "← Back", className }: BackButtonProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
@@ -35,5 +36,24 @@ export function BackButton({ label = "← Back", className }: BackButtonProps) {
     >
       {displayLabel}
     </button>
+  );
+}
+
+export function BackButton({ label = "← Back", className }: BackButtonProps) {
+  return (
+    <Suspense
+      fallback={
+        <button
+          className={cn(
+            "self-start text-sm text-muted-foreground hover:text-foreground transition-colors",
+            className
+          )}
+        >
+          {label}
+        </button>
+      }
+    >
+      <BackButtonInner label={label} className={className} />
+    </Suspense>
   );
 }

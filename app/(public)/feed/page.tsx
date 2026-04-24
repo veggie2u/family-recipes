@@ -10,16 +10,9 @@ async function FeedContent({ filter }: { filter: string | undefined }) {
   const userId = claimsData?.claims?.sub ?? null;
   const activeFilter = filter ?? "all";
 
-  const { events, nextCursor, reactionMap } = await getFeed({ filter: activeFilter });
-
-  let initialBookmarkedIds: string[] = [];
-  if (userId) {
-    const { data: bookmarks } = await supabase
-      .from("recipe_bookmarks")
-      .select("recipe_id")
-      .eq("user_id", userId);
-    initialBookmarkedIds = bookmarks?.map((b) => b.recipe_id) ?? [];
-  }
+  const { events, nextCursor, reactionMap, initialBookmarkedIds } = await getFeed({
+    filter: activeFilter,
+  });
 
   return (
     <FeedList

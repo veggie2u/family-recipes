@@ -26,6 +26,7 @@ export type FeedEvent = {
   event_created_at: string;
   score: number;
   tags: string[];
+  bookmark_count: number;
 };
 
 export type EventReactionData = {
@@ -45,6 +46,7 @@ export async function getFeed({
   events: FeedEvent[];
   nextCursor: string | null;
   reactionMap: Record<string, EventReactionData>;
+  initialBookmarkedIds: string[];
 }> {
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
@@ -59,11 +61,39 @@ export async function getFeed({
 
   if (error) throw error;
 
-  const events = (rawEvents ?? []) as FeedEvent[];
+  const baseEvents = (rawEvents ?? []) as Omit<FeedEvent, "bookmark_count">[];
+  if (baseEvents.length === 0) return { events: [], nextCursor: null, reactionMap: {}, initialBookmarkedIds: [] };
+
+  // Batch-fetch bookmark rows (count + user state in one query)
+  const recipeIds = baseEvents
+    .map((e) => e.recipe_id)
+    .filter((id): id is string => id !== null);
+
+  const bookmarkCountMap = new Map<string, number>();
+  let initialBookmarkedIds: string[] = [];
+  if (recipeIds.length > 0) {
+    const { data: bookmarkRows } = await supabase
+      .from("recipe_bookmarks")
+      .select("recipe_id, user_id")
+      .in("recipe_id", recipeIds);
+    for (const row of bookmarkRows ?? []) {
+      bookmarkCountMap.set(row.recipe_id, (bookmarkCountMap.get(row.recipe_id) ?? 0) + 1);
+    }
+    if (userId) {
+      initialBookmarkedIds = (bookmarkRows ?? [])
+        .filter((r) => r.user_id === userId)
+        .map((r) => r.recipe_id);
+    }
+  }
+
+  const events: FeedEvent[] = baseEvents.map((e) => ({
+    ...e,
+    bookmark_count: e.recipe_id !== null ? (bookmarkCountMap.get(e.recipe_id) ?? 0) : 0,
+  }));
+
   const nextCursor = events.length === 20 ? events[events.length - 1].event_created_at : null;
 
   // Batch-fetch reaction rows for all events
-  const recipeIds = events.map((e) => e.recipe_id).filter(Boolean) as string[];
   const cookbookIds = events
     .filter((e) => !e.recipe_id && e.cookbook_id)
     .map((e) => e.cookbook_id) as string[];
@@ -113,5 +143,5 @@ export async function getFeed({
     }
   }
 
-  return { events, nextCursor, reactionMap };
+  return { events, nextCursor, reactionMap, initialBookmarkedIds };
 }

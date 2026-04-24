@@ -70,21 +70,31 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
   let isBookmarked = false;
   let eligibleCookbooks: { id: string; name: string }[] = [];
 
-  // Fetch reaction data in parallel with the bookmark/cookbook queries
+  // Fetch bookmark count, user state, and reaction data all in parallel
   const reactionDataPromise = getRecipeReactionData(id, userId);
+  const [bookmarkCountResult, ...userQueryResults] = await Promise.all([
+    supabase
+      .from("recipe_bookmarks")
+      .select("*", { count: "exact", head: true })
+      .eq("recipe_id", id),
+    userId
+      ? supabase
+          .from("recipe_bookmarks")
+          .select("recipe_id")
+          .eq("recipe_id", id)
+          .eq("user_id", userId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    isOwner && userId
+      ? supabase.from("cookbook_recipes").select("cookbook_id").eq("recipe_id", id)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  const bookmarkCount = bookmarkCountResult.count ?? 0;
 
   if (userId) {
-    const [bookmarkResult, alreadyInResult] = await Promise.all([
-      supabase
-        .from("recipe_bookmarks")
-        .select("recipe_id")
-        .eq("recipe_id", id)
-        .eq("user_id", userId)
-        .maybeSingle(),
-      isOwner
-        ? supabase.from("cookbook_recipes").select("cookbook_id").eq("recipe_id", id)
-        : Promise.resolve({ data: [] }),
-    ]);
+    const bookmarkResult = userQueryResults[0] as { data: { recipe_id: string } | null };
+    const alreadyInResult = userQueryResults[1] as { data: { cookbook_id: string }[] | null };
     isBookmarked = !!bookmarkResult.data;
 
     if (isOwner) {
@@ -122,7 +132,8 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
             <BookmarkButton
               recipeId={id}
               initialBookmarked={isBookmarked}
-              className="border border-border hover:bg-muted hover:text-foreground p-1.5"
+              initialBookmarkCount={bookmarkCount}
+              className="border border-border hover:bg-muted hover:text-foreground"
             />
           )}
           {userId && (
