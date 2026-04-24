@@ -88,6 +88,12 @@ async function FamilyDetailContent({
     .flat()
     .filter((c): c is NonNullable<typeof c> => c != null) as unknown as CookbookRow[];
 
+  // Hide private cookbooks from unauthenticated visitors
+  const visibleCookbooks = userId
+    ? familyCookbooks
+    : familyCookbooks.filter((c) => c.is_public);
+  const hiddenPrivateCount = familyCookbooks.length - visibleCookbooks.length;
+
   const cookbookIdsInFamily = familyCookbooks.map((c) => c.id);
 
   let allUserCookbooks: { id: string; name: string; description: string | null }[] = [];
@@ -149,6 +155,7 @@ async function FamilyDetailContent({
           members={members}
           isActiveMember={isActiveMember}
           familyId={id}
+          isAuthenticated={userId !== null}
         />
       </section>
 
@@ -164,7 +171,7 @@ async function FamilyDetailContent({
             />
           )}
         </div>
-        {familyCookbooks.length === 0 ? (
+        {visibleCookbooks.length === 0 && hiddenPrivateCount === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center gap-3 border border-dashed border-border rounded-lg">
             <p className="text-muted-foreground">
               No cookbooks in this family yet.
@@ -172,32 +179,40 @@ async function FamilyDetailContent({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {familyCookbooks.map((cookbook) => {
-              const tags = cookbook.cookbook_tags?.flatMap(
-                (ct: { tags: { name: string } | { name: string }[] | null }) =>
-                  Array.isArray(ct.tags) ? ct.tags.map((t) => t.name) : ct.tags ? [ct.tags.name] : []
-              ) ?? [];
-              return (
-                <CookbookCard
-                  key={cookbook.id}
-                  id={cookbook.id}
-                  name={cookbook.name}
-                  description={cookbook.description}
-                  isPublic={cookbook.is_public}
-                  isOwner={cookbook.created_by === userId}
-                  recipeCount={(cookbook.cookbook_recipes as unknown as { count: number }[] | null)?.[0]?.count ?? 0}
-                  tags={tags}
-                  href={`/cookbooks/${cookbook.id}?from=family`}
-                  removeSlot={
-                    isActiveMember ? (
-                      <RemoveCookbookFromFamilyButton familyId={id} cookbookId={cookbook.id} />
-                    ) : undefined
-                  }
-                />
-              );
-            })}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {visibleCookbooks.map((cookbook) => {
+                const tags = cookbook.cookbook_tags?.flatMap(
+                  (ct: { tags: { name: string } | { name: string }[] | null }) =>
+                    Array.isArray(ct.tags) ? ct.tags.map((t) => t.name) : ct.tags ? [ct.tags.name] : []
+                ) ?? [];
+                return (
+                  <CookbookCard
+                    key={cookbook.id}
+                    id={cookbook.id}
+                    name={cookbook.name}
+                    description={cookbook.description}
+                    isPublic={cookbook.is_public}
+                    isOwner={cookbook.created_by === userId}
+                    recipeCount={(cookbook.cookbook_recipes as unknown as { count: number }[] | null)?.[0]?.count ?? 0}
+                    tags={tags}
+                    href={`/cookbooks/${cookbook.id}?from=family`}
+                    removeSlot={
+                      isActiveMember ? (
+                        <RemoveCookbookFromFamilyButton familyId={id} cookbookId={cookbook.id} />
+                      ) : undefined
+                    }
+                  />
+                );
+              })}
+            </div>
+            {hiddenPrivateCount > 0 && (
+              <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5" />
+                {hiddenPrivateCount} private cookbook{hiddenPrivateCount > 1 ? "s" : ""} visible to family members only.
+              </p>
+            )}
+          </>
         )}
       </section>
     </article>

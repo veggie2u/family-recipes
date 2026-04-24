@@ -40,6 +40,7 @@ export default function Home() {
             alt=""
             width={840}
             height={865}
+            priority
             className="w-96 h-auto rounded-xl opacity-90"
           />
         </div>
