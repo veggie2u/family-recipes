@@ -238,6 +238,7 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardPr
           <BookmarkButton
             recipeId={event.recipe_id!}
             initialBookmarked={isBookmarked}
+            initialBookmarkCount={event.bookmark_count}
           />
         )}
       </div>
