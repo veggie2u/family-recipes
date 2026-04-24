@@ -28,11 +28,41 @@ const features = [
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col bg-background">
-      <AppNav />
+      {/* Hero — full viewport, nav floats inside */}
+      <section className="relative overflow-hidden min-h-screen flex flex-col items-center justify-center text-center px-6 py-20 md:py-28">
+        {/* Floating nav — pure glassmorphism, no border, no bg fill */}
+        <AppNav className="absolute top-0 left-0 right-0 z-20 border-b-0 bg-transparent backdrop-blur-[16px]" />
 
-      {/* Hero */}
-      <section className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 md:py-28">
-        <div className="max-w-2xl flex flex-col items-center gap-6">
+        {/* Framing images — decorative, cropped at edges, lg+ only */}
+        <div className="pointer-events-none hidden lg:block absolute left-0 top-0 -translate-x-16 -translate-y-8">
+          <Image
+            src="/books.png"
+            alt=""
+            width={840}
+            height={865}
+            className="w-96 h-auto rounded-xl opacity-90"
+          />
+        </div>
+        <div className="pointer-events-none hidden lg:block absolute right-0 top-1/4 -translate-y-16 translate-x-14">
+          <Image
+            src="/RecipeCard.png"
+            alt=""
+            width={911}
+            height={1012}
+            className="w-72 h-auto rounded-xl opacity-90"
+          />
+        </div>
+        <div className="pointer-events-none hidden lg:block absolute left-0 bottom-0 -translate-x-10">
+          <Image
+            src="/coffee.png"
+            alt=""
+            width={792}
+            height={793}
+            className="w-64 h-auto rounded-xl opacity-90"
+          />
+        </div>
+
+        <div className="relative z-10 max-w-2xl flex flex-col items-center gap-6">
           {/* Decorative icon */}
           <div className="mb-2">
             <Image
@@ -86,7 +116,7 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="border-t border-border py-16 px-6">
+      <section className="bg-card py-16 px-6">
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map(({ icon: Icon, title, description }) => (
             <div
@@ -108,7 +138,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8 px-6">
+      <footer className="bg-background py-8 px-6">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <BrandLogo
             iconClassName="h-5 w-auto"

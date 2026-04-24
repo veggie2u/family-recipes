@@ -14,7 +14,7 @@ export default function CookbooksLayout({
         {children}
       </div>
 
-      <footer className="border-t border-border py-8 px-6">
+      <footer className="bg-muted py-8 px-6">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>© 2024 Family Recipes. All rights reserved.</p>
         </div>

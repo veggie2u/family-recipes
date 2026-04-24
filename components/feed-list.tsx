@@ -125,7 +125,7 @@ export function FeedList({
 
       {/* Filter tabs — authenticated only, hidden during search */}
       {userId !== null && !searchQuery.trim() && (
-        <div className="flex items-center gap-2 border-b border-border pb-4 flex-wrap">
+        <div className="flex items-center gap-2 pb-4 flex-wrap">
           {FILTER_OPTIONS.map((opt) => (
             <a
               key={opt.value}
@@ -134,7 +134,7 @@ export function FeedList({
                 "px-3 py-1.5 rounded-full text-sm font-medium transition-colors",
                 filter === opt.value
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  : "text-secondary hover:text-secondary hover:bg-secondary/10"
               )}
             >
               {opt.label}
@@ -271,7 +271,7 @@ function SearchResultCard({ result, onTagClick }: { result: SearchResult; onTagC
                   e.stopPropagation();
                   onTagClick(tag);
                 }}
-                className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-border text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+                className="inline-flex items-center rounded-full border border-secondary px-2.5 py-0.5 text-xs font-semibold transition-colors bg-transparent text-secondary hover:bg-secondary/10 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 {tag}
               </button>
