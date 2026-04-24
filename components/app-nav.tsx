@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { AuthButton } from "@/components/auth-button";
+import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { label: "Feed", href: "/feed" },
@@ -10,9 +11,9 @@ const NAV_LINKS = [
   { label: "Families", href: "/families" },
 ];
 
-export function AppNav() {
+export function AppNav({ className }: { className?: string }) {
   return (
-    <nav className="w-full border-b border-border">
+    <nav className={cn("w-full bg-background", className)}>
       <div className="max-w-5xl mx-auto flex justify-between items-center px-6 py-4">
         <div className="flex items-center gap-8">
           <BrandLogo href="/feed" />
@@ -21,7 +22,7 @@ export function AppNav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm text-secondary/70 hover:text-secondary transition-colors"
               >
                 {link.label}
               </Link>

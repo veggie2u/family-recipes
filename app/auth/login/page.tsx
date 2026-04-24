@@ -6,7 +6,7 @@ export default function Page() {
   return (
     <div className="min-h-svh bg-background flex flex-col">
       {/* Minimal nav */}
-      <nav className="w-full border-b border-border px-6 py-4 flex justify-between items-center">
+      <nav className="w-full bg-background px-6 py-4 flex justify-between items-center">
         <BrandLogo />
         <ThemeSwitcher />
       </nav>

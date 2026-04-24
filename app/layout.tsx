@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import { Playfair_Display } from "next/font/google";
+import { Manrope } from "next/font/google";
+import { Newsreader } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
@@ -15,13 +15,13 @@ export const metadata: Metadata = {
     "Preserve, organize, and share the recipes that bring your family together.",
 };
 
-const geistSans = Geist({
+const manrope = Manrope({
   variable: "--font-geist-sans",
   display: "swap",
   subsets: ["latin"],
 });
 
-const playfairDisplay = Playfair_Display({
+const newsreader = Newsreader({
   variable: "--font-playfair",
   display: "swap",
   subsets: ["latin"],
@@ -35,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${playfairDisplay.variable} ${geistSans.className} antialiased`}
+        className={`${manrope.variable} ${newsreader.variable} ${manrope.className} antialiased`}
       >
         <ThemeProvider
           attribute="class"

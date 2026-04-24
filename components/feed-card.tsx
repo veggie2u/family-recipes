@@ -196,7 +196,7 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardPr
                 e.stopPropagation();
                 onTagClick?.(tag);
               }}
-              className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-border text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+              className="inline-flex items-center rounded-full border border-secondary px-2.5 py-0.5 text-xs font-semibold transition-colors bg-transparent text-secondary hover:bg-secondary/10 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
             >
               {tag}
             </button>
