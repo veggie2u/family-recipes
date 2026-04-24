@@ -9,26 +9,30 @@ export async function AuthButton() {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  let displayName = user?.email ?? "";
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("name")
-      .eq("id", user.sub)
-      .single();
-    if (profile?.name) displayName = profile.name;
+  if (!user) {
+    return (
+      <div className="flex gap-2">
+        <Button asChild size="sm" variant={"outline"}>
+          <Link href="/auth/login">Sign in</Link>
+        </Button>
+        <Button asChild size="sm" variant={"default"}>
+          <Link href="/auth/sign-up">Sign up</Link>
+        </Button>
+      </div>
+    );
   }
 
-  return user ? (
-    <UserMenu displayName={displayName} />
-  ) : (
-    <div className="flex gap-2">
-      <Button asChild size="sm" variant={"outline"}>
-        <Link href="/auth/login">Sign in</Link>
-      </Button>
-      <Button asChild size="sm" variant={"default"}>
-        <Link href="/auth/sign-up">Sign up</Link>
-      </Button>
-    </div>
-  );
+  const [profileResult, inviteResult] = await Promise.all([
+    supabase.from("profiles").select("name").eq("id", user.sub).single(),
+    supabase
+      .from("family_members")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.sub)
+      .eq("status", "invited"),
+  ]);
+
+  const displayName = profileResult.data?.name ?? user.email ?? "";
+  const inviteCount = inviteResult.count ?? 0;
+
+  return <UserMenu displayName={displayName} inviteCount={inviteCount} />;
 }

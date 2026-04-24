@@ -120,6 +120,7 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
       description={recipe.description}
       ingredients={recipe.ingredients}
       instructions={recipe.instructions}
+      isPublic={recipe.is_public}
       isOwner={isOwner}
       creatorName={creatorName}
       tags={tags}

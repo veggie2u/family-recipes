@@ -165,15 +165,26 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick, reactionData
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-lg border border-border bg-card p-5",
+        "relative flex flex-col gap-3 rounded-lg border border-border bg-card p-5",
         "hover:border-accent/50 hover:shadow-sm transition-all"
       )}
     >
+      {/* Bookmark — top-right corner */}
+      {userId !== null && event.recipe_id !== null && (
+        <div className="absolute top-3 right-3">
+          <BookmarkButton
+            recipeId={event.recipe_id!}
+            initialBookmarked={isBookmarked}
+            initialBookmarkCount={event.bookmark_count}
+          />
+        </div>
+      )}
+
       {/* Source context */}
-      <p className="text-xs text-muted-foreground">{sourceContext(event)}</p>
+      <p className={cn("text-xs text-muted-foreground", userId !== null && event.recipe_id !== null && "pr-8")}>{sourceContext(event)}</p>
 
       {/* Title + description */}
-      <div className="flex flex-col gap-1">
+      <div className={cn("flex flex-col gap-1", userId !== null && event.recipe_id !== null && "pr-8")}>
         {event.recipe_id !== null ? (
           <Link
             href={`/recipes/${event.recipe_id}?from=feed`}
@@ -268,20 +279,13 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick, reactionData
             )}
         </div>
 
-        {/* Timestamp + bookmark */}
+        {/* Timestamp */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">
             {formatDistanceToNow(new Date(event.event_created_at), {
               addSuffix: true,
             })}
           </span>
-          {userId !== null && event.recipe_id !== null && (
-            <BookmarkButton
-              recipeId={event.recipe_id!}
-              initialBookmarked={isBookmarked}
-              initialBookmarkCount={event.bookmark_count}
-            />
-          )}
         </div>
       </div>
     </div>

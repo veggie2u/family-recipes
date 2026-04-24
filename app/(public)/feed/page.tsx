@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { FeedList } from "@/components/feed-list";
 import { CreateDropdown } from "@/components/create-dropdown";
 import { getFeed } from "@/app/(public)/feed/actions";
+import { PendingInvitesBanner } from "@/components/pending-invites-banner";
 
 async function FeedContent({ filter }: { filter: string | undefined }) {
   const supabase = await createClient();
@@ -64,6 +65,10 @@ export default function FeedPage({
         }
       >
         <FeedHeader />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <PendingInvitesBanner />
       </Suspense>
 
       <Suspense

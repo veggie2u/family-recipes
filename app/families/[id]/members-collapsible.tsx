@@ -22,12 +22,14 @@ interface MembersCollapsibleProps {
   members: MemberRow[];
   isActiveMember: boolean;
   familyId: string;
+  isAuthenticated: boolean;
 }
 
 export function MembersCollapsible({
   members,
   isActiveMember,
   familyId,
+  isAuthenticated,
 }: MembersCollapsibleProps) {
   const visibleMembers = members.filter(
     (m) => m.status === "active" || m.status === "invited"
@@ -37,7 +39,7 @@ export function MembersCollapsible({
     <Collapsible defaultOpen={false}>
       <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 rounded-md py-1 text-left hover:opacity-80 transition-opacity border-b border-border pb-3">
         <h2 className="font-semibold text-xl text-foreground">
-          Members ({visibleMembers.length})
+          {isAuthenticated ? `Members (${visibleMembers.length})` : "Members"}
         </h2>
         <ChevronDown className={cn(
           "h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200",
@@ -47,7 +49,9 @@ export function MembersCollapsible({
 
       <CollapsibleContent className="flex flex-col gap-6 pt-4">
         {visibleMembers.length === 0 ? (
-          <p className="text-muted-foreground">No members yet.</p>
+          <p className="text-muted-foreground">
+            {isAuthenticated ? "No members yet." : "Sign in to view members."}
+          </p>
         ) : (
           <ul className="flex flex-col gap-2">
             {visibleMembers.map((member) => {

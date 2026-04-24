@@ -35,9 +35,10 @@ const THEME_LABELS: Record<Theme, string> = {
 
 interface UserMenuProps {
   displayName: string;
+  inviteCount?: number;
 }
 
-export function UserMenu({ displayName }: UserMenuProps) {
+export function UserMenu({ displayName, inviteCount = 0 }: UserMenuProps) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -63,8 +64,13 @@ export function UserMenu({ displayName }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" aria-label="User menu">
+        <Button variant="outline" size="icon" aria-label="User menu" className="relative">
           <UserCircle className="h-5 w-5" />
+          {inviteCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-white font-bold leading-none">
+              {inviteCount > 9 ? "9+" : inviteCount}
+            </span>
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
@@ -86,6 +92,11 @@ export function UserMenu({ displayName }: UserMenuProps) {
         <DropdownMenuItem onSelect={() => router.push("/families")} className="flex gap-2">
           <Users size={ICON_SIZE} className="text-muted-foreground" />
           My Families
+          {inviteCount > 0 && (
+            <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] text-white font-bold">
+              {inviteCount > 9 ? "9+" : inviteCount}
+            </span>
+          )}
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => router.push("/bookmarks")} className="flex gap-2">
           <Bookmark size={ICON_SIZE} className="text-muted-foreground" />

@@ -3,13 +3,37 @@ import { Suspense } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { AuthButton } from "@/components/auth-button";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/server";
 
-const NAV_LINKS = [
+const PUBLIC_NAV_LINKS = [
   { label: "Feed", href: "/feed" },
   { label: "Recipes", href: "/recipes" },
-  { label: "Cookbooks", href: "/cookbooks" },
   { label: "Families", href: "/families" },
 ];
+
+const AUTH_NAV_LINKS = [
+  { label: "Cookbooks", href: "/cookbooks" },
+];
+
+async function AuthNavLinks() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims?.sub) return null;
+
+  return (
+    <>
+      {AUTH_NAV_LINKS.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className="text-sm text-secondary/70 hover:text-secondary transition-colors"
+        >
+          {link.label}
+        </Link>
+      ))}
+    </>
+  );
+}
 
 export function AppNav({ className }: { className?: string }) {
   return (
@@ -18,7 +42,7 @@ export function AppNav({ className }: { className?: string }) {
         <div className="flex items-center gap-8">
           <BrandLogo href="/feed" />
           <div className="hidden sm:flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
+            {PUBLIC_NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -27,6 +51,9 @@ export function AppNav({ className }: { className?: string }) {
                 {link.label}
               </Link>
             ))}
+            <Suspense>
+              <AuthNavLinks />
+            </Suspense>
           </div>
         </div>
         <div className="flex items-center gap-3">
