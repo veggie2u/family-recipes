@@ -17,6 +17,8 @@ export async function bookmarkRecipe(recipeId: string): Promise<void> {
   if (error) throw error;
 
   revalidatePath("/bookmarks");
+  revalidatePath("/feed");
+  revalidatePath(`/recipes/${recipeId}`);
 }
 
 export async function removeBookmark(recipeId: string): Promise<void> {
@@ -34,4 +36,6 @@ export async function removeBookmark(recipeId: string): Promise<void> {
   if (error) throw error;
 
   revalidatePath("/bookmarks");
+  revalidatePath("/feed");
+  revalidatePath(`/recipes/${recipeId}`);
 }
