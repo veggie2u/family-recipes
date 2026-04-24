@@ -49,8 +49,32 @@ async function CookbookDetailContent({
   const userId = claimsData?.claims?.sub ?? null;
   const isOwner = userId === cookbook.created_by;
 
-  // Private cookbooks are only visible to the creator
-  if (!cookbook.is_public && !isOwner) notFound();
+  // Private cookbooks: owner always has access; family members also have access
+  if (!cookbook.is_public && !isOwner) {
+    if (!userId) notFound();
+
+    // Check if the user is an active member of any family that has this cookbook
+    const { data: familyCookbooks } = await supabase
+      .from("family_cookbooks")
+      .select("family_id")
+      .eq("cookbook_id", id);
+
+    const familyIds = familyCookbooks?.map((fc) => fc.family_id) ?? [];
+    let hasAccess = false;
+
+    if (familyIds.length > 0) {
+      const { data: membership } = await supabase
+        .from("family_members")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .in("family_id", familyIds)
+        .limit(1);
+      hasAccess = (membership?.length ?? 0) > 0;
+    }
+
+    if (!hasAccess) notFound();
+  }
 
   const creatorName =
     (cookbook.profiles as unknown as { name: string | null } | null)?.name ??
