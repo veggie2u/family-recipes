@@ -6,11 +6,12 @@ export type FeedEvent = {
   event_id: string;
   event_type:
     | "recipe_created"
+    | "recipe_updated"
     | "recipe_added_to_family"
     | "recipe_added_to_cookbook"
     | "cookbook_created"
     | "cookbook_added_to_family"
-    | "family_created";
+    | "family_member_added";
   recipe_id: string | null;
   recipe_title: string | null;
   recipe_desc: string | null;

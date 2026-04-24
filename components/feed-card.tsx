@@ -14,10 +14,10 @@ interface FeedCardProps {
 }
 
 function sourceContext(event: FeedEvent): React.ReactNode {
-  if (event.event_type === "family_created") {
+  if (event.event_type === "recipe_created") {
     return (
       <>
-        Family created by{" "}
+        Recipe created by{" "}
         <Link
           href={`/profile/${event.actor_id}`}
           className="font-medium hover:underline transition-colors"
@@ -27,10 +27,10 @@ function sourceContext(event: FeedEvent): React.ReactNode {
       </>
     );
   }
-  if (event.event_type === "recipe_created") {
+  if (event.event_type === "recipe_updated") {
     return (
       <>
-        Recipe created by{" "}
+        Recipe updated by{" "}
         <Link
           href={`/profile/${event.actor_id}`}
           className="font-medium hover:underline transition-colors"
@@ -131,11 +131,34 @@ function sourceContext(event: FeedEvent): React.ReactNode {
       </>
     );
   }
+  if (event.event_type === "family_member_added") {
+    return (
+      <>
+        <Link
+          href={`/profile/${event.actor_id}`}
+          className="font-medium hover:underline transition-colors"
+        >
+          {event.actor_name}
+        </Link>
+        {" joined "}
+        {event.family_id !== null ? (
+          <Link
+            href={`/families/${event.family_id}`}
+            className="font-semibold hover:underline transition-colors"
+          >
+            {event.family_name}
+          </Link>
+        ) : (
+          <span className="font-semibold text-foreground">{event.family_name}</span>
+        )}
+      </>
+    );
+  }
   return null;
 }
 
 export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardProps) {
-  const isFamilyEvent = event.event_type === "family_created";
+  const isMemberEvent = event.event_type === "family_member_added";
 
   return (
     <div
@@ -156,7 +179,7 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardPr
           >
             {event.recipe_title}
           </Link>
-        ) : isFamilyEvent ? (
+        ) : isMemberEvent ? (
           <Link
             href={`/families/${event.family_id}?from=feed`}
             className="font-display font-semibold text-lg text-foreground hover:text-accent transition-colors leading-snug"
@@ -177,7 +200,7 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardPr
                 {event.recipe_desc}
               </p>
             )
-          : !isFamilyEvent && event.cookbook_desc && (
+          : !isMemberEvent && event.cookbook_desc && (
               <p className="text-sm text-muted-foreground line-clamp-3">
                 {event.cookbook_desc}
               </p>
