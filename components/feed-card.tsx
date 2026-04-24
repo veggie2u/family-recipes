@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { BookmarkButton } from "@/components/bookmark-button";
+import { ReactionButton } from "@/components/reaction-button";
 import { cn } from "@/lib/utils";
-import type { FeedEvent } from "@/app/(public)/feed/actions";
+import type { FeedEvent, EventReactionData } from "@/app/(public)/feed/actions";
 
 interface FeedCardProps {
   event: FeedEvent;
   userId: string | null;
   isBookmarked: boolean;
   onTagClick?: (tag: string) => void;
+  reactionData?: EventReactionData;
 }
 
 function sourceContext(event: FeedEvent): React.ReactNode {
@@ -157,7 +159,7 @@ function sourceContext(event: FeedEvent): React.ReactNode {
   return null;
 }
 
-export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardProps) {
+export function FeedCard({ event, userId, isBookmarked, onTagClick, reactionData }: FeedCardProps) {
   const isMemberEvent = event.event_type === "family_member_added";
 
   return (
@@ -227,19 +229,59 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick }: FeedCardPr
         </div>
       )}
 
-      {/* Footer: timestamp + bookmark */}
+      {/* Footer: reactions on left, timestamp + bookmark on right */}
       <div className="flex items-center justify-between mt-auto pt-1">
-        <span className="text-xs text-muted-foreground">
-          {formatDistanceToNow(new Date(event.event_created_at), {
-            addSuffix: true,
-          })}
-        </span>
-        {userId !== null && event.recipe_id !== null && (
-          <BookmarkButton
-            recipeId={event.recipe_id!}
-            initialBookmarked={isBookmarked}
-          />
-        )}
+        {/* Reactions */}
+        <div className="flex items-center gap-3">
+          {reactionData && event.recipe_id !== null && (
+            <>
+              <ReactionButton
+                entityType="recipe"
+                entityId={event.recipe_id}
+                reactionType="chefs_kiss"
+                initialActive={reactionData.user_chefs_kiss}
+                initialCount={reactionData.chefs_kiss_count}
+                userId={userId}
+              />
+              <ReactionButton
+                entityType="recipe"
+                entityId={event.recipe_id}
+                reactionType="made_it"
+                initialActive={reactionData.user_made_it}
+                initialCount={reactionData.made_it_count}
+                userId={userId}
+              />
+            </>
+          )}
+          {reactionData &&
+            !isMemberEvent &&
+            event.recipe_id === null &&
+            event.cookbook_id !== null && (
+              <ReactionButton
+                entityType="cookbook"
+                entityId={event.cookbook_id}
+                reactionType="chefs_kiss"
+                initialActive={reactionData.user_chefs_kiss}
+                initialCount={reactionData.chefs_kiss_count}
+                userId={userId}
+              />
+            )}
+        </div>
+
+        {/* Timestamp + bookmark */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            {formatDistanceToNow(new Date(event.event_created_at), {
+              addSuffix: true,
+            })}
+          </span>
+          {userId !== null && event.recipe_id !== null && (
+            <BookmarkButton
+              recipeId={event.recipe_id!}
+              initialBookmarked={isBookmarked}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

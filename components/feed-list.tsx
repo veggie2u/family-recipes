@@ -6,7 +6,7 @@ import { Search, X } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { getFeed } from "@/app/(public)/feed/actions";
-import type { FeedEvent } from "@/app/(public)/feed/actions";
+import type { FeedEvent, EventReactionData } from "@/app/(public)/feed/actions";
 import { searchGlobal } from "@/app/(public)/feed/search-actions";
 import type { SearchResult } from "@/app/(public)/feed/search-actions";
 import { FeedCard } from "@/components/feed-card";
@@ -18,6 +18,7 @@ interface FeedListProps {
   filter: string;
   userId: string | null;
   initialBookmarkedIds: string[];
+  initialReactionMap: Record<string, EventReactionData>;
 }
 
 const FILTER_OPTIONS = [
@@ -40,12 +41,14 @@ export function FeedList({
   filter,
   userId,
   initialBookmarkedIds,
+  initialReactionMap,
 }: FeedListProps) {
   const [events, setEvents] = useState<FeedEvent[]>(initialEvents);
   const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialCursor !== null);
   const [bookmarkedIds] = useState(() => new Set(initialBookmarkedIds));
+  const [reactionMap, setReactionMap] = useState<Record<string, EventReactionData>>(initialReactionMap);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,14 +73,14 @@ export function FeedList({
     if (!cursor || isLoading) return;
     setIsLoading(true);
     try {
-      const { events: newEvents, nextCursor } = await getFeed({
+      const { events: newEvents, nextCursor, reactionMap: newReactionMap } = await getFeed({
         filter,
         cursor,
       });
       setEvents((prev) => [...prev, ...newEvents]);
       setCursor(nextCursor);
       setHasMore(nextCursor !== null);
-      // Track any new bookmarked ids coming from server (none here, but keep set stable)
+      setReactionMap((prev) => ({ ...prev, ...newReactionMap }));
     } catch {
       toast.error("Failed to load more recipes.");
     } finally {
@@ -158,6 +161,7 @@ export function FeedList({
                   userId={userId}
                   isBookmarked={event.recipe_id !== null && bookmarkedIds.has(event.recipe_id)}
                   onTagClick={setSearchQuery}
+                  reactionData={reactionMap[event.event_id]}
                 />
               ))}
             </div>

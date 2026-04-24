@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
 import { FeedList } from "@/components/feed-list";
 import { CreateDropdown } from "@/components/create-dropdown";
-import type { FeedEvent } from "@/app/(public)/feed/actions";
+import { getFeed } from "@/app/(public)/feed/actions";
 
 async function FeedContent({ filter }: { filter: string | undefined }) {
   const supabase = await createClient();
@@ -10,16 +10,7 @@ async function FeedContent({ filter }: { filter: string | undefined }) {
   const userId = claimsData?.claims?.sub ?? null;
   const activeFilter = filter ?? "all";
 
-  const { data: rawEvents, error } = await supabase.rpc("get_feed", {
-    p_user_id: userId,
-    p_cursor: new Date().toISOString(),
-    p_limit: 20,
-    p_filter: userId ? activeFilter : "all",
-  });
-  if (error) throw error;
-
-  const events = (rawEvents ?? []) as FeedEvent[];
-  const nextCursor = events.length === 20 ? events[events.length - 1].event_created_at : null;
+  const { events, nextCursor, reactionMap } = await getFeed({ filter: activeFilter });
 
   let initialBookmarkedIds: string[] = [];
   if (userId) {
@@ -37,6 +28,7 @@ async function FeedContent({ filter }: { filter: string | undefined }) {
       filter={activeFilter}
       userId={userId}
       initialBookmarkedIds={initialBookmarkedIds}
+      initialReactionMap={reactionMap}
     />
   );
 }
