@@ -107,6 +107,14 @@ export async function acceptInvitation(memberId: string) {
 
   const userId = claims.claims.sub;
 
+  // Fetch family_id before updating so we can revalidate the specific family page
+  const { data: member } = await supabase
+    .from("family_members")
+    .select("family_id")
+    .eq("id", memberId)
+    .eq("user_id", userId)
+    .single();
+
   const { error } = await supabase
     .from("family_members")
     .update({ status: "active" })
@@ -116,6 +124,8 @@ export async function acceptInvitation(memberId: string) {
   if (error) throw new Error(error.message);
 
   revalidatePath("/families");
+  revalidatePath("/feed");
+  if (member?.family_id) revalidatePath(`/families/${member.family_id}`);
 }
 
 export async function declineInvitation(memberId: string) {
@@ -124,6 +134,14 @@ export async function declineInvitation(memberId: string) {
   if (!claims?.claims) redirect("/auth/login");
 
   const userId = claims.claims.sub;
+
+  // Fetch family_id before deleting so we can revalidate the specific family page
+  const { data: member } = await supabase
+    .from("family_members")
+    .select("family_id")
+    .eq("id", memberId)
+    .eq("user_id", userId)
+    .single();
 
   const { error } = await supabase
     .from("family_members")
@@ -134,6 +152,8 @@ export async function declineInvitation(memberId: string) {
   if (error) throw new Error(error.message);
 
   revalidatePath("/families");
+  revalidatePath("/feed");
+  if (member?.family_id) revalidatePath(`/families/${member.family_id}`);
 }
 
 export async function addCookbookToFamily(familyId: string, cookbookId: string) {

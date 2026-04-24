@@ -9,6 +9,9 @@ import { MembersCollapsible } from "./members-collapsible";
 import AddCookbookToFamilyPanel from "@/components/add-cookbook-to-family-panel";
 import { RemoveCookbookFromFamilyButton } from "@/components/remove-cookbook-from-family-button";
 import { cn } from "@/lib/utils";
+import { acceptInvitation, declineInvitation } from "@/app/families/actions";
+import { Button } from "@/components/ui/button";
+import { Users } from "lucide-react";
 
 type MemberRow = {
   id: string;
@@ -79,9 +82,18 @@ async function FamilyDetailContent({
 
   const members = (rawMembers ?? []) as unknown as MemberRow[];
   const currentMember = members.find((m) => m.user_id === userId && m.status === "active");
+  const invitedMember = members.find((m) => m.user_id === userId && m.status === "invited");
   const isOwner = family.created_by === userId;
   const isActiveMember = !!currentMember;
+  const isInvited = !!invitedMember;
   const isFollowing = !!userFollowRow;
+
+  // Private family: only visible to owner, active members, and invited users (via RLS).
+  // If none of the above, RLS already blocked the query and we'd have notFound() above.
+  // Extra guard: if private and user has no relationship at all, hide it.
+  if (!family.is_public && !isOwner && !isActiveMember && !isInvited && userId === null) {
+    notFound();
+  }
 
   const familyCookbooks = (rawFamilyCookbooks ?? [])
     .map((fc) => fc.cookbooks)
@@ -108,6 +120,26 @@ async function FamilyDetailContent({
 
   return (
     <article className="flex flex-col gap-8">
+      {/* Pending invitation banner */}
+      {isInvited && invitedMember && (
+        <section className="rounded-lg border border-border bg-card px-5 py-4 flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-muted-foreground shrink-0" />
+            <h2 className="font-semibold text-sm text-foreground">
+              You&apos;ve been invited to join this family
+            </h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <form action={acceptInvitation.bind(null, invitedMember.id)}>
+              <Button type="submit" size="sm">Accept</Button>
+            </form>
+            <form action={declineInvitation.bind(null, invitedMember.id)}>
+              <Button type="submit" variant="outline" size="sm">Decline</Button>
+            </form>
+          </div>
+        </section>
+      )}
+
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
@@ -137,8 +169,8 @@ async function FamilyDetailContent({
           )}
         </div>
 
-        {/* Follow button — authenticated non-members only */}
-        {userId && !isActiveMember && family.is_public && (
+        {/* Follow button — authenticated non-members and non-invited users only */}
+        {userId && !isActiveMember && !isInvited && family.is_public && (
           <FollowButton
             type="family"
             targetId={id}
