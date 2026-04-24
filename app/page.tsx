@@ -71,6 +71,7 @@ export default function Home() {
               width={188}
               height={200}
               className="h-48 w-auto object-contain"
+              unoptimized
             />
           </div>
 
