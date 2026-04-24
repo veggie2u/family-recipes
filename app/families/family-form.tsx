@@ -13,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 
 interface FamilyFormValues {
   name: string;
@@ -83,9 +82,9 @@ export function FamilyForm({
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <Label htmlFor="is_public" className="font-medium cursor-pointer">
+                <FormLabel className="font-medium cursor-pointer">
                   Make this family public
-                </Label>
+                </FormLabel>
               </div>
               <FormMessage />
             </FormItem>

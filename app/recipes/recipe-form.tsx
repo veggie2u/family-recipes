@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { TagInput } from "@/components/tag-input";
 
 interface RecipeFormValues {
@@ -169,9 +168,9 @@ export function RecipeForm({
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <Label htmlFor="is_public" className="font-medium cursor-pointer">
+                <FormLabel className="font-medium cursor-pointer">
                   Make this recipe public
-                </Label>
+                </FormLabel>
               </div>
               <FormMessage />
             </FormItem>
