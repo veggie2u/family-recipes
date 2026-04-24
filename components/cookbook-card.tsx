@@ -44,8 +44,8 @@ export function CookbookCard({
           <span
             className={`flex items-center gap-1 shrink-0 text-xs font-medium px-2 py-0.5 rounded-full mt-0.5 ${
               isPublic
-                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                : "bg-muted text-muted-foreground"
+                ? "border border-emerald-600/40 text-emerald-700 dark:text-emerald-400 dark:border-emerald-500/40"
+                : "border border-border text-muted-foreground"
             }`}
           >
             {isPublic ? (
@@ -68,7 +68,7 @@ export function CookbookCard({
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1">
           {tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="text-xs rounded-full">
+            <Badge key={tag} variant="outline" className="text-xs rounded-full text-secondary border-secondary">
               {tag}
             </Badge>
           ))}

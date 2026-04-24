@@ -38,8 +38,8 @@ export function RecipeDetail({
             <span
               className={`self-start flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
                 isPublic
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                  : "bg-muted text-muted-foreground"
+                  ? "border border-emerald-600/40 text-emerald-700 dark:text-emerald-400 dark:border-emerald-500/40"
+                  : "border border-border text-muted-foreground"
               }`}
             >
               {isPublic ? (
@@ -60,7 +60,7 @@ export function RecipeDetail({
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="rounded-full">{tag}</Badge>
+                <Badge key={tag} variant="outline" className="rounded-full text-secondary border-secondary">{tag}</Badge>
               ))}
             </div>
           )}
