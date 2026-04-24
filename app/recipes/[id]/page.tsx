@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { Pencil } from "lucide-react";
 import { RecipeDetail } from "@/components/recipe-detail";
 import { BackButton } from "@/components/back-button";
 import { BookmarkButton } from "@/components/bookmark-button";
-import { DeleteRecipeButton } from "@/components/delete-recipe-button";
+import { RecipeActionsMenu } from "@/components/recipe-actions-menu";
 import AddToCookbookButton from "@/components/add-to-cookbook-button";
 import { createClient } from "@/lib/supabase/server";
 
@@ -110,19 +109,16 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
       actions={
         <>
           {isOwner && (
-            <>
-              <AddToCookbookButton recipeId={id} cookbooks={eligibleCookbooks} />
-              <Link
-                href={`/recipes/${id}/edit`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-                Edit
-              </Link>
-              <DeleteRecipeButton id={id} />
-            </>
+            <AddToCookbookButton recipeId={id} cookbooks={eligibleCookbooks} />
           )}
-          {userId && <BookmarkButton recipeId={id} initialBookmarked={isBookmarked} />}
+          {userId && (
+            <BookmarkButton
+              recipeId={id}
+              initialBookmarked={isBookmarked}
+              className="border border-border hover:bg-muted hover:text-foreground p-1.5"
+            />
+          )}
+          {isOwner && <RecipeActionsMenu recipeId={id} />}
         </>
       }
     />

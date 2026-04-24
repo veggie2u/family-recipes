@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,12 +8,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { deleteRecipe } from "@/app/recipes/actions";
 
-export function DeleteRecipeButton({ id }: { id: string }) {
-  const [open, setOpen] = useState(false);
+interface DeleteRecipeButtonProps {
+  id: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function DeleteRecipeButton({ id, open, onOpenChange }: DeleteRecipeButtonProps) {
   const [isPending, setIsPending] = useState(false);
 
   async function handleDelete() {
@@ -23,13 +26,7 @@ export function DeleteRecipeButton({ id }: { id: string }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-destructive/40 text-destructive text-sm font-medium hover:bg-destructive/10 transition-colors">
-          <Trash2 className="w-3.5 h-3.5" />
-          Delete
-        </button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete recipe?</DialogTitle>
@@ -40,7 +37,7 @@ export function DeleteRecipeButton({ id }: { id: string }) {
         </DialogHeader>
         <DialogFooter>
           <button
-            onClick={() => setOpen(false)}
+            onClick={() => onOpenChange(false)}
             disabled={isPending}
             className="px-4 py-2 rounded border border-border text-foreground text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
           >
