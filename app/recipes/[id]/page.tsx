@@ -150,7 +150,7 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
               initialActive={reactionData.user_chefs_kiss}
               initialCount={reactionData.chefs_kiss_count}
               userId={userId}
-              className="border border-border hover:bg-muted p-1.5 rounded"
+              variant="circle"
             />
             <ReactionButton
               entityType="recipe"
@@ -159,7 +159,7 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
               initialActive={reactionData.user_made_it}
               initialCount={reactionData.made_it_count}
               userId={userId}
-              className="border border-border hover:bg-muted p-1.5 rounded"
+              variant="circle"
             />
           </>
         ) : null
