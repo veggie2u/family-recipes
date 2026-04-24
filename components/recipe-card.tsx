@@ -22,6 +22,8 @@ interface RecipeCardProps {
   bookmarkSlot?: React.ReactNode;
   /** Optional slot rendered left of bookmarkSlot in the bottom row (e.g. remove button). */
   removeSlot?: React.ReactNode;
+  /** Optional slot rendered left of removeSlot in the bottom row (e.g. reaction buttons). */
+  reactionSlot?: React.ReactNode;
 }
 
 export function RecipeCard({
@@ -36,9 +38,10 @@ export function RecipeCard({
   className,
   bookmarkSlot,
   removeSlot,
+  reactionSlot,
 }: RecipeCardProps) {
   const byline = isOwner ? "Your recipe" : creatorName;
-  const hasFooter = byline || bookmarkSlot || removeSlot;
+  const hasFooter = byline || bookmarkSlot || removeSlot || reactionSlot;
 
   return (
     <Link
@@ -92,8 +95,9 @@ export function RecipeCard({
           ) : (
             <span />
           )}
-          {(removeSlot || bookmarkSlot) && (
+          {(reactionSlot || removeSlot || bookmarkSlot) && (
             <div className="flex items-center gap-1">
+              {reactionSlot}
               {removeSlot}
               {bookmarkSlot}
             </div>

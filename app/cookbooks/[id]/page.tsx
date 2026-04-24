@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
 import { Globe, Lock, Pencil, Users as UsersIcon } from "lucide-react";
-import { getCookbookReactionData } from "@/app/actions/reactions";
+import { getCookbookReactionData, getRecipeReactionsBatch } from "@/app/actions/reactions";
 import { ReactionButton } from "@/components/reaction-button";
 import { Badge } from "@/components/ui/badge";
 import { RecipeCard } from "@/components/recipe-card";
@@ -142,16 +142,24 @@ async function CookbookDetailContent({
     allUserRecipes = data ?? [];
   }
 
-  // Batch-fetch bookmark state for authenticated users
+  // Batch-fetch bookmark state and recipe reactions in parallel
+  const recipeIds = recipes.map((r) => r.id);
   let bookmarkedIds = new Set<string>();
-  if (userId && recipes.length > 0) {
-    const recipeIds = recipes.map((r) => r.id);
-    const { data: bookmarks } = await supabase
-      .from("recipe_bookmarks")
-      .select("recipe_id")
-      .eq("user_id", userId)
-      .in("recipe_id", recipeIds);
-    bookmarkedIds = new Set((bookmarks ?? []).map((b) => b.recipe_id));
+  let recipeReactions: Awaited<ReturnType<typeof getRecipeReactionsBatch>> = {};
+
+  if (recipeIds.length > 0) {
+    const [bookmarkResult, reactionsResult] = await Promise.all([
+      userId
+        ? supabase
+            .from("recipe_bookmarks")
+            .select("recipe_id")
+            .eq("user_id", userId)
+            .in("recipe_id", recipeIds)
+        : Promise.resolve({ data: [] as { recipe_id: string }[] }),
+      getRecipeReactionsBatch(recipeIds, userId),
+    ]);
+    bookmarkedIds = new Set((bookmarkResult.data ?? []).map((b) => b.recipe_id));
+    recipeReactions = reactionsResult;
   }
 
   return (
@@ -289,7 +297,7 @@ async function CookbookDetailContent({
                         : []
                 ) ?? [];
               return (
-                <RecipeCard
+              <RecipeCard
                   key={recipe.id}
                   id={recipe.id}
                   title={recipe.title}
@@ -305,6 +313,26 @@ async function CookbookDetailContent({
                   }
                   tags={recipeTags}
                   href={`/recipes/${recipe.id}?from=cookbook`}
+                  reactionSlot={
+                    <div className="flex items-center gap-1">
+                      <ReactionButton
+                        entityType="recipe"
+                        entityId={recipe.id}
+                        reactionType="chefs_kiss"
+                        initialActive={recipeReactions[recipe.id]?.user_chefs_kiss ?? false}
+                        initialCount={recipeReactions[recipe.id]?.chefs_kiss_count ?? 0}
+                        userId={userId}
+                      />
+                      <ReactionButton
+                        entityType="recipe"
+                        entityId={recipe.id}
+                        reactionType="made_it"
+                        initialActive={recipeReactions[recipe.id]?.user_made_it ?? false}
+                        initialCount={recipeReactions[recipe.id]?.made_it_count ?? 0}
+                        userId={userId}
+                      />
+                    </div>
+                  }
                   removeSlot={
                     isOwner ? (
                       <RemoveRecipeFromCookbookButton cookbookId={id} recipeId={recipe.id} />

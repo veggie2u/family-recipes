@@ -118,6 +118,64 @@ export async function getRecipeReactionData(
   };
 }
 
+export async function getRecipeReactionsBatch(
+  recipeIds: string[],
+  userId: string | null
+): Promise<
+  Record<
+    string,
+    {
+      chefs_kiss_count: number;
+      made_it_count: number;
+      user_chefs_kiss: boolean;
+      user_made_it: boolean;
+    }
+  >
+> {
+  if (recipeIds.length === 0) return {};
+
+  const supabase = await createClient();
+
+  // Fetch all reactions for all recipe IDs in one query
+  const [{ data: allReactions }, { data: userReactions }] = await Promise.all([
+    supabase
+      .from("recipe_reactions")
+      .select("recipe_id, reaction_type")
+      .in("recipe_id", recipeIds),
+    userId
+      ? supabase
+          .from("recipe_reactions")
+          .select("recipe_id, reaction_type")
+          .in("recipe_id", recipeIds)
+          .eq("user_id", userId)
+      : Promise.resolve({ data: [] as { recipe_id: string; reaction_type: string }[] }),
+  ]);
+
+  // Build result map
+  const result: Record<
+    string,
+    { chefs_kiss_count: number; made_it_count: number; user_chefs_kiss: boolean; user_made_it: boolean }
+  > = {};
+
+  for (const id of recipeIds) {
+    result[id] = { chefs_kiss_count: 0, made_it_count: 0, user_chefs_kiss: false, user_made_it: false };
+  }
+
+  for (const row of allReactions ?? []) {
+    if (!result[row.recipe_id]) continue;
+    if (row.reaction_type === "chefs_kiss") result[row.recipe_id].chefs_kiss_count++;
+    if (row.reaction_type === "made_it") result[row.recipe_id].made_it_count++;
+  }
+
+  for (const row of userReactions ?? []) {
+    if (!result[row.recipe_id]) continue;
+    if (row.reaction_type === "chefs_kiss") result[row.recipe_id].user_chefs_kiss = true;
+    if (row.reaction_type === "made_it") result[row.recipe_id].user_made_it = true;
+  }
+
+  return result;
+}
+
 export async function getCookbookReactionData(
   cookbookId: string,
   userId: string | null
