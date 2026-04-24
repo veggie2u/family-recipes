@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
 import { FeedList } from "@/components/feed-list";
 import { CreateDropdown } from "@/components/create-dropdown";
-import type { FeedEvent } from "@/app/(public)/feed/actions";
+import { getFeed } from "@/app/(public)/feed/actions";
 
 async function FeedContent({ filter }: { filter: string | undefined }) {
   const supabase = await createClient();
@@ -10,43 +10,9 @@ async function FeedContent({ filter }: { filter: string | undefined }) {
   const userId = claimsData?.claims?.sub ?? null;
   const activeFilter = filter ?? "all";
 
-  const { data: rawEvents, error } = await supabase.rpc("get_feed", {
-    p_user_id: userId,
-    p_cursor: new Date().toISOString(),
-    p_limit: 20,
-    p_filter: userId ? activeFilter : "all",
+  const { events, nextCursor, reactionMap, initialBookmarkedIds } = await getFeed({
+    filter: activeFilter,
   });
-  if (error) throw error;
-
-  const baseEvents = (rawEvents ?? []) as Omit<FeedEvent, "bookmark_count">[];
-  const nextCursor =
-    baseEvents.length === 20 ? baseEvents[baseEvents.length - 1].event_created_at : null;
-
-  // Batch-fetch bookmark counts + user bookmark state in parallel
-  const recipeIds = baseEvents
-    .map((e) => e.recipe_id)
-    .filter((id): id is string => id !== null);
-
-  const [bookmarkRows, userBookmarkRows] = await Promise.all([
-    recipeIds.length > 0
-      ? supabase.from("recipe_bookmarks").select("recipe_id").in("recipe_id", recipeIds)
-      : Promise.resolve({ data: [] as { recipe_id: string }[] }),
-    userId
-      ? supabase.from("recipe_bookmarks").select("recipe_id").eq("user_id", userId)
-      : Promise.resolve({ data: [] as { recipe_id: string }[] }),
-  ]);
-
-  const bookmarkCountMap = new Map<string, number>();
-  for (const row of bookmarkRows.data ?? []) {
-    bookmarkCountMap.set(row.recipe_id, (bookmarkCountMap.get(row.recipe_id) ?? 0) + 1);
-  }
-
-  const initialBookmarkedIds = (userBookmarkRows.data ?? []).map((b) => b.recipe_id);
-
-  const events: FeedEvent[] = baseEvents.map((e) => ({
-    ...e,
-    bookmark_count: e.recipe_id !== null ? (bookmarkCountMap.get(e.recipe_id) ?? 0) : 0,
-  }));
 
   return (
     <FeedList
@@ -55,6 +21,7 @@ async function FeedContent({ filter }: { filter: string | undefined }) {
       filter={activeFilter}
       userId={userId}
       initialBookmarkedIds={initialBookmarkedIds}
+      initialReactionMap={reactionMap}
     />
   );
 }

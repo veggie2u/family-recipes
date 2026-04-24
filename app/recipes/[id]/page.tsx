@@ -7,6 +7,8 @@ import { BookmarkButton } from "@/components/bookmark-button";
 import { RecipeActionsMenu } from "@/components/recipe-actions-menu";
 import AddToCookbookButton from "@/components/add-to-cookbook-button";
 import { createClient } from "@/lib/supabase/server";
+import { getRecipeReactionData } from "@/app/actions/reactions";
+import { ReactionButton } from "@/components/reaction-button";
 
 async function RecipeDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -68,7 +70,8 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
   let isBookmarked = false;
   let eligibleCookbooks: { id: string; name: string }[] = [];
 
-  // Fetch bookmark count for all visitors (in parallel with user-specific queries)
+  // Fetch bookmark count, user state, and reaction data all in parallel
+  const reactionDataPromise = getRecipeReactionData(id, userId);
   const [bookmarkCountResult, ...userQueryResults] = await Promise.all([
     supabase
       .from("recipe_bookmarks")
@@ -109,6 +112,8 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
     }
   }
 
+  const reactionData = await reactionDataPromise;
+
   return (
     <RecipeDetail
       title={recipe.title}
@@ -130,6 +135,28 @@ async function RecipeDetailContent({ params }: { params: Promise<{ id: string }>
               initialBookmarkCount={bookmarkCount}
               className="border border-border hover:bg-muted hover:text-foreground"
             />
+          )}
+          {userId && (
+            <>
+              <ReactionButton
+                entityType="recipe"
+                entityId={id}
+                reactionType="chefs_kiss"
+                initialActive={reactionData.user_chefs_kiss}
+                initialCount={reactionData.chefs_kiss_count}
+                userId={userId}
+                className="border border-border hover:bg-muted p-1.5 rounded"
+              />
+              <ReactionButton
+                entityType="recipe"
+                entityId={id}
+                reactionType="made_it"
+                initialActive={reactionData.user_made_it}
+                initialCount={reactionData.made_it_count}
+                userId={userId}
+                className="border border-border hover:bg-muted p-1.5 rounded"
+              />
+            </>
           )}
           {isOwner && <RecipeActionsMenu recipeId={id} />}
         </>

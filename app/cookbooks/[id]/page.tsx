@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
 import { Globe, Lock, Pencil, Users as UsersIcon } from "lucide-react";
+import { getCookbookReactionData } from "@/app/actions/reactions";
+import { ReactionButton } from "@/components/reaction-button";
 import { Badge } from "@/components/ui/badge";
 import { RecipeCard } from "@/components/recipe-card";
 import { FollowButton } from "@/components/follow-button";
@@ -66,11 +68,12 @@ async function CookbookDetailContent({
             : []
     ) ?? [];
 
-  // Parallel: follower count, user follow row, recipes (with tags + creator)
+  // Parallel: follower count, user follow row, recipes (with tags + creator), cookbook reactions
   const [
     { count: followerCount },
     { data: userFollowRow },
     { data: cookbookRecipes },
+    cookbookReactionData,
   ] = await Promise.all([
     supabase
       .from("cookbook_follows")
@@ -91,6 +94,7 @@ async function CookbookDetailContent({
       )
       .eq("cookbook_id", id)
       .order("added_at", { ascending: false }),
+    getCookbookReactionData(id, userId),
   ]);
 
   const isFollowing = !!userFollowRow;
@@ -176,30 +180,45 @@ async function CookbookDetailContent({
           )}
         </div>
 
-        {/* Owner actions */}
-        {isOwner && (
-          <div className="flex items-center gap-2 shrink-0">
-            <Link
-              href={`/cookbooks/${id}/edit`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
-            >
-              <Pencil className="w-3.5 h-3.5" />
-              Edit
-            </Link>
-            <DeleteCookbookButton id={id} />
-          </div>
-        )}
+        {/* Right-side header actions */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Reaction button — all authenticated users */}
+          {userId && (
+            <ReactionButton
+              entityType="cookbook"
+              entityId={id}
+              reactionType="chefs_kiss"
+              initialActive={cookbookReactionData.user_chefs_kiss}
+              initialCount={cookbookReactionData.chefs_kiss_count}
+              userId={userId}
+              className="border border-border hover:bg-muted p-1.5 rounded"
+            />
+          )}
 
-        {/* Follow button — authenticated non-owners only */}
-        {userId && !isOwner && (
-          <FollowButton
-            type="cookbook"
-            targetId={id}
-            initialFollowing={isFollowing}
-            followerCount={followerCount ?? 0}
-            className="shrink-0"
-          />
-        )}
+          {/* Owner actions */}
+          {isOwner && (
+            <>
+              <Link
+                href={`/cookbooks/${id}/edit`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-border text-sm font-medium hover:bg-muted transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Edit
+              </Link>
+              <DeleteCookbookButton id={id} />
+            </>
+          )}
+
+          {/* Follow button — authenticated non-owners only */}
+          {userId && !isOwner && (
+            <FollowButton
+              type="cookbook"
+              targetId={id}
+              initialFollowing={isFollowing}
+              followerCount={followerCount ?? 0}
+            />
+          )}
+        </div>
       </div>
 
       {cookbook.description && (
