@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
-import { Globe, Lock, Pencil } from "lucide-react";
+import { Globe, Lock, Pencil, Users as UsersIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { RecipeCard } from "@/components/recipe-card";
 import { FollowButton } from "@/components/follow-button";
@@ -157,6 +157,12 @@ async function CookbookDetailContent({
               className={`text-sm ${isOwner ? "text-accent/70" : "text-muted-foreground"}`}
             >
               {isOwner ? "Your cookbook" : `By ${creatorName}`}
+            </p>
+          )}
+          {isOwner && (
+            <p className="flex items-center gap-1 text-sm text-muted-foreground">
+              <UsersIcon className="w-3.5 h-3.5" />
+              {followerCount ?? 0} {followerCount === 1 ? "follower" : "followers"}
             </p>
           )}
           {tags.length > 0 && (

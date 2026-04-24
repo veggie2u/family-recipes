@@ -26,6 +26,7 @@ export type FeedEvent = {
   event_created_at: string;
   score: number;
   tags: string[];
+  bookmark_count: number;
 };
 
 export async function getFeed({
@@ -48,7 +49,30 @@ export async function getFeed({
 
   if (error) throw error;
 
-  const events = (rawEvents ?? []) as FeedEvent[];
+  const baseEvents = (rawEvents ?? []) as Omit<FeedEvent, "bookmark_count">[];
+  if (baseEvents.length === 0) return { events: [], nextCursor: null };
+
+  // Batch-fetch bookmark counts for all recipe_ids in this page
+  const recipeIds = baseEvents
+    .map((e) => e.recipe_id)
+    .filter((id): id is string => id !== null);
+
+  const bookmarkCountMap = new Map<string, number>();
+  if (recipeIds.length > 0) {
+    const { data: bookmarkRows } = await supabase
+      .from("recipe_bookmarks")
+      .select("recipe_id")
+      .in("recipe_id", recipeIds);
+    for (const row of bookmarkRows ?? []) {
+      bookmarkCountMap.set(row.recipe_id, (bookmarkCountMap.get(row.recipe_id) ?? 0) + 1);
+    }
+  }
+
+  const events: FeedEvent[] = baseEvents.map((e) => ({
+    ...e,
+    bookmark_count: e.recipe_id !== null ? (bookmarkCountMap.get(e.recipe_id) ?? 0) : 0,
+  }));
+
   const nextCursor = events.length === 20 ? events[events.length - 1].event_created_at : null;
   return { events, nextCursor };
 }
