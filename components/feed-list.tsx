@@ -77,7 +77,10 @@ export function FeedList({
         filter,
         cursor,
       });
-      setEvents((prev) => [...prev, ...newEvents]);
+      setEvents((prev) => {
+        const existingIds = new Set(prev.map((e) => e.event_id));
+        return [...prev, ...newEvents.filter((e) => !existingIds.has(e.event_id))];
+      });
       setCursor(nextCursor);
       setHasMore(nextCursor !== null);
       setReactionMap((prev) => ({ ...prev, ...newReactionMap }));

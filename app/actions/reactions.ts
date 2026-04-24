@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 type EntityType = "recipe" | "cookbook";
@@ -56,6 +57,13 @@ export async function toggleReaction(
     .select("*", { count: "exact", head: true })
     .eq(idColumn, entityId)
     .eq("reaction_type", reactionType);
+
+  revalidatePath("/feed");
+  if (entityType === "recipe") {
+    revalidatePath(`/recipes/${entityId}`);
+  } else {
+    revalidatePath(`/cookbooks/${entityId}`);
+  }
 
   return { active, count: count ?? 0 };
 }
