@@ -146,7 +146,7 @@ export default function Home() {
             iconClassName="h-5 w-auto"
             textClassName="text-sm font-medium"
           />
-          <p>© 2024 Family Recipes. All rights reserved.</p>
+          <p>© 2026 Family Recipes. All rights reserved.</p>
         </div>
       </footer>
     </main>
