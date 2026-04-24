@@ -76,7 +76,7 @@ export default function Home() {
             />
           </div>
 
-          <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground leading-tight">
+          <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground" style={{ lineHeight: 1.25 }}>
             Your Family&apos;s Culinary Heritage
           </h1>
 
