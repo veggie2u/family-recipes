@@ -1,8 +1,14 @@
 import { SignUpForm } from "@/components/sign-up-form";
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { redirect } from "next/navigation";
+import { getFeatureFlags, isFlagEnabled } from "@/lib/feature-flags";
 
-export default function Page() {
+export default async function Page() {
+  const flags = await getFeatureFlags();
+  if (!isFlagEnabled(flags, "ALLOW_SIGN_UPS")) {
+    redirect("/");
+  }
   return (
     <div className="min-h-svh bg-background flex flex-col">
       {/* Minimal nav */}

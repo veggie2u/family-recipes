@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import { Newsreader } from "next/font/google";
+import { Suspense } from "react";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { FeatureFlagProvider } from "@/lib/feature-flag-context";
+import { getFeatureFlags } from "@/lib/feature-flags";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -28,6 +31,11 @@ const newsreader = Newsreader({
   subsets: ["latin"],
 });
 
+async function FlaggedProviders({ children }: { children: React.ReactNode }) {
+  const flags = await getFeatureFlags();
+  return <FeatureFlagProvider flags={flags}>{children}</FeatureFlagProvider>;
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -45,7 +53,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TooltipProvider>
-            {children}
+            <Suspense>
+              <FlaggedProviders>{children}</FlaggedProviders>
+            </Suspense>
           </TooltipProvider>
         </ThemeProvider>
       </body>

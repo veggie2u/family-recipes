@@ -3,6 +3,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { BookOpen, Heart, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { getFeatureFlags, isFlagEnabled } from "@/lib/feature-flags";
 
 const features = [
   {
@@ -25,7 +26,9 @@ const features = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const flags = await getFeatureFlags();
+  const allowSignUps = isFlagEnabled(flags, "ALLOW_SIGN_UPS");
   return (
     <main className="min-h-screen flex flex-col bg-background">
       {/* Hero — full viewport, nav floats inside */}
@@ -95,12 +98,18 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/auth/sign-up"
-              className="inline-flex items-center justify-center px-6 py-3 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
-            >
-              Get Started — It&apos;s Free
-            </Link>
+            {allowSignUps ? (
+              <Link
+                href="/auth/sign-up"
+                className="inline-flex items-center justify-center px-6 py-3 rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+              >
+                Get Started — It&apos;s Free
+              </Link>
+            ) : (
+              <span className="inline-flex items-center justify-center px-6 py-3 rounded bg-primary/40 text-primary-foreground/60 font-medium cursor-not-allowed">
+                Get Started — It&apos;s Free
+              </span>
+            )}
             <Link
               href="/feed"
               className="inline-flex items-center justify-center px-6 py-3 rounded border border-border text-foreground font-medium hover:bg-muted transition-colors"

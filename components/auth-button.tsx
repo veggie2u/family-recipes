@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { UserMenu } from "./user-menu";
+import { getFeatureFlags, isFlagEnabled } from "@/lib/feature-flags";
 
 export async function AuthButton() {
   const supabase = await createClient();
@@ -10,14 +11,22 @@ export async function AuthButton() {
   const user = data?.claims;
 
   if (!user) {
+    const flags = await getFeatureFlags();
+    const allowSignUps = isFlagEnabled(flags, "ALLOW_SIGN_UPS");
     return (
       <div className="flex gap-2">
         <Button asChild size="sm" variant={"outline"}>
           <Link href="/auth/login">Sign in</Link>
         </Button>
-        <Button asChild size="sm" variant={"default"}>
-          <Link href="/auth/sign-up">Sign up</Link>
-        </Button>
+        {allowSignUps ? (
+          <Button asChild size="sm" variant={"default"}>
+            <Link href="/auth/sign-up">Sign up</Link>
+          </Button>
+        ) : (
+          <Button size="sm" variant={"default"} disabled>
+            Sign up
+          </Button>
+        )}
       </div>
     );
   }
