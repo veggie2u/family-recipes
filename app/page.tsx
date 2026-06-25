@@ -31,10 +31,9 @@ export default async function Home() {
   const allowSignUps = isFlagEnabled(flags, "ALLOW_SIGN_UPS");
   return (
     <main className="min-h-screen flex flex-col bg-background">
-      {/* Hero — full viewport, nav floats inside */}
-      <section className="relative overflow-hidden min-h-screen flex flex-col items-center justify-center text-center px-6 py-20 md:py-28">
-        {/* Floating nav — pure glassmorphism, no border, no bg fill */}
-        <AppNav className="absolute top-0 left-0 right-0 z-20 border-b-0 bg-transparent backdrop-blur-[16px]" />
+      <AppNav />
+      {/* Hero */}
+      <section className="relative overflow-hidden flex-1 flex flex-col items-center justify-center text-center px-6 py-20 md:py-28">
 
         {/* Framing images — decorative, cropped at edges, lg+ only */}
         <div className="pointer-events-none hidden lg:block absolute left-0 top-0 -translate-x-16 -translate-y-8">
@@ -80,7 +79,7 @@ export default async function Home() {
           </div>
 
           <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground" style={{ lineHeight: 1.25 }}>
-            Your Family&apos;s Culinary Heritage
+            My Family Recipes
           </h1>
 
           <p className="text-lg text-muted-foreground leading-relaxed max-w-lg">

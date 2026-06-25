@@ -26,7 +26,7 @@ async function AuthNavLinks() {
         <Link
           key={link.href}
           href={link.href}
-          className="text-sm text-secondary/70 hover:text-secondary transition-colors"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           {link.label}
         </Link>
@@ -37,7 +37,7 @@ async function AuthNavLinks() {
 
 export function AppNav({ className }: { className?: string }) {
   return (
-    <nav className={cn("w-full bg-background", className)}>
+    <nav className={cn("w-full sticky top-0 z-10 bg-card shadow-sm", className)}>
       <div className="max-w-5xl mx-auto flex justify-between items-center px-6 py-4">
         <div className="flex items-center gap-8">
           <BrandLogo href="/feed" />
@@ -46,7 +46,7 @@ export function AppNav({ className }: { className?: string }) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm text-secondary/70 hover:text-secondary transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 {link.label}
               </Link>

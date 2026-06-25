@@ -15,15 +15,15 @@ export async function AuthButton() {
     const allowSignUps = isFlagEnabled(flags, "ALLOW_SIGN_UPS");
     return (
       <div className="flex gap-2">
-        <Button asChild size="sm" variant={"outline"}>
+        <Button asChild variant={"outline"}>
           <Link href="/auth/login">Sign in</Link>
         </Button>
         {allowSignUps ? (
-          <Button asChild size="sm" variant={"default"}>
+          <Button asChild variant={"default"}>
             <Link href="/auth/sign-up">Sign up</Link>
           </Button>
         ) : (
-          <Button size="sm" variant={"default"} disabled>
+          <Button variant={"default"} disabled>
             Sign up
           </Button>
         )}
