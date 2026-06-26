@@ -43,7 +43,11 @@ export function TagInput({ allTags, value, onChange }: TagInputProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (normalised) addTag(normalised);
+      if (suggestions.length > 0) {
+        addTag(suggestions[0]);
+      } else if (normalised) {
+        addTag(normalised);
+      }
     } else if (e.key === "Backspace" && !inputValue && value.length > 0) {
       removeTag(value[value.length - 1]);
     } else if (e.key === "Escape") {

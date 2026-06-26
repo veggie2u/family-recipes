@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Globe, Lock, Pencil, Users as UsersIcon } from "lucide-react";
 import { getCookbookReactionData, getRecipeReactionsBatch } from "@/app/actions/reactions";
 import { ReactionButton } from "@/components/reaction-button";
-import { Badge } from "@/components/ui/badge";
+import { RecipeTag } from "@/components/ui/recipe-tag";
 import { RecipeCard } from "@/components/recipe-card";
 import { FollowButton } from "@/components/follow-button";
 import { BookmarkButton } from "@/components/bookmark-button";
@@ -204,9 +204,7 @@ async function CookbookDetailContent({
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {tags.map((tag) => (
-                <Badge key={tag} variant="outline">
-                  {tag}
-                </Badge>
+                <RecipeTag key={tag} tagText={tag} />
               ))}
             </div>
           )}

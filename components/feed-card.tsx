@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { BookmarkButton } from "@/components/bookmark-button";
 import { ReactionButton } from "@/components/reaction-button";
 import { cn } from "@/lib/utils";
+import { RecipeTag } from "@/components/ui/recipe-tag";
 import type { FeedEvent, EventReactionData } from "@/app/(public)/feed/actions";
 
 interface FeedCardProps {
@@ -224,18 +225,7 @@ export function FeedCard({ event, userId, isBookmarked, onTagClick, reactionData
       {event.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {event.tags.map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onTagClick?.(tag);
-              }}
-              className="inline-flex items-center rounded-full border border-secondary px-2.5 py-0.5 text-xs font-semibold transition-colors bg-transparent text-secondary hover:bg-secondary/10 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              {tag}
-            </button>
+            <RecipeTag key={tag} tagText={tag} onClick={onTagClick} />
           ))}
         </div>
       )}

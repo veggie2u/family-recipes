@@ -12,6 +12,14 @@ export function About() {
         sign-up flow. We&apos;ll open registration back up soon.
       </p>
 
+      <p className="text-sm text-muted-foreground bg-muted px-4 py-3 rounded-md mb-8">
+        <strong>Test data:</strong> The app currently contains sample recipes and cookbooks tagged
+        with <strong>test</strong> — these will be deleted after the beta period ends. To keep
+        your content safe, don&apos;t use the <strong>test</strong> tag on anything you want to
+        preserve. If you&apos;re just playing around, tagging your recipes and cookbooks
+        with <strong>test</strong> means they&apos;ll be cleaned up automatically when beta wraps up.
+      </p>
+
       <h2 className="text-xl font-semibold mb-4">What&apos;s Inside</h2>
       <div className="flex flex-col gap-6 mb-10">
         <div>

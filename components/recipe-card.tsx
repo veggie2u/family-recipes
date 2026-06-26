@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Globe, Lock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { RecipeTag } from "@/components/ui/recipe-tag";
 import { cn } from "@/lib/utils";
 
 interface RecipeCardProps {
@@ -80,9 +80,7 @@ export function RecipeCard({
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1">
           {tags.map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs rounded-full text-secondary border-secondary">
-              {tag}
-            </Badge>
+            <RecipeTag key={tag} tagText={tag} />
           ))}
         </div>
       )}
