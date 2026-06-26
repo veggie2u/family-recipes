@@ -31,17 +31,29 @@ export async function AuthButton() {
     );
   }
 
-  const [profileResult, inviteResult] = await Promise.all([
-    supabase.from("profiles").select("name").eq("id", user.sub).single(),
+  const profileResult = await supabase
+    .from("profiles")
+    .select("name, changelog_seen_at")
+    .eq("id", user.sub)
+    .single();
+
+  const seenAt = profileResult.data?.changelog_seen_at ?? "1970-01-01";
+
+  const [inviteResult, changelogResult] = await Promise.all([
     supabase
       .from("family_members")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.sub)
       .eq("status", "invited"),
+    supabase
+      .from("changelog")
+      .select("id", { count: "exact", head: true })
+      .gt("release_date", seenAt),
   ]);
 
   const displayName = profileResult.data?.name ?? user.email ?? "";
   const inviteCount = inviteResult.count ?? 0;
+  const unreadChanges = changelogResult.count ?? 0;
 
-  return <UserMenu displayName={displayName} inviteCount={inviteCount} />;
+  return <UserMenu displayName={displayName} inviteCount={inviteCount} unreadChanges={unreadChanges} />;
 }
