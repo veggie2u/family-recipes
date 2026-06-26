@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { AuthButton } from "@/components/auth-button";
-import { BetaBanner } from "@/components/beta-banner";
+import { BetaBanner } from "@/components/beta/beta-banner";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
 
