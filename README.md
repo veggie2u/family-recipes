@@ -32,7 +32,10 @@ The app will be running at [localhost:3000](http://localhost:3000).
 
 ## Versioning
 
-The app version is stored in `package.json`. The patch version is bumped automatically on every commit via a pre-commit hook. Run `npm run prepare` once after cloning to install it.
+The app version is stored in `package.json`. The patch version is bumped automatically on every commit via a pre-commit hook. Run this once after cloning to install it locally:
+```bash
+cp scripts/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+```
 
 To bump the minor or major version manually (e.g. before a significant release):
 ```bash
