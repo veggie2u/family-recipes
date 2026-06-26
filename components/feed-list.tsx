@@ -141,7 +141,7 @@ export function FeedList({
                 "px-3 py-1.5 rounded-full text-sm font-medium transition-colors",
                 filter === opt.value
                   ? "bg-primary text-primary-foreground"
-                  : "text-secondary hover:text-secondary hover:bg-secondary/10"
+                  : "text-secondary hover:text-secondary hover:bg-secondary/10 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted"
               )}
             >
               {opt.label}
