@@ -1,5 +1,5 @@
 import { Globe, Lock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { RecipeTag } from "@/components/ui/recipe-tag";
 
 interface RecipeDetailProps {
   title: string;
@@ -63,7 +63,7 @@ export function RecipeDetail({
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {tags.map((tag) => (
-                <Badge key={tag} variant="outline" className="rounded-full text-secondary border-secondary">{tag}</Badge>
+                <RecipeTag key={tag} tagText={tag} />
               ))}
             </div>
           )}

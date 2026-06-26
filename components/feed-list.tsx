@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Search, X } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { RecipeTag } from "@/components/ui/recipe-tag";
 import { getFeed } from "@/app/(public)/feed/actions";
 import type { FeedEvent, EventReactionData } from "@/app/(public)/feed/actions";
 import { searchGlobal } from "@/app/(public)/feed/search-actions";
@@ -270,18 +271,7 @@ function SearchResultCard({ result, onTagClick }: { result: SearchResult; onTagC
         result.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-0.5" onClick={(e) => e.preventDefault()}>
             {result.tags.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onTagClick(tag);
-                }}
-                className="inline-flex items-center rounded-full border border-secondary px-2.5 py-0.5 text-xs font-semibold transition-colors bg-transparent text-secondary hover:bg-secondary/10 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                {tag}
-              </button>
+              <RecipeTag key={tag} tagText={tag} onClick={onTagClick} />
             ))}
           </div>
         )}
