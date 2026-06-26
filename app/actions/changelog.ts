@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 export async function markChangelogSeen(): Promise<void> {
@@ -11,4 +12,6 @@ export async function markChangelogSeen(): Promise<void> {
     .from("profiles")
     .update({ changelog_seen_at: new Date().toISOString() })
     .eq("id", data.claims.sub);
+
+  revalidatePath("/", "layout");
 }

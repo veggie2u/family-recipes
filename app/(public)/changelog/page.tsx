@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
-import { markChangelogSeen } from "@/app/actions/changelog";
+import { MarkChangelogSeen } from "@/components/mark-changelog-seen";
 
 type ChangelogEntry = {
   version: string;
@@ -61,14 +61,11 @@ export default async function ChangelogPage({
   const { data: entries } = await query;
   const groups = groupByVersion(entries ?? []);
 
-  if (isRecent && userId) {
-    await markChangelogSeen();
-  }
-
   const hasNoRecent = isRecent && groups.length === 0;
 
   return (
     <div className="max-w-2xl mx-auto py-4">
+      {isRecent && userId && <MarkChangelogSeen />}
       <h1 className="text-3xl font-bold mb-8">
         {isRecent ? "Recent Changes" : "What's New"}
       </h1>
