@@ -1,10 +1,13 @@
 {
   "private": true,
+  "version": "1.1.1",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "version:minor": "npm --no-git-tag-version version minor && git add package.json package-lock.json",
+    "version:major": "npm --no-git-tag-version version major && git add package.json package-lock.json"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

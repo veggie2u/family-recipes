@@ -1,4 +1,5 @@
 import { AppNav } from "@/components/app-nav";
+import { SiteFooter } from "@/components/site-footer";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function CookbooksLayout({
@@ -14,11 +15,7 @@ export default function CookbooksLayout({
         {children}
       </div>
 
-      <footer className="bg-muted py-8 px-6">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© 2026 Family Recipes. All rights reserved.</p>
-        </div>
-      </footer>
+      <SiteFooter />
       <Toaster position="top-right" />
     </main>
   );

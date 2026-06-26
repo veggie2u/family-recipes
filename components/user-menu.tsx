@@ -1,6 +1,6 @@
 "use client";
 
-import { BookMarked, BookOpen, Bookmark, Laptop, Moon, Sun, UserCircle, Users } from "lucide-react";
+import { BookMarked, BookOpen, Bookmark, Laptop, Moon, Newspaper, Sun, UserCircle, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -36,9 +36,10 @@ const THEME_LABELS: Record<Theme, string> = {
 interface UserMenuProps {
   displayName: string;
   inviteCount?: number;
+  unreadChanges?: number;
 }
 
-export function UserMenu({ displayName, inviteCount = 0 }: UserMenuProps) {
+export function UserMenu({ displayName, inviteCount = 0, unreadChanges = 0 }: UserMenuProps) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -66,11 +67,13 @@ export function UserMenu({ displayName, inviteCount = 0 }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon" aria-label="User menu" className="relative">
           <UserCircle className="h-5 w-5" />
-          {inviteCount > 0 && (
+          {inviteCount > 0 ? (
             <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-white font-bold leading-none">
               {inviteCount > 9 ? "9+" : inviteCount}
             </span>
-          )}
+          ) : unreadChanges > 0 ? (
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-destructive" />
+          ) : null}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
@@ -101,6 +104,13 @@ export function UserMenu({ displayName, inviteCount = 0 }: UserMenuProps) {
         <DropdownMenuItem onSelect={() => router.push("/bookmarks")} className="flex gap-2">
           <Bookmark size={ICON_SIZE} className="text-muted-foreground" />
           Bookmarks
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => router.push("/changelog?view=recent")} className="flex gap-2">
+          <Newspaper size={ICON_SIZE} className="text-muted-foreground" />
+          Recent Changes
+          {unreadChanges > 0 && (
+            <span className="ml-auto h-2 w-2 rounded-full bg-destructive" />
+          )}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => router.push("/profile")}>

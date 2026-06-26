@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { getFeatureFlags, isFlagEnabled } from "@/lib/feature-flags";
 import { createClient } from "@/lib/supabase/server";
+import { Button } from "@/components/ui/button";
 import { FeedbackButton } from "@/components/feedback-dialog";
 
 export async function BetaBanner() {
@@ -16,7 +18,12 @@ export async function BetaBanner() {
         <p className="text-sm text-amber-900 font-medium">
           Currently in beta. Full release coming soon. Please leave feedback.
         </p>
-        {isLoggedIn && <FeedbackButton />}
+        <div className="flex items-center gap-2 shrink-0">
+          <Button size="sm" asChild>
+            <Link href="/changelog">Changes</Link>
+          </Button>
+          {isLoggedIn && <FeedbackButton />}
+        </div>
       </div>
     </div>
   );

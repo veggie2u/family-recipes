@@ -30,6 +30,32 @@ The app will be running at [localhost:3000](http://localhost:3000).
 - **Components**: shadcn/ui
 - **Fonts**: Playfair Display (headings), Geist Sans (body)
 
+## Versioning
+
+The app version is stored in `package.json`. The patch version is bumped automatically on every commit via a pre-commit hook. Run this once after cloning to install it locally:
+```bash
+cp scripts/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+```
+
+To bump the minor or major version manually (e.g. before a significant release):
+```bash
+npm run version:minor   # 1.1.0 → 1.2.0
+npm run version:major   # 1.2.0 → 2.0.0
+```
+These commands update `package.json`, stage the file, and skip the auto-patch hook so the version isn't double-bumped.
+
+## Release notes
+
+To tell users about new changes, insert rows into the `changelog` table in Supabase:
+
+| Column | Example |
+|--------|---------|
+| `version` | `1.2.0` |
+| `release_date` | `2026-06-26` |
+| `description` | `Added family recipe collections` |
+
+Add one row per change item. Users can view all changes at `/changelog`, or see only what's new since their last visit via the **Recent Changes** link in the user menu.
+
 ## Docs
 
 - [`docs/requirements.md`](docs/requirements.md) — product requirements
