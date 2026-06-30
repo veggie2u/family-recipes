@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
-import { MarkChangelogSeen } from "@/components/mark-changelog-seen";
 
 type ChangelogEntry = {
   version: string;
@@ -46,6 +45,11 @@ export default async function ChangelogPage({
       .eq("id", userId)
       .single();
     seenAt = profile?.changelog_seen_at ?? null;
+
+    await supabase
+      .from("profiles")
+      .update({ changelog_seen_at: new Date().toISOString() })
+      .eq("id", userId);
   }
 
   let query = supabase
@@ -65,7 +69,6 @@ export default async function ChangelogPage({
 
   return (
     <div className="max-w-2xl mx-auto py-4">
-      {isRecent && userId && <MarkChangelogSeen />}
       <h1 className="text-3xl font-bold mb-8">
         {isRecent ? "Recent Changes" : "What's New"}
       </h1>
