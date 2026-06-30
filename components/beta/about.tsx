@@ -1,4 +1,9 @@
-export function About() {
+import { getFeatureFlags, isFlagEnabled } from "@/lib/feature-flags";
+
+export async function About() {
+  const flags = await getFeatureFlags();
+  const signupsDisabled = !isFlagEnabled(flags, "ALLOW_SIGN_UPS");
+
   return (
     <div className="py-4">
       <h1 className="text-3xl font-bold mb-2">Welcome to Family Recipes — Beta</h1>
@@ -7,10 +12,12 @@ export function About() {
         so you may notice changes to navigation, layout, and features as we work toward a full
         release. We appreciate your patience and feedback along the way.
       </p>
-      <p className="text-sm text-muted-foreground bg-muted px-4 py-3 rounded-md mb-8">
-        <strong>Note:</strong> Sign-ups are temporarily disabled while we confirm and test the
-        sign-up flow. We&apos;ll open registration back up soon.
-      </p>
+      {signupsDisabled && (
+        <p className="text-sm text-muted-foreground bg-muted px-4 py-3 rounded-md mb-8">
+          <strong>Note:</strong> Sign-ups are temporarily disabled while we confirm and test the
+          sign-up flow. We&apos;ll open registration back up soon.
+        </p>
+      )}
 
       <p className="text-sm text-muted-foreground bg-muted px-4 py-3 rounded-md mb-8">
         <strong>Test data:</strong> The app currently contains sample recipes and cookbooks tagged
