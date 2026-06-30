@@ -12,6 +12,7 @@ Built with [Next.js](https://nextjs.org) and [Supabase](https://supabase.com).
    ```env
    NEXT_PUBLIC_SUPABASE_URL=<your project URL>
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<your publishable or anon key>
+   FEATURE_FLAGS_ENV=dev
    ```
 
 3. Install dependencies and run the dev server:
